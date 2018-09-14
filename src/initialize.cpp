@@ -1,4 +1,4 @@
-#include "main.h"
+#include "../include/main.h"
 
 void on_center_button() {
 	static bool pressed = false;
