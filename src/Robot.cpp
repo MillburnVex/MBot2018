@@ -1,11 +1,8 @@
 #include "Robot.h"
 
-
-Robot::Robot()
-{
+Robot::Robot() {
 }
 
-int Robot::getState()
-{
-	return 0;
+int Robot::getState() {
+    return 0;
 }

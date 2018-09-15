@@ -1,9 +1,8 @@
 #pragma once
-class Robot
-{
 
+class Robot {
 public:
-	Robot();
+    Robot();
 
-	int getState();
+    int getState();
 };

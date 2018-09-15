@@ -1,61 +1,81 @@
 #include "../include/main.h"
+#include "BotMotorConfig.h"
 
 #pragma once
 
-class BotMotorConfig
-{
+class BotMotor {
+private:
+    BotMotorConfig config;
 public:
-	std::uint8_t id;
-	bool reverse;
-	pros::motor_gearset_e gearset;
+    explicit BotMotor(std::uint8_t id) : BotMotor(BotMotorConfig(id)) {};
 
-	BotMotorConfig(std::uint8_t id) : BotMotorConfig(id, false, pros::E_MOTOR_GEARSET_06) {};
-	BotMotorConfig(std::uint8_t id, bool reverse, pros::motor_gearset_e_t gearset);
+    explicit BotMotor(BotMotorConfig config) : config(config) {};
+
+    /**
+     * Sets the voltage of the motor
+     * @param voltage an int from -127 to 127
+     */
+    virtual void setVoltage(int8_t voltage) = 0;
+
+    /**
+     * Sets the velocity of the motor
+     * @param vel
+     */
+    virtual void setVelocity(int8_t vel) = 0;
+
+    /**
+     * Sets the position goal of the motor in absolute degrees relative to the last time it was recalibrated
+     * @param pos the position goal in degrees
+     * @param vel the maximum allowable velocity
+     */
+    virtual void setPositionAbsolute(double pos, int vel) = 0;
+
+    /**
+     * Sets the position goal of the motor in degrees relative to its current position
+     * @param pos the amount to move in degrees
+     * @param vel the maximum allowable velocity
+     */
+    virtual void setPositionRelative(double pos, int vel) = 0;
+
+    /**
+     *
+     * @param pid
+     */
+    virtual void setPID(pros::motor_pid_s_t pid) = 0;
+
+    virtual pros::motor_pid_full_s_t getPID() = 0;
+
+    virtual bool containsRealMotor() = 0;
+
+    virtual pros::Motor getProsMotor() = 0;
+
+    BotMotorConfig getConfig() { return config; };
 };
 
-class BotMotor
-{
+class RealMotor final : public BotMotor {
 private:
-	BotMotorConfig cfg;
-public:
-	BotMotor(std::uint8_t id) : BotMotor(BotMotorConfig(id)){};
-	BotMotor(BotMotorConfig cfg);
-
-	virtual void set(int vel) = 0;
-	virtual void setVoltage(int voltage) = 0;
-	virtual void setVelocity(int vel) = 0;
-	virtual void setPosition(double pos, int vel) = 0;
-	virtual void setPositionRelative(double pos, int vel) = 0;
-	virtual void setPID(pros::motor_pid_s_t pid) = 0;
-
-	virtual pros::motor_pid_full_s_t getPID() = 0;
-	virtual bool containsRealMotor() = 0;
-	virtual pros::Motor getRealMotor() = 0;
-
-	BotMotorConfig getConfig() { return cfg; };
-};
-
-class RealMotor : public BotMotor
-{
-private:
-	pros::Motor *motor;
+    pros::Motor *motor;
 
 public:
-	RealMotor(std::uint8_t id) : RealMotor(BotMotorConfig(id)) {};
-	RealMotor(BotMotorConfig cfg) : BotMotor(cfg)
-	{
-		motor = new pros::Motor(cfg.id, cfg.gearset, cfg.reverse, pros::E_MOTOR_ENCODER_DEGREES);
-	};
+    explicit RealMotor(std::uint8_t id) : RealMotor(BotMotorConfig(id)) {};
 
-	void set(int vel);
-	void setVoltage(int voltage);
-	void setVelocity(int vel);
-	void setPosition(double pos, int vel);
-	void setPositionRelative(double pos, int vel);
-	void setPID(pros::motor_pid_s_t pid);
+    explicit RealMotor(BotMotorConfig config) : BotMotor(config) {
+        motor = new pros::Motor(config.id, config.gearset, config.reverse, pros::E_MOTOR_ENCODER_DEGREES);
+    };
 
-	pros::motor_pid_full_s_t getPID();
-	bool containsRealMotor() { return true; }
-	pros::Motor getRealMotor() { return *motor; }
+    void setVoltage(int8_t voltage) override;
 
+    void setVelocity(int8_t vel) override;
+
+    void setPositionAbsolute(double pos, int vel) override;
+
+    void setPositionRelative(double pos, int vel) override;
+
+    void setPID(pros::motor_pid_s_t pid) override;
+
+    pros::motor_pid_full_s_t getPID() override;
+
+    bool containsRealMotor() override { return true; }
+
+    pros::Motor getProsMotor() override { return *motor; }
 };

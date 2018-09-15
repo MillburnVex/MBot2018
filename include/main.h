@@ -36,7 +36,7 @@
  */
 #define PROS_USE_LITERALS
 
-#include "api.h"
+#include "../include/api.h"
 
 /**
  * If you find doing pros::Motor() to be tedious and you'd prefer just to do

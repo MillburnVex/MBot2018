@@ -1,4 +1,5 @@
 #include "../include/main.h"
+#include "../include/pros/llemu.hpp"
 
 void on_center_button() {
 	static bool pressed = false;
