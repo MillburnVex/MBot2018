@@ -1,11 +1,5 @@
 #include "BotMotor.h"
 
-BotMotorConfig::BotMotorConfig(std::uint8_t id, bool reverse, pros::motor_gearset_e_t gearset) {
-    this->id = id;
-    this->reverse = reverse;
-    this->gearset = gearset;
-}
-
 void RealMotor::setPositionAbsolute(double pos, int vel) {
     motor->move_absolute(pos, vel);
 }
