@@ -4,5 +4,5 @@ class Robot {
 public:
     Robot();
 
-    int getState();
+    int GetState();
 };

@@ -1,26 +1,26 @@
 #include "BotMotor.h"
 
-void RealMotor::setPositionAbsolute(double pos, int vel) {
+void RealMotor::SetPositionAbsolute(double pos, int vel) {
     motor->move_absolute(pos, vel);
 }
 
-void RealMotor::setPositionRelative(double pos, int vel) {
+void RealMotor::SetPositionRelative(double pos, int vel) {
     motor->move_relative(pos, vel);
 }
 
-void RealMotor::setVelocity(int8_t vel) {
+void RealMotor::SetVelocity(int8_t vel) {
     motor->move_velocity(vel);
 }
 
-void RealMotor::setVoltage(int8_t voltage) {
+void RealMotor::SetVoltage(int8_t voltage) {
     motor->move_voltage(voltage);
 }
 
-void RealMotor::setPID(pros::motor_pid_s_t pid) {
+void RealMotor::SetPID(pros::motor_pid_s_t pid) {
     motor->set_pos_pid(pid);
     motor->set_vel_pid(pid);
 }
 
-pros::motor_pid_full_s_t RealMotor::getPID() {
+pros::motor_pid_full_s_t RealMotor::GetPID() {
     return motor->get_vel_pid();
 }

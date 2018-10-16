@@ -3,6 +3,6 @@
 Robot::Robot() {
 }
 
-int Robot::getState() {
+int Robot::GetState() {
     return 0;
 }
