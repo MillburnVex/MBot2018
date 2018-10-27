@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "../include/api.h"
+#include "api.h"
 
 /**
  * A class that contains information and settings about a motor
