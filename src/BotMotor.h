@@ -1,7 +1,7 @@
+#pragma once
+
 #include "../include/main.h"
 #include "BotMotorConfig.h"
-
-#pragma once
 
 class BotMotor {
 private:

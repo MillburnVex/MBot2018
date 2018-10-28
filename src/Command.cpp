@@ -1,5 +1,11 @@
 #include "Command.h"
 
+class DriveCommand : public Command {
+	DriveCommand() : Command(pros::E_CONTROLLER_MASTER, { pros::E_CONTROLLER_ANALOG_RIGHT_Y }) {}
+
+	void Execute()
+};
+
 Command::Command(pros::controller_id_e_t type, std::vector<int> controls) : type(type), controls(std::move(controls))  {
     allCommands.push_back(*this);
 }

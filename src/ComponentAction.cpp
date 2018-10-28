@@ -1,5 +1,6 @@
 typedef enum {
     // Flywheel
-    STOP, SPIN_UP,
-    DRIVE
+    FLYWHEEL_STOP, FLYWHEEL_FULL_SPEED,
+    DRIVE_LINEAR, DRIVE_ROTATE,
+
 } ComponentAction;
