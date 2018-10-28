@@ -1,4 +1,5 @@
 #include "BotMotor.h"
+#include "Robot.h"
 
 void RealMotor::SetPositionAbsolute(double pos, int vel) {
     motor->move_absolute(pos, vel);
@@ -24,3 +25,7 @@ void RealMotor::SetPID(pros::motor_pid_s_t pid) {
 pros::motor_pid_full_s_t RealMotor::GetPID() {
     return motor->get_vel_pid();
 }
+
+BotMotor::BotMotor(BotMotorConfig config) : config(config) {
+    motors.push_back(this);
+};

@@ -1,6 +1,11 @@
 #include "api.h"
+#include "BotComponent.h"
+#include "Command.h"
 
-using namespace pros::literals;
+void Update() {
+    //Components::Update();
+    //Commands::Update();
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -16,5 +21,18 @@ using namespace pros::literals;
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-
+    auto *master = new pros::Controller(pros::E_CONTROLLER_MASTER);
+    pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
+    /*
+    while (!m.is_connected()) {
+        pros::lcd::print(1, "Connect master controller!");
+        pros::Task::delay(500);
+    }
+    m.print(1, 1, "test");
+     */
+    //uint32_t time = pros::millis();
+    //while (true) {
+        //Update();
+        //pros::Task::delay_until(&time, 20);
+    //}
 }

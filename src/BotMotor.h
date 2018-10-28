@@ -1,15 +1,17 @@
 #pragma once
 
-#include "../include/main.h"
+#include <vector>
 #include "BotMotorConfig.h"
 
 class BotMotor {
 private:
     BotMotorConfig config;
 public:
-    explicit BotMotor(std::uint8_t id) : BotMotor(BotMotorConfig(id)) {};
+    static std::vector<BotMotor*> motors;
 
-    explicit BotMotor(BotMotorConfig config) : config(config) {};
+    explicit BotMotor(BotMotorID id) : BotMotor(BotMotorConfig(id)) {};
+
+    explicit BotMotor(BotMotorConfig config);
 
     /**
      * Sets the voltage of the motor
@@ -45,7 +47,7 @@ public:
 
     virtual pros::motor_pid_full_s_t GetPID() = 0;
 
-    virtual bool ContainsRealMotor() = 0;
+    virtual bool IsRealMotor() = 0;
 
     virtual pros::Motor GetProsMotor() = 0;
 
@@ -57,7 +59,7 @@ private:
     pros::Motor *motor;
 
 public:
-    explicit RealMotor(std::uint8_t id) : RealMotor(BotMotorConfig(id)) {};
+    explicit RealMotor(BotMotorID id) : RealMotor(BotMotorConfig(id)) {};
 
     explicit RealMotor(BotMotorConfig config) : BotMotor(config) {
         motor = new pros::Motor(config.id, config.gearset, config.reverse, pros::E_MOTOR_ENCODER_DEGREES);
@@ -75,7 +77,7 @@ public:
 
     pros::motor_pid_full_s_t GetPID() override;
 
-    bool ContainsRealMotor() override { return true; }
+    bool IsRealMotor() override { return true; }
 
     pros::Motor GetProsMotor() override { return *motor; }
 };

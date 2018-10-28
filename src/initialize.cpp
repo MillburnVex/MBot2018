@@ -1,15 +1,6 @@
-#include "../include/main.h"
-#include "../include/pros/llemu.hpp"
-
-void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
-}
+#include "okapi/api.hpp"
+#include "BotComponent.h"
+#include "Command.h"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -18,10 +9,11 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
+    //pros::lcd::initialize();
+    //Components::Init();
+    //pros::Task::delay(20000);
+    //pros::lcd::print(1, "done");
+    //Commands::Init();
 }
 
 /**
@@ -30,7 +22,7 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
-	// print("javier coindreau")
+    // print("javier coindreau")
 }
 
 /**

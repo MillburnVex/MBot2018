@@ -5,9 +5,11 @@
 #include "api.h"
 #include <array>
 
-#define DIGITAL_PRESSED = (1000 - 1)
-#define DIGITAL_REPEATED = (1000 - 2)
-#define DIGITAL_RELEASED = (1000 - 3)
+#define DIGITAL_PRESSED (1000 - 1)
+#define DIGITAL_REPEATED (1000 - 2)
+#define DIGITAL_RELEASED (1000 - 3)
+
+#define CONTROL_NOT_ACTIVE INT32_MAX
 
 /**
  * An abstract class that can be extended to create commands. On instantiation of a command, it is automatically added
@@ -16,9 +18,9 @@
  * of the execute method, as blocking the thread will stop other commands from executing as well
  */
 class Command {
-
 public:
-    static std::vector<Command> allCommands;
+    static std::vector<Command*> allCommands;
+    static std::vector<int> digitalControlsCurrentlyPressed;
 
     std::vector<int> controls;
     pros::controller_id_e_t type;
@@ -40,9 +42,6 @@ public:
 
 namespace Commands {
 
-    std::vector<Command> queue;
-    std::vector<int> digitalControlsCurrentlyPressed;
-
     int GetValue(std::vector<std::pair<int, int>>& vec, int control);
 
     bool Contains(std::vector<int> &vec, int i);
@@ -50,4 +49,6 @@ namespace Commands {
     bool Contains(std::vector<int> &vec, std::vector<int> &i);
 
     void Update();
+
+    void Init();
 }
