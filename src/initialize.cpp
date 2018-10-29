@@ -1,4 +1,3 @@
-#include "okapi/api.hpp"
 #include "BotComponent.h"
 #include "Command.h"
 
@@ -9,11 +8,9 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-    //pros::lcd::initialize();
-    //Components::Init();
-    //pros::Task::delay(20000);
-    //pros::lcd::print(1, "done");
-    //Commands::Init();
+    pros::lcd::initialize();
+    Components::Init();
+    Commands::Init();
 }
 
 /**

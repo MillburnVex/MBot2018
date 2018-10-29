@@ -1,31 +1,27 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "ComponentAction.h"
 
 class BotComponent {
 public:
-    static std::vector<BotComponent*> allComponents;
+static std::vector<BotComponent*> allComponents;
 
-    std::vector<ComponentAction> validActions;
-    std::vector<ComponentAction> activeActions{};
+std::vector<ComponentAction> validActions;
+std::vector<ComponentAction> activeActions{};
 
-    std::string name;
+std::string name;
 
-    BotComponent(std::string name, std::vector<ComponentAction> validActions);
+BotComponent(std::string name, std::vector<ComponentAction> validActions);
 
-    bool IsActive(ComponentAction action);
-
-    virtual void Execute(ComponentAction action, int value) {}
-
-    virtual void Update() {}
+virtual void Execute(ComponentAction action, int value) {
+}
 };
 
 namespace Components {
 
-    void Execute(ComponentAction action, int value);
+void Execute(ComponentAction action, int value);
 
-    void Update();
-
-    void Init();
+void Init();
 }

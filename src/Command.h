@@ -5,11 +5,18 @@
 #include "api.h"
 #include <array>
 
-#define DIGITAL_PRESSED (1000 - 1)
-#define DIGITAL_REPEATED (1000 - 2)
-#define DIGITAL_RELEASED (1000 - 3)
+typedef enum {
+	PRESSED = 1000, REPEATED, RELEASED
+} PressType;
 
-#define CONTROL_NOT_ACTIVE INT32_MAX
+typedef struct {
+	PressType pressType;
+	int control;
+	int value;
+} ControlPress;
+
+#define CONTROL_NOT_ACTIVE 10000
+#define ANALOG_CONTROL_ACTIVE_THRESHOLD 3
 
 /**
  * An abstract class that can be extended to create commands. On instantiation of a command, it is automatically added
@@ -19,36 +26,47 @@
  */
 class Command {
 public:
-    static std::vector<Command*> allCommands;
-    static std::vector<int> digitalControlsCurrentlyPressed;
+static std::vector<Command*> allCommands;
+static std::vector<int> controlsLastActive;
 
-    std::vector<int> controls;
-    pros::controller_id_e_t type;
+std::vector<int> controls;
+pros::controller_id_e_t type;
 
-    /**
-     * @param type one of pros::E_CONTROLLER_{MASTER, PARTNER}
-     * @param controls the controls this wants to be sent
-     */
-    Command(pros::controller_id_e_t type, std::vector<int> controls);
+/**
+ * @param type one of pros::E_CONTROLLER_{MASTER, PARTNER}
+ * @param controls the controls this wants to be sent
+ */
+Command(pros::controller_id_e_t type, std::vector<int> controls);
 
-    /**
-     * Executes the command with the given values. For analog controls, the value will be in [-127, 127]. For digital controls,
-     * the value will be one of DIGITAL_{PRESSED, REPEATED, RELEASED}
-     * @param values the control, control_value pairs that this command indicated it wanted to receive in the constructor. To
-     * get a control_value, just use Commands::GetValue(pros::controller_{analog, digital}_e_t)
-     */
-    virtual void Execute(std::vector<std::pair<int, int>> &values) {}
+/**
+ * Executes the command with the given values. For analog controls, the value will be in [-127, 127]. For digital controls,
+ * the value will be one of DIGITAL_{PRESSED, REPEATED, RELEASED}
+ * @param values the control, control_value pairs that this command indicated it wanted to receive in the constructor. To
+ * get a control_value from the wector, just use Commands::GetValue(values, control)
+ */
+virtual void Execute(std::vector<ControlPress*> &values) {
+}
 };
 
 namespace Commands {
 
-    int GetValue(std::vector<std::pair<int, int>>& vec, int control);
+	/**
+	 * Returns the value of the ControlPress representing the control parameter
+	 */
+int GetValue(std::vector<ControlPress*>& values, int control);
 
-    bool Contains(std::vector<int> &vec, int i);
+ /**
+ * Returns the press type of the ControlPress representing the control parameter
+ */
+PressType GetPressType(std::vector<ControlPress*>& values, int control);
 
-    bool Contains(std::vector<int> &vec, std::vector<int> &i);
+bool Contains(std::vector<int> &vec, int i);
 
-    void Update();
+bool Contains(std::vector<int> &vec, std::vector<int> &i);
 
-    void Init();
+bool Contains(std::vector<ControlPress*> presses, int control);
+
+void Update();
+
+void Init();
 }

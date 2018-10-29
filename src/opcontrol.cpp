@@ -3,8 +3,7 @@
 #include "Command.h"
 
 void Update() {
-    //Components::Update();
-    //Commands::Update();
+	Commands::Update();
 }
 
 /**
@@ -12,7 +11,7 @@ void Update() {
  * with the default priority and stack size whenever the robot is enabled via
  * the Field Management System or the VEX Competition Switch in the operator
  * control mode.
- *
+
  * If no competition control is connected, this function will run immediately
  * following initialize().
  *
@@ -21,18 +20,16 @@ void Update() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-    auto *master = new pros::Controller(pros::E_CONTROLLER_MASTER);
-    pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
-    /*
-    while (!m.is_connected()) {
-        pros::lcd::print(1, "Connect master controller!");
-        pros::Task::delay(500);
-    }
-    m.print(1, 1, "test");
-     */
-    //uint32_t time = pros::millis();
-    //while (true) {
-        //Update();
-        //pros::Task::delay_until(&time, 20);
-    //}
+	pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
+	pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
+	 while (!master.is_connected()) {
+	    pros::lcd::print(1, "Connect master controller!");
+	    pros::Task::delay(500);
+	   }
+	 master.rumble("..");
+	uint32_t time = pros::millis();
+	while (true) {
+		Update();
+		pros::Task::delay_until(&time, 20);
+	}
 }
