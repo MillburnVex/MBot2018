@@ -89,12 +89,12 @@ bool Commands::Contains(std::vector<int> &vec, std::vector<int> &i) {
 
 void Commands::Update() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	std::vector<ControlPress*> newControls;
+	std::vector<ControlPress*> newControls{};
 
-	std::vector<ControlPress*> masterControls;
+	std::vector<ControlPress*> masterControls{};
 
 	// loop through all the values in the controller_digital_e_t enum
-	for (int i = pros::E_CONTROLLER_DIGITAL_L1; i < pros::E_CONTROLLER_DIGITAL_A; i++) {
+	for (int i = pros::E_CONTROLLER_DIGITAL_L1; i <= pros::E_CONTROLLER_DIGITAL_A; i++) {
 		auto button = static_cast<pros::controller_digital_e_t>(i);
 		if (master.get_digital(button)) {
 			ControlPress press = {};
@@ -105,7 +105,7 @@ void Commands::Update() {
 		}
 	}
 	// loop through all the values in the controller_analog_e_t enum
-	for (int i = pros::E_CONTROLLER_ANALOG_LEFT_X; i < pros::E_CONTROLLER_ANALOG_RIGHT_Y; i++) {
+	for (int i = pros::E_CONTROLLER_ANALOG_LEFT_X; i <= pros::E_CONTROLLER_ANALOG_RIGHT_Y; i++) {
 		auto control = static_cast<pros::controller_analog_e_t>(i);
 		int value = master.get_analog(control);
 		if (value < -ANALOG_CONTROL_ACTIVE_THRESHOLD || value > ANALOG_CONTROL_ACTIVE_THRESHOLD) {
@@ -118,24 +118,35 @@ void Commands::Update() {
 	}
 	// check for new presses and repeated presses
 	for (ControlPress* i : newControls) {
+		
 		ControlPress press = {};
 		// assign press type
+		
 		if (Contains(Command::controlsLastActive, i->control)) {
+			//printf("control %d has been repeated\n", i->control);
 			press.pressType = PressType::REPEATED;
 		} else {
+			//printf("control %d PRESSED\n", i->control);
 			press.pressType = PressType::PRESSED;
 		}
+		
 		press.control = i->control;
+		
 		press.value = i->value;
+		// this fucker
 		masterControls.push_back(&press);
+		
+	}
+	printf("new controls:\n");
+	for (ControlPress* press : newControls) {
+		printf("    control %d\n", press->control);
 	}
 	// check for releases
 	for (int i : Command::controlsLastActive) {
 		if (!Contains(newControls, i)) {
 			ControlPress press = {};
 			press.pressType = PressType::RELEASED;
-			press.control = i;
-			press.value = 0;
+			press.control = i;			press.value = 0;
 			masterControls.push_back(&press);
 		}
 	}
@@ -152,8 +163,14 @@ void Commands::Update() {
 			command->Execute(controlsToSend);
 		}
 	}
+	int i = 0;
+	for(ControlPress* press : masterControls) {
+		i++;
+		pros::lcd::print(i, std::to_string(press->control).c_str());
+	}
 	Command::controlsLastActive.clear();
 	for (ControlPress* press : newControls) {
+		//printf("press %d in the new contrls\n", press->control);
 		Command::controlsLastActive.push_back(press->control);
 	}
 }

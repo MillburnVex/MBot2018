@@ -1,9 +1,16 @@
-#include "api.h"
+#include "../include/main.h"
 #include "BotComponent.h"
 #include "Command.h"
+#include "../include/pros/misc.hpp"
+#include "../include/pros/misc.h"
+#include "../include/pros/llemu.hpp"
+
+int i = 0;
 
 void Update() {
 	Commands::Update();
+	pros::lcd::print(5, std::to_string(i).c_str());
+	i++;
 }
 
 /**
