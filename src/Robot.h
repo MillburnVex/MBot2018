@@ -8,7 +8,7 @@ namespace Robot {
 
     int GetState();
 
-    BotMotor* GetMotor(BotMotorID id);
+    BotMotor *GetMotor(BotMotorID id);
 
     void Init();
 };

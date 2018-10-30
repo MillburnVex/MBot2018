@@ -1,4 +1,5 @@
 #include "Robot.h"
+#include "BotComponent.h"
 
 int Robot::GetState() {
     return 0;
@@ -13,9 +14,10 @@ void Robot::Init() {
     RealMotor(BotMotorID::FLYWHEEL);
     RealMotor(BotMotorID::CAP_LIFT);
     RealMotor(BotMotorID::BALL_LIFT);
+    Components::Execute(ComponentAction::FLYWHEEL_PASSIVE_SPEED);
 }
 
-BotMotor * Robot::GetMotor(BotMotorID id) {
+BotMotor *Robot::GetMotor(BotMotorID id) {
     for (auto motor : BotMotor::motors) {
         if (motor->GetConfig().id == id) {
             return motor;

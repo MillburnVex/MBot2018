@@ -3,7 +3,7 @@
 #include "Command.h"
 
 void Update() {
-	Commands::Update();
+    Commands::Update();
 }
 
 /**
@@ -20,16 +20,16 @@ void Update() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
-	pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
-	 while (!master.is_connected()) {
-	    pros::lcd::print(1, "Connect master controller!");
-	    pros::Task::delay(500);
-	   }
-	 master.rumble("..");
-	uint32_t time = pros::millis();
-	while (true) {
-		Update();
-		pros::Task::delay_until(&time, 20);
-	}
+    pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
+    pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
+    while (!master.is_connected()) {
+        pros::lcd::print(1, "Connect master controller!");
+        pros::Task::delay(500);
+    }
+    master.rumble("..");
+    uint32_t time = pros::millis();
+    while (true) {
+        Update();
+        pros::Task::delay_until(&time, 20);
+    }
 }

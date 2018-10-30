@@ -1,5 +1,6 @@
 #include "BotComponent.h"
 #include "Command.h"
+#include "Robot.h"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -9,6 +10,7 @@
  */
 void initialize() {
     pros::lcd::initialize();
+    Robot::Init();
     Components::Init();
     Commands::Init();
 }

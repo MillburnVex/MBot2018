@@ -6,22 +6,24 @@
 
 class BotComponent {
 public:
-static std::vector<BotComponent*> allComponents;
+    static std::vector<BotComponent *> allComponents;
 
-std::vector<ComponentAction> validActions;
-std::vector<ComponentAction> activeActions{};
+    std::vector<ComponentAction> validActions;
+    std::vector<ComponentAction> activeActions{};
 
-std::string name;
+    std::string name;
 
-BotComponent(std::string name, std::vector<ComponentAction> validActions);
+    BotComponent(std::string name, std::vector<ComponentAction> validActions);
 
-virtual void Execute(ComponentAction action, int value) {
-}
+    virtual void Execute(ComponentAction action, int value) {
+    }
 };
 
 namespace Components {
 
-void Execute(ComponentAction action, int value);
+    void Execute(ComponentAction action);
 
-void Init();
+    void Execute(ComponentAction action, int value);
+
+    void Init();
 }
