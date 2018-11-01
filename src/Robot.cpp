@@ -14,7 +14,7 @@ void Robot::Init() {
     RealMotor(BotMotorID::FLYWHEEL);
     RealMotor(BotMotorID::CAP_LIFT);
     RealMotor(BotMotorID::BALL_LIFT);
-    Components::Execute(ComponentAction::FLYWHEEL_PASSIVE_SPEED);
+    Components::Execute(ActionType::FLYWHEEL_PASSIVE_SPEED);
 }
 
 BotMotor *Robot::GetMotor(BotMotorID id) {

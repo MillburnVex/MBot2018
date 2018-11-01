@@ -4,6 +4,7 @@
 #include <vector>
 #include "api.h"
 #include <array>
+#include <set>
 
 typedef enum {
     PRESSED = 1000, REPEATED, RELEASED
@@ -26,7 +27,7 @@ typedef enum {
     C_CAP_LIFT_UP = pros::E_CONTROLLER_DIGITAL_R1,
     C_CAP_LIFT_DOWN = pros::E_CONTROLLER_DIGITAL_R2,
     C_SHOOT = pros::E_CONTROLLER_DIGITAL_X,
-    C_CLAW_ROTATE_180 = pros::E_CONTROLLER_DIGITAL_UP
+    C_CLAW_ROTATE_180 = pros::E_CONTROLLER_DIGITAL_UP,
 } Control;
 
 /**
@@ -37,19 +38,19 @@ typedef enum {
  */
 class Command {
 public:
-    static std::vector<Command *> allCommands;
-    static std::vector<int> controlsLastActive;
+    static std::set<Command *> allCommands;
+    static std::set<int> controlsLastActive;
     // the ones that were created by calling Commands::Execute
-    static std::vector<ControlPress*> executedControls;
+    static std::set<ControlPress*> executedControls;
 
-    std::vector<int> controls;
+    std::set<int> controls;
     pros::controller_id_e_t type;
 
 /**
  * @param type one of pros::E_CONTROLLER_{MASTER, PARTNER}
  * @param controls the controls this wants to be sent
  */
-    Command(pros::controller_id_e_t type, std::vector<int> controls);
+    Command(pros::controller_id_e_t type, std::set<int> controls);
 
 /**
  * Executes the command with the given values. For analog controls, the value will be in [-127, 127]. For digital controls,
@@ -57,7 +58,7 @@ public:
  * @param values the control, control_value pairs that this command indicated it wanted to receive in the constructor. To
  * get a control_value from the wector, just use Commands::GetValue(values, control)
  */
-    virtual void Execute(std::vector<ControlPress *> &values) {
+    virtual void Execute(std::set<ControlPress *> &values) {
     }
 };
 
@@ -66,18 +67,18 @@ namespace Commands {
     /**
      * @return the value of the ControlPress representing the control parameter
      */
-    int GetValue(std::vector<ControlPress *> &values, int control);
+    int GetValue(std::set<ControlPress *> &values, int control);
 
     /**
     * @return the press type of the ControlPress representing the control parameter
     */
-    PressType GetPressType(std::vector<ControlPress *> &values, int control);
+    PressType GetPressType(std::set<ControlPress *> &values, int control);
 
-    bool Contains(std::vector<int> &vec, int i);
+    bool Contains(std::set<int> &vec, int i);
 
-    bool Contains(std::vector<int> &vec, std::vector<int> &i);
+    bool Contains(std::set<int> &vec, std::set<int> &i);
 
-    bool Contains(std::vector<ControlPress *> presses, int control);
+    bool Contains(std::set<ControlPress *> presses, int control);
 
     void Execute(Control control);
 
