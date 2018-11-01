@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <string>
-#include <set>
+#include <vector>
 #include "ComponentAction.h"
 
 #define ACTION_TYPE_NOT_ACTIVE 100000
@@ -15,24 +15,24 @@
  */
 class BotComponent {
 public:
-    static std::set<BotComponent *> allComponents;
-    static std::set<ComponentAction *> queue;
+    static std::vector<BotComponent *> allComponents;
+    static std::vector<ComponentAction *> queue;
 
-    std::set<ActionType> validActions;
+    std::vector<ActionType> validActions;
 
     std::string name;
 
-    BotComponent(std::string name, std::set<ActionType> validActions);
+    BotComponent(std::string name, std::vector<ActionType> validActions);
 
-    virtual void Execute(std::set<ComponentAction*>& actions) {
+    virtual void Execute(std::vector<ComponentAction*>& actions) {
     }
 };
 
 namespace Components {
 
-    bool IsActive(std::set<ComponentAction*>& actions, ActionType actionType);
+    bool IsActive(std::vector<ComponentAction*>& actions, ActionType actionType);
 
-    int GetValue(std::set<ComponentAction*>& actions, ActionType actionType);
+    int GetValue(std::vector<ComponentAction*>& actions, ActionType actionType);
 
     void Execute(ActionType actionType);
 

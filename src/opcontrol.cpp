@@ -1,10 +1,12 @@
-#include "api.h"
+
+#include "../include/main.h"
 #include "BotComponent.h"
 #include "Command.h"
 
 void Update() {
     Commands::Update();
     Components::Update();
+
 }
 
 bool skipConnectingController = false;

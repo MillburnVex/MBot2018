@@ -4,15 +4,15 @@
 #include "api.h"
 
 typedef enum {
-    FLYWHEEL,
-    BALL_LIFT,
-    DRIVE_LEFT_FRONT, DRIVE_LEFT_BACK, DRIVE_RIGHT_FRONT, DRIVE_RIGHT_BACK,
+    FLYWHEEL = 5,
+    BALL_LIFT = 8,
+    DRIVE_LEFT_FRONT = 2, DRIVE_LEFT_BACK = 1, DRIVE_RIGHT_FRONT = 10, DRIVE_RIGHT_BACK = 9,
     CAP_LIFT,
     CLAW
 } BotMotorID;
 
 /**
- * A class that contains information and settings about a motor
+ * A class that contains information and vectortings about a motor
  */
 struct BotMotorConfig {
     /**
@@ -24,9 +24,10 @@ struct BotMotorConfig {
      */
     bool reverse;
     /**
-     * The PROS motor gearset to use. Options are pros::E_MOTOR_GEARSET_<06|18|36>
+     * The PROS motor gearset to use. Options are pros::E_MOTOR_gearset_<06|18|36>
      */
     pros::motor_gearset_e gearset;
+
 
     explicit BotMotorConfig(BotMotorID id) : BotMotorConfig(id, false, pros::E_MOTOR_GEARSET_06) {};
 
