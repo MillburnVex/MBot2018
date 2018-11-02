@@ -11,12 +11,12 @@ void RealMotor::vectorPositionRelative(double pos, int vel) {
     motor->move_relative(pos, vel);
 }
 
-void RealMotor::vectorVelocity(int8_t vel) {
+void RealMotor::vectorVelocity(int16_t vel) {
     motor->move_velocity(vel);
 }
 
 void RealMotor::vectorVoltage(int8_t voltage) {
-    motor->move_voltage(voltage);
+    motor->move(voltage);
 }
 
 void RealMotor::vectorPID(pros::motor_pid_s_t pid) {

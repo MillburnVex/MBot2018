@@ -1,5 +1,6 @@
 #include <string>
 #include <utility>
+#include <algorithm>
 #include "api.h"
 #include "BotComponent.h"
 #include "Robot.h"
@@ -8,18 +9,12 @@ class FlywheelComponent : public BotComponent {
 public:
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {
-                                               ActionType::FLYWHEEL_FULL_SPEED, ActionType::FLYWHEEL_STOP,
-                                               ActionType::FLYWHEEL_PASSIVE_SPEED
+                                               ActionType::FLYWHEEL_RUN
                                        }) {}
 
-    void Execute(std::vector<ComponentAction *> &actions) override {
-        if (Components::IsActive(actions, ActionType::FLYWHEEL_FULL_SPEED)) {
-            Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(127);
-        } else if (Components::IsActive(actions, ActionType::FLYWHEEL_STOP)) {
-            Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(0);
-        } else if (Components::IsActive(actions, ActionType::FLYWHEEL_PASSIVE_SPEED)) {
-            Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(80);
-        }
+    void Execute(std::vector<ComponentAction> &actions) override {
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
+        
     }
 };
 
@@ -30,22 +25,28 @@ public:
                                             ActionType::DRIVE_LINEAR, ActionType::DRIVE_ROTATE
                                     }) {}
 
-    void Execute(std::vector<ComponentAction *> &actions) override {
+    void Execute(std::vector<ComponentAction> &actions) override {
         int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
         int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE);
+		printf("linear: %d\n", linear);
+		printf("rotate: %d\n", rotate);
         if (linear != ACTION_TYPE_NOT_ACTIVE && rotate != ACTION_TYPE_NOT_ACTIVE) {
             // linear and rotate at the same time! yay
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVoltage(std::clamp(linear+rotate, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVoltage(std::clamp(linear+rotate, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(std::clamp(-linear+rotate, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(std::clamp(-linear+rotate, -127, 127));
         } else if (linear != ACTION_TYPE_NOT_ACTIVE) {
             // pretty sure just vectorting voltage is fine, cuz the value and the voltage have a domain/range of [-127, 127]
             Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVoltage(linear);
             Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVoltage(linear);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(linear);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(linear);
+            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(-linear);
+            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(-linear);
         } else if (rotate != ACTION_TYPE_NOT_ACTIVE) {
             Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVoltage(rotate);
             Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVoltage(rotate);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(-rotate);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(-rotate);
+            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(rotate);
+            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(rotate);
         }
     }
 };
@@ -60,14 +61,15 @@ public:
         //Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorPID(ballLiftPID);
     }
 
-    void Execute(std::vector<ComponentAction *> &actions) override {
+    void Execute(std::vector<ComponentAction> &actions) override {
+		//printf("VICTORY ROYALE %d\n");
         if (Components::IsActive(actions, ActionType::BALL_LIFT_DOWN)) {
             // needs tuning. I figure lower is better for now
-            Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVelocity(8);
+            Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(127);
         } else if (Components::IsActive(actions, ActionType::BALL_LIFT_UP)) {
-			Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVelocity(-1000);
-			printf("ds\n");
-            
+			Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(-127);
+        } else if(Components::IsActive(actions, ActionType::BALL_LIFT_STOP)) {
+			Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(0);
         }
     }
 };
@@ -78,7 +80,7 @@ public:
             ActionType::CAP_LIFT_DOWN, ActionType::CAP_LIFT_DROP, ActionType::CAP_LIFT_HOLD, ActionType::CAP_LIFT_UP
     }) {}
 
-    void Execute(std::vector<ComponentAction *> &actions) override {
+    void Execute(std::vector<ComponentAction> &actions) override {
         if(Components::IsActive(actions, ActionType::CAP_LIFT_UP)) {
             Robot::GetMotor(BotMotorID::CAP_LIFT)->vectorVelocity(8);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_HOLD)) {
@@ -101,7 +103,7 @@ public:
         Robot::GetMotor(BotMotorID::CLAW)->vectorPID(clawPID);
     }
 
-    void Execute(std::vector<ComponentAction*>& actions) override {
+    void Execute(std::vector<ComponentAction>& actions) override {
         if(Components::IsActive(actions, ActionType::CLAW_FOLD_DOWN)) {
             // this needs testing
             Robot::GetMotor(BotMotorID::CLAW)->vectorPositionAbsolute(0, 8);
@@ -109,7 +111,7 @@ public:
     }
 };
 std::vector<BotComponent *> BotComponent::allComponents;
-std::vector<ComponentAction *> BotComponent::queue;
+std::vector<ComponentAction> BotComponent::queue;
 
 BotComponent::BotComponent(std::string name, std::vector<ActionType> validActions) :
         validActions(std::move(validActions)),
@@ -117,19 +119,19 @@ BotComponent::BotComponent(std::string name, std::vector<ActionType> validAction
     BotComponent::allComponents.push_back(this);
 }
 
-bool Components::IsActive(std::vector<ComponentAction *> &actions, ActionType actionType) {
-    for (ComponentAction *action : actions) {
-        if (action->type == actionType) {
+bool Components::IsActive(std::vector<ComponentAction> &actions, ActionType actionType) {
+    for (ComponentAction action : actions) {
+        if (action.type == actionType) {
             return true;
         }
     }
     return false;
 }
 
-int Components::GetValue(std::vector<ComponentAction *> &actions, ActionType actionType) {
-    for (ComponentAction *action : actions) {
-        if (action->type == actionType) {
-            return action->value;
+int Components::GetValue(std::vector<ComponentAction> &actions, ActionType actionType) {
+    for (ComponentAction action : actions) {
+        if (action.type == actionType) {
+            return action.value;
         }
     }
     return ACTION_TYPE_NOT_ACTIVE;
@@ -139,21 +141,23 @@ void Components::Execute(ActionType actionType, int value) {
     ComponentAction action = {};
     action.value = value;
     action.type = actionType;
-    BotComponent::queue.push_back(&action);
+    BotComponent::queue.push_back(action);
 }
 
 void Components::Update() {
+	std::vector<ComponentAction> actionsToSend;
     for (BotComponent *component : BotComponent::allComponents) {
-        std::vector<ComponentAction *> actionsToSend;
-        for (ComponentAction *action : BotComponent::queue) {
+		actionsToSend.clear();
+        for (ComponentAction action : BotComponent::queue) {
             for (ActionType validActionType : component->validActions) {
-                if (action->type == validActionType) {
+                if (action.type == validActionType) {
                     actionsToSend.push_back(action);
                 }
             }
         }
         component->Execute(actionsToSend);
     }
+	BotComponent::queue.clear();
 }
 
 void Components::Init() {

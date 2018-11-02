@@ -12,7 +12,7 @@ void Robot::Init() {
 	new RealMotor(BotMotorID::DRIVE_LEFT_FRONT);
 	new RealMotor(BotMotorID::DRIVE_RIGHT_BACK);
 	new RealMotor(BotMotorID::DRIVE_RIGHT_FRONT);
-	new RealMotor(BotMotorID::FLYWHEEL);
+	new RealMotor(BotMotorConfig(BotMotorID::FLYWHEEL, false, pros::E_MOTOR_GEARSET_06));
 	new RealMotor(BotMotorID::CAP_LIFT);
 	new RealMotor(BotMotorID::BALL_LIFT);
 }

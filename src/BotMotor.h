@@ -24,7 +24,7 @@ public:
  * vectors the velocity of the motor
  * @param vel
  */
-    virtual void vectorVelocity(int8_t vel) = 0;
+    virtual void vectorVelocity(int16_t vel) = 0;
 
 /**
  * vectors the position goal of the motor in absolute degrees relative to the last time it was recalibrated
@@ -71,7 +71,7 @@ public:
 
     void vectorVoltage(int8_t voltage) override;
 
-    void vectorVelocity(int8_t vel) override;
+    void vectorVelocity(int16_t vel) override;
 
     void vectorPositionAbsolute(double pos, int vel) override;
 

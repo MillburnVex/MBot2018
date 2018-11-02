@@ -2,12 +2,12 @@
 
 #include <utility>
 #include <vector>
-#include "api.h"
+#include "../include/api.h"
 #include <array>
 #include <vector>
 
 typedef enum {
-    NOT_ACTIVE = -1, PRESSED = 1000, REPEATED = 2, RELEASED = 4
+    NOT_ACTIVE = -1, PRESSED = 50, REPEATED = 52, RELEASED = 53
 } PressType;
 
 typedef struct {
@@ -20,8 +20,8 @@ typedef struct {
 #define ANALOG_CONTROL_ACTIVE_THRESHOLD 3
 
 typedef enum {
-    C_DRIVE_LINEAR = pros::E_CONTROLLER_ANALOG_RIGHT_Y,
-    C_DRIVE_ROTATE = pros::E_CONTROLLER_ANALOG_RIGHT_X,
+    C_DRIVE_LINEAR = pros::E_CONTROLLER_ANALOG_LEFT_Y,
+    C_DRIVE_ROTATE = pros::E_CONTROLLER_ANALOG_LEFT_X,
     C_BALL_LIFT_UP = pros::E_CONTROLLER_DIGITAL_L1,
     C_BALL_LIFT_DOWN = pros::E_CONTROLLER_DIGITAL_L2,
     C_CAP_LIFT_UP = pros::E_CONTROLLER_DIGITAL_R1,
@@ -55,10 +55,10 @@ public:
 /**
  * Executes the command with the given values. For analog controls, the value will be in [-127, 127]. For digital controls,
  * the value will be one of DIGITAL_{PRESSED, REPEATED, RELEASED}
- * @param values the control, control_value pairs that this command indicated it wanted to receive in the constructor. To
+ * @param values the control, control_value pairs that this command indicated it wanted to recieve in the constructor. To
  * get a control_value from the wector, just use Commands::GetValue(values, control)
  */
-    virtual void Execute(std::vector<ControlPress *> &values) {
+    virtual void Execute(std::vector<ControlPress> &values) {
     }
 };
 
@@ -67,12 +67,12 @@ namespace Commands {
     /**
      * @return the value of the ControlPress representing the control parameter
      */
-    int GetValue(std::vector<ControlPress *> &values, int control);
+    int GetValue(std::vector<ControlPress> &values, int control);
 
     /**
     * @return the press type of the ControlPress representing the control parameter
     */
-    PressType GetPressType(std::vector<ControlPress *> &values, int control);
+    PressType GetPressType(std::vector<ControlPress> &values, int control);
 
     bool Contains(std::vector<int> &vec, int i);
 
