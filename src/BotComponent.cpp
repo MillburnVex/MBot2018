@@ -27,34 +27,21 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
         int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
-        int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE);
+        int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
 		printf("linear: %d\n", linear);
 		printf("rotate: %d\n", rotate);
-        if (linear != ACTION_TYPE_NOT_ACTIVE && rotate != ACTION_TYPE_NOT_ACTIVE) {
-            // linear and rotate at the same time! yay
-			Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVoltage(std::clamp(linear+rotate, -127, 127));
-			Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVoltage(std::clamp(linear+rotate, -127, 127));
-			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(std::clamp(-linear+rotate, -127, 127));
-			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(std::clamp(-linear+rotate, -127, 127));
-        } else if (linear != ACTION_TYPE_NOT_ACTIVE) {
-            // pretty sure just vectorting voltage is fine, cuz the value and the voltage have a domain/range of [-127, 127]
-            Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVoltage(linear);
-            Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVoltage(linear);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(-linear);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(-linear);
-        } else if (rotate != ACTION_TYPE_NOT_ACTIVE) {
-            Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVoltage(rotate);
-            Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVoltage(rotate);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVoltage(rotate);
-            Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVoltage(rotate);
-        }
+		Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVelocity(std::clamp(linear+rotate, -200, 200));
+		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVelocity(std::clamp(linear+rotate, -200, 200));
+		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVelocity(std::clamp(-linear+rotate, -200, 200));
+		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVelocity(std::clamp(-linear+rotate, -200, 200));
+
     }
 };
 
 class BallLiftComponent : public BotComponent {
 public:
     BallLiftComponent() : BotComponent("Ball lift component", {
-            ActionType::BALL_LIFT_DOWN, ActionType::BALL_LIFT_STOP, ActionType::BALL_LIFT_UP
+            ActionType::BALL_LIFT_RUN
     }) {
         //pros::motor_pid_s ballLiftPID = pros::motor_pid_s();
         // jav do this
@@ -63,14 +50,9 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
 		//printf("VICTORY ROYALE %d\n");
-        if (Components::IsActive(actions, ActionType::BALL_LIFT_DOWN)) {
-            // needs tuning. I figure lower is better for now
-            Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(127);
-        } else if (Components::IsActive(actions, ActionType::BALL_LIFT_UP)) {
-			Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(-127);
-        } else if(Components::IsActive(actions, ActionType::BALL_LIFT_STOP)) {
-			Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(0);
-        }
+		int speed = Components::GetValue(actions, ActionType::BALL_LIFT_RUN);
+        Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(speed);
+      
     }
 };
 

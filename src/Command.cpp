@@ -17,12 +17,19 @@ public:
         int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
 		if(linear != CONTROL_NOT_ACTIVE)
 		{
-			Components::Execute(ActionType::DRIVE_LINEAR, linear);
+			Components::Execute(ActionType::DRIVE_LINEAR, linear * (1.57));
+		}else
+		{
+			Components::Execute(ActionType::DRIVE_LINEAR, 0);
 		}
         if(rotation != CONTROL_NOT_ACTIVE)
         {
-			Components::Execute(ActionType::DRIVE_ROTATE, rotation);
+			Components::Execute(ActionType::DRIVE_ROTATE, rotation * (1.57));
+        }else
+        {
+			Components::Execute(ActionType::DRIVE_ROTATE, 0);
         }
+
         
     }
 };
@@ -37,11 +44,11 @@ public:
         bool down = (Commands::GetPressType(values, Control::C_BALL_LIFT_DOWN) != PressType::NOT_ACTIVE);
         // here's where we check sensor values
         if(!up && !down) {
-            Components::Execute(ActionType::BALL_LIFT_STOP);
+            Components::Execute(ActionType::BALL_LIFT_RUN, 0);
         } else if(up) {
-            Components::Execute(ActionType::BALL_LIFT_UP);
+            Components::Execute(ActionType::BALL_LIFT_RUN, -100);
         } else {
-            Components::Execute(ActionType::BALL_LIFT_DOWN);
+            Components::Execute(ActionType::BALL_LIFT_RUN, 100);
         }
     }
 };
@@ -55,7 +62,7 @@ public:
     void Execute(std::vector<ControlPress> &values) override {
         bool shoot = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::NOT_ACTIVE);
         if(shoot) {
-			Components::Execute(ActionType::FLYWHEEL_RUN, -127);
+			Components::Execute(ActionType::FLYWHEEL_RUN, -120);
         }
     	else
         {

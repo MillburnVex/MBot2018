@@ -29,7 +29,7 @@ struct BotMotorConfig {
     pros::motor_gearset_e gearset;
 
 
-    explicit BotMotorConfig(BotMotorID id) : BotMotorConfig(id, false, pros::E_MOTOR_GEARSET_06) {};
+    explicit BotMotorConfig(BotMotorID id) : BotMotorConfig(id, false, pros::E_MOTOR_GEARSET_18) {};
 
     BotMotorConfig(BotMotorID id, bool reverse, pros::motor_gearset_e_t gearset) : id(id), reverse(reverse),
                                                                                    gearset(gearset) {};
