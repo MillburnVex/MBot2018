@@ -61,6 +61,8 @@ public:
 
     void Execute(std::vector<ControlPress> &values) override {
         bool shoot = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::NOT_ACTIVE);
+		//vex::vision::signature BLUE_CLOSE (1, -3681, -3031, -3356, 13071, 14649, 13860, 8.4, 0);
+		//vex::vision::signature RED_CLOSE(2, 10493, 11317, 10905, -665, -323, -494, 8.3, 0);
         if(shoot) {
 			Components::Execute(ActionType::FLYWHEEL_RUN, -120);
         }
