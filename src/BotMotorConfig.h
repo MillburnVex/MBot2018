@@ -7,8 +7,8 @@ typedef enum {
     FLYWHEEL = 5,
     BALL_LIFT = 8,
     DRIVE_LEFT_FRONT = 2, DRIVE_LEFT_BACK = 1, DRIVE_RIGHT_FRONT = 10, DRIVE_RIGHT_BACK = 9,
-    CAP_LIFT,
-    CLAW
+    CAP_LIFT = 3,
+    CLAW = 6
 } BotMotorID;
 
 /**

@@ -9,74 +9,96 @@ std::vector<ControlPress*> Command::executedControls;
 
 class DriveCommands : public Command {
 public:
-    DriveCommands() : Command(pros::E_CONTROLLER_MASTER,
-                              {Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE}) {}
+	DriveCommands() : Command(pros::E_CONTROLLER_MASTER,
+		{ Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE }) {}
 
-    void Execute(std::vector<ControlPress> &values) override {
-        int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
-        int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
-		if(linear != CONTROL_NOT_ACTIVE)
+	void Execute(std::vector<ControlPress> &values) override {
+		int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
+		int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
+		if (linear != CONTROL_NOT_ACTIVE)
 		{
 			Components::Execute(ActionType::DRIVE_LINEAR, linear * (1.57));
-		}else
+		}
+		else
 		{
 			Components::Execute(ActionType::DRIVE_LINEAR, 0);
 		}
-        if(rotation != CONTROL_NOT_ACTIVE)
-        {
+		if (rotation != CONTROL_NOT_ACTIVE)
+		{
 			Components::Execute(ActionType::DRIVE_ROTATE, rotation * (1.57));
-        }else
-        {
+		}
+		else
+		{
 			Components::Execute(ActionType::DRIVE_ROTATE, 0);
-        }
+		}
 
-        
-    }
+
+	}
 };
 
 class BallLiftCommands : public Command {
 public:
-    BallLiftCommands() : Command(pros::E_CONTROLLER_MASTER,
-                                 {Control::C_BALL_LIFT_DOWN, Control::C_BALL_LIFT_UP}) {}
+	BallLiftCommands() : Command(pros::E_CONTROLLER_MASTER,
+		{ Control::C_BALL_LIFT_DOWN, Control::C_BALL_LIFT_UP }) {}
 
-    void Execute(std::vector<ControlPress> &values) override {
-        bool up = (Commands::GetPressType(values, Control::C_BALL_LIFT_UP) != PressType::NOT_ACTIVE);
-        bool down = (Commands::GetPressType(values, Control::C_BALL_LIFT_DOWN) != PressType::NOT_ACTIVE);
-        // here's where we check sensor values
-        if(!up && !down) {
-            Components::Execute(ActionType::BALL_LIFT_RUN, 0);
-        } else if(up) {
-            Components::Execute(ActionType::BALL_LIFT_RUN, -100);
-        } else {
-            Components::Execute(ActionType::BALL_LIFT_RUN, 100);
-        }
-    }
+	void Execute(std::vector<ControlPress> &values) override {
+		bool up = (Commands::GetPressType(values, Control::C_BALL_LIFT_UP) != PressType::NOT_ACTIVE);
+		bool down = (Commands::GetPressType(values, Control::C_BALL_LIFT_DOWN) != PressType::NOT_ACTIVE);
+		// here's where we check sensor values
+		if (!up && !down) {
+			Components::Execute(ActionType::BALL_LIFT_RUN, 0);
+		}
+		else if (up) {
+			Components::Execute(ActionType::BALL_LIFT_RUN, -100);
+		}
+		else {
+			Components::Execute(ActionType::BALL_LIFT_RUN, 100);
+		}
+	}
 };
 
 class ShootCommand : public Command {
 public:
-    ShootCommand() : Command(pros::E_CONTROLLER_MASTER, {
-            Control::C_SHOOT
-    }) {}
+	ShootCommand() : Command(pros::E_CONTROLLER_MASTER, {
+			Control::C_SHOOT
+		}) {}
 
-    void Execute(std::vector<ControlPress> &values) override {
-        bool shoot = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::NOT_ACTIVE);
+	void Execute(std::vector<ControlPress> &values) override {
+		bool shoot = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::NOT_ACTIVE);
 		//vex::vision::signature BLUE_CLOSE (1, -3681, -3031, -3356, 13071, 14649, 13860, 8.4, 0);
 		//vex::vision::signature RED_CLOSE(2, 10493, 11317, 10905, -665, -323, -494, 8.3, 0);
-        if(shoot) {
-			Components::Execute(ActionType::FLYWHEEL_RUN, -120);
-        }
-    	else
-        {
-			Components::Execute(ActionType::FLYWHEEL_RUN, -100);
-        }
-    }
+		if (shoot) {
+			Components::Execute(ActionType::FLYWHEEL_RUN, 550);
+		}
+		else
+		{
+			Components::Execute(ActionType::FLYWHEEL_RUN, 480);
+		}
+	}
+};
+
+class ClawCommand : public Command {
+public:
+	ClawCommand() : Command(pros::E_CONTROLLER_MASTER, {
+			Control::C_CLAW_FOLD_DOWN, Control::C_CLAW_FOLD_UP
+		}) {}
+
+	void Execute(std::vector<ControlPress> &values) override {
+		printf("dfssad\n");
+		if (Commands::GetPressType(values, Control::C_CLAW_FOLD_DOWN) != PressType::NOT_ACTIVE) {
+			Components::Execute(ActionType::CLAW_FOLD_DOWN);
+		} else if (Commands::GetPressType(values, Control::C_CLAW_FOLD_UP) != PressType::NOT_ACTIVE) {
+			Components::Execute(ActionType::CLAW_FOLD_UP);
+		}
+		printf("dab\n");
+	}
 };
 
 void Commands::Init() {
     new DriveCommands();
     new BallLiftCommands();
 	new ShootCommand();
+	new ClawCommand();
 }
 
 Command::Command(pros::controller_id_e_t type, std::vector<int> controls) : type(type), controls(std::move(controls)) {

@@ -11,9 +11,13 @@
  */
 void initialize() {
     pros::lcd::initialize();
-    Robot::Init();
-    Components::Init();
-    Commands::Init();
+
+    Robot::Init();	printf("tart1\n");
+
+    Components::Init();	printf("tart2\n");
+
+    Commands::Init();	printf("tart3\n");
+
 }
 
 /**

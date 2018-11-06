@@ -29,9 +29,12 @@ void SkipConnectingController() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	printf("tart4\n");
+
     pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
-    pros::lcd::register_btn0_cb(SkipConnectingController);
+    pros::lcd::register_btn0_cb(SkipConnectingController);	printf("tart5\n");
+
     while (!master.is_connected() || skipConnectingController) {
         pros::lcd::print(1, "Connect master controller!");
         pros::lcd::print(1, "Press button on left to skip");
