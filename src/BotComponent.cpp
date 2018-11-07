@@ -18,7 +18,7 @@ public:
 		printf("df\n");
 		auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(), Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
 		printf("%d\n", newval);
-		Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(fmax(0, newval));
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(fmax(0, newval));
         
     }
 };
@@ -35,10 +35,10 @@ public:
         int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
 		printf("linear: %d\n", linear);
 		printf("rotate: %d\n", rotate);
-		Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->vectorVelocity(std::clamp(linear+rotate, -200, 200));
-		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->vectorVelocity(std::clamp(linear+rotate, -200, 200));
-		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->vectorVelocity(std::clamp(-linear+rotate, -200, 200));
-		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->vectorVelocity(std::clamp(-linear+rotate, -200, 200));
+		Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVelocity(std::clamp(linear+rotate, -200, 200));
+		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVelocity(std::clamp(linear+rotate, -200, 200));
+		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVelocity(std::clamp(-linear+rotate, -200, 200));
+		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVelocity(std::clamp(-linear+rotate, -200, 200));
 
     }
 };
@@ -56,7 +56,7 @@ public:
     void Execute(std::vector<ComponentAction> &actions) override {
 		//printf("VICTORY ROYALE %d\n");
 		int speed = Components::GetValue(actions, ActionType::BALL_LIFT_RUN);
-        Robot::GetMotor(BotMotorID::BALL_LIFT)->vectorVoltage(speed);
+        Robot::GetMotor(BotMotorID::BALL_LIFT)->SetVoltage(speed);
       
     }
 };
@@ -69,13 +69,13 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
         if(Components::IsActive(actions, ActionType::CAP_LIFT_UP)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->vectorVelocity(8);
+            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(8);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_HOLD)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->vectorVelocity(0);
+            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(0);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_DROP)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->vectorVoltage(0);
+            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(0);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_DOWN)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->vectorVelocity(-8);
+            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(-8);
         }
     }
 };
@@ -94,13 +94,13 @@ public:
 		printf("started\n");
         if(Components::IsActive(actions, ActionType::CLAW_FOLD_DOWN)) {
             // this needs testing
-			Robot::GetMotor(BotMotorID::CLAW)->vectorVoltage(-100);
+			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(-100);
 		}
 		else if (Components::IsActive(actions, ActionType::CLAW_FOLD_UP)) {
-			Robot::GetMotor(BotMotorID::CLAW)->vectorVoltage(100);
+			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(100);
 		}
 		else {
-			Robot::GetMotor(BotMotorID::CLAW)->vectorVoltage(0);
+			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(0);
 		}
 		printf("ended\n");
     }
