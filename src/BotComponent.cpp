@@ -7,18 +7,19 @@
 #include "PID.h"
 
 class FlywheelComponent : public BotComponent {
-	PID pid = PID(1, 1, 1, 1000, -1000);
+	PID pid = PID(1, 0.0f, 1, 1000, -1000);
 public:
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {
                                                ActionType::FLYWHEEL_RUN
                                        }) {}
-
+	 
     void Execute(std::vector<ComponentAction> &actions) override {
-		printf("df\n");
-		auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(), Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
-		printf("%d\n", newval);
-		Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(fmax(0, newval));
+		//printf("%f\n", -Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity());
+		auto newval = pid.GetValue(-Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(), Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
+		//printf("pid value %d\n", newval);
+		//printf("clamped %d\n", std::clamp(newval, 0, 127));
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(-std::clamp(newval, 100, 127));
         
     }
 };
@@ -91,7 +92,6 @@ public:
     }
 
     void Execute(std::vector<ComponentAction>& actions) override {
-		printf("started\n");
         if(Components::IsActive(actions, ActionType::CLAW_FOLD_DOWN)) {
             // this needs testing
 			Robot::GetMotor(BotMotorID::CLAW)->vectorVoltage(-100);
@@ -102,7 +102,6 @@ public:
 		else {
 			Robot::GetMotor(BotMotorID::CLAW)->vectorVoltage(0);
 		}
-		printf("ended\n");
     }
 };
 std::vector<BotComponent *> BotComponent::allComponents;
@@ -159,7 +158,7 @@ void Components::Init() {
     new DriveComponent();
     new FlywheelComponent();
     new BallLiftComponent();
-    new CapLiftComponent();
+    //new CapLiftComponent();
     new ClawComponent();
 }
 

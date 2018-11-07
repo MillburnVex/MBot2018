@@ -1,7 +1,9 @@
 #include <vector>
 #include <algorithm>
 #include "Command.h"
+#include "Robot.h"
 #include "BotComponent.h"
+#include "../include/main.h"
 
 std::vector<Command *> Command::allCommands;
 std::vector<int> Command::controlsLastActive;
@@ -10,11 +12,16 @@ std::vector<ControlPress*> Command::executedControls;
 class DriveCommands : public Command {
 public:
 	DriveCommands() : Command(pros::E_CONTROLLER_MASTER,
-		{ Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE }) {}
+		{ Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE, Control::C_AIM }) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
 		int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
 		int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
+		bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::NOT_ACTIVE);
+		if (aim) {
+			Components::Execute(ActionType::DRIVE_LINEAR, 0);
+			return;
+		}
 		if (linear != CONTROL_NOT_ACTIVE)
 		{
 			Components::Execute(ActionType::DRIVE_LINEAR, linear * (1.57));
@@ -25,7 +32,7 @@ public:
 		}
 		if (rotation != CONTROL_NOT_ACTIVE)
 		{
-			Components::Execute(ActionType::DRIVE_ROTATE, rotation * (1.57));
+			Components::Execute(ActionType::DRIVE_ROTATE, rotation);
 		}
 		else
 		{
@@ -58,22 +65,47 @@ public:
 };
 
 class ShootCommand : public Command {
+	
+
 public:
+	const static int NUM_VISION_OBJECTS = 4;
+
 	ShootCommand() : Command(pros::E_CONTROLLER_MASTER, {
-			Control::C_SHOOT
+			Control::C_SHOOT, Control::C_AIM
 		}) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
 		bool shoot = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::NOT_ACTIVE);
-		//vex::vision::signature BLUE_CLOSE (1, -3681, -3031, -3356, 13071, 14649, 13860, 8.4, 0);
-		//vex::vision::signature RED_CLOSE(2, 10493, 11317, 10905, -665, -323, -494, 8.3, 0);
+		bool aim   = (Commands::GetPressType(values, Control::C_AIM)   != PressType::NOT_ACTIVE);
+
+		pros::vision_object_s_t objects[NUM_VISION_OBJECTS];
+		std::int32_t objcount = Robot::GetCamera().read_by_size(0, NUM_VISION_OBJECTS, objects);
+
+		if (objcount > NUM_VISION_OBJECTS) objcount = 0;
+
+		int id = -1;
+		int val = 10000;
+
+		for (int i = 0; i < objcount; i++) {
+			if (val > std::abs(objects[i].x_middle_coord)) {
+				id = i;
+				val = std::abs(objects[i].x_middle_coord);
+			}
+		}
+
+		if (aim && id != -1) {
+			Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
+		}
+
 		if (shoot) {
 			Components::Execute(ActionType::FLYWHEEL_RUN, 550);
 		}
 		else
 		{
-			Components::Execute(ActionType::FLYWHEEL_RUN, 480);
+			Components::Execute(ActionType::FLYWHEEL_RUN, 500);
 		}
+
+		
 	}
 };
 
@@ -84,13 +116,11 @@ public:
 		}) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
-		printf("dfssad\n");
 		if (Commands::GetPressType(values, Control::C_CLAW_FOLD_DOWN) != PressType::NOT_ACTIVE) {
 			Components::Execute(ActionType::CLAW_FOLD_DOWN);
 		} else if (Commands::GetPressType(values, Control::C_CLAW_FOLD_UP) != PressType::NOT_ACTIVE) {
 			Components::Execute(ActionType::CLAW_FOLD_UP);
 		}
-		printf("dab\n");
 	}
 };
 
@@ -145,6 +175,7 @@ bool Commands::Contains(std::vector<int> &vec, std::vector<int> &i) {
 }
 
 void Commands::Update() {
+
     pros::Controller master(pros::E_CONTROLLER_MASTER);
     pros::Controller partner(pros::E_CONTROLLER_PARTNER);
     std::vector<ControlPress> newControls;

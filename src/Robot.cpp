@@ -2,8 +2,14 @@
 #include "BotComponent.h"
 
 
+pros::Vision camera(4, pros::E_VISION_ZERO_CENTER);
+
 int Robot::GetState() {
     return 0;
+}
+
+pros::Vision Robot::GetCamera() {
+	return camera;
 }
 
 void Robot::Init() {

@@ -29,7 +29,6 @@ void SkipConnectingController() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	printf("tart4\n");
 
     pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);

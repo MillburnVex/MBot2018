@@ -5,7 +5,7 @@
 #include <vector>
 #include "ComponentAction.h"
 
-#define ACTION_TYPE_NOT_ACTIVE 100000
+#define ACTION_TYPE_NOT_ACTIVE 0
 
 /**
  * A component of the bot, e.g. the ball lift or the flywheel. These should correspond with actual physical components,

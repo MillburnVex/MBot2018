@@ -8,6 +8,8 @@ namespace Robot {
 
     int GetState();
 
+	pros::Vision GetCamera();
+
     BotMotor *GetMotor(BotMotorID id);
 
     void Init();
