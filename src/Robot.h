@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "BotMotorConfig.h"
+#include "Sensor.h"
 #include "BotMotor.h"
 
 namespace Robot {
@@ -11,6 +11,8 @@ namespace Robot {
 	pros::Vision GetCamera();
 
     BotMotor *GetMotor(BotMotorID id);
+
+    Sensor *GetSensor(SensorID id);
 
     void Init();
 };

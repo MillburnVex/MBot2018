@@ -1,7 +1,7 @@
 #include "BotMotor.h"
 #include "Robot.h"
 
-std::vector<BotMotor *> BotMotor::motors;
+std::vector<BotMotor *> BotMotor::allMotors;
 
 void RealMotor::vectorPositionAbsolute(double pos, int vel) {
     motor->move_absolute(pos, vel);
@@ -11,7 +11,7 @@ void RealMotor::vectorPositionRelative(double pos, int vel) {
     motor->move_relative(pos, vel);
 }
 
-void RealMotor::vectorVelocity(int16_t vel) {
+void RealMotor::SetVelocity(int16_t vel) {
     motor->move_velocity(vel);
 }
 
@@ -29,5 +29,5 @@ pros::motor_pid_full_s_t RealMotor::GetPID() {
 }
 
 BotMotor::BotMotor(BotMotorConfig config) : config(config) {
-    motors.push_back(this);
+    allMotors.push_back(this);
 };
