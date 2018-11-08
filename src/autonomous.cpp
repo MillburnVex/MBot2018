@@ -14,5 +14,4 @@
  */
 void autonomous() {
     // example code
-
 }

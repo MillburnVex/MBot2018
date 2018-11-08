@@ -7,14 +7,8 @@
 #include <vector>
 
 typedef enum {
-    NOT_ACTIVE = -1, PRESSED = 50, REPEATED = 52, RELEASED = 53
+    PRESS_NOT_ACTIVE = -1, PRESSED = 50, REPEATED = 52, RELEASED = 53
 } PressType;
-
-typedef struct {
-    PressType pressType;
-    int control;
-    int value;
-} ControlPress;
 
 #define CONTROL_NOT_ACTIVE 10000
 #define ANALOG_CONTROL_ACTIVE_THRESHOLD 3
@@ -24,15 +18,28 @@ typedef enum {
     C_DRIVE_ROTATE = pros::E_CONTROLLER_ANALOG_LEFT_X,
     C_BALL_LIFT_UP = pros::E_CONTROLLER_DIGITAL_L1,
     C_BALL_LIFT_DOWN = pros::E_CONTROLLER_DIGITAL_L2,
-    C_CAP_LIFT_UP = -1,
-    C_CAP_LIFT_DOWN = -1,
+    C_CAP_LIFT_UP = pros::E_CONTROLLER_DIGITAL_UP,
+    C_CAP_LIFT_DOWN = pros::E_CONTROLLER_DIGITAL_DOWN,
     C_SHOOT = pros::E_CONTROLLER_DIGITAL_X,
 	C_AIM = pros::E_CONTROLLER_DIGITAL_B,
 	C_CLAW_FOLD_UP = pros::E_CONTROLLER_DIGITAL_R1,
 	C_CLAW_FOLD_DOWN = pros::E_CONTROLLER_DIGITAL_R2,
-    C_CLAW_ROTATE_180 = pros::E_CONTROLLER_DIGITAL_UP,
+    C_CLAW_ROTATE_180 = pros::E_CONTROLLER_DIGITAL_UP
 } Control;
 
+typedef enum {
+	MASTER = pros::E_CONTROLLER_MASTER,
+	PARTNER = pros::E_CONTROLLER_PARTNER,
+	BOTH,
+	CONTOLLER_NOT_ACTIVE = -1
+} Controller;
+
+typedef struct {
+	PressType pressType;
+	int control;
+	int value;
+	Controller controller;
+} ControlPress;
 /**
  * An abstract class that can be extended to create commands. On instantiation of a command, it is automatically added
  * to a static list which will be checked each tick with the latest values. Commands will be executed (each tick)
@@ -42,18 +49,18 @@ typedef enum {
 class Command {
 public:
     static std::vector<Command *> allCommands;
-    static std::vector<int> controlsLastActive;
+    static std::vector<std::pair<int, int>> controlsLastActive;
     // the ones that were created by calling Commands::Execute
     static std::vector<ControlPress*> executedControls;
 
     std::vector<int> controls;
-    pros::controller_id_e_t type;
+    Controller type;
 
 /**
- * @param type one of pros::E_CONTROLLER_{MASTER, PARTNER}
+ * @param type one of Controller::{MASTER, PARTNER, BOTH}
  * @param controls the controls this wants to be sent
  */
-    Command(pros::controller_id_e_t type, std::vector<int> controls);
+    Command(Controller type, std::vector<int> controls);
 
 /**
  * Executes the command with the given values. For analog controls, the value will be in [-127, 127]. For digital controls,
@@ -72,14 +79,22 @@ namespace Commands {
      */
     int GetValue(std::vector<ControlPress> &values, int control);
 
+	int GetValue(std::vector<ControlPress> &value, int control, Controller controller);
+
     /**
     * @return the press type of the ControlPress representing the control parameter
     */
     PressType GetPressType(std::vector<ControlPress> &values, int control);
 
-    bool Contains(std::vector<int> &vec, int i);
+	PressType GetPressType(std::vector<ControlPress> &values, int control, Controller controller);
+
+	Controller GetController(std::vector<ControlPress> &values, int control);
+
+    bool Contains(std::vector<std::pair<int, int>> &vec, int controller, int control);
 
     bool Contains(std::vector<int> &vec, std::vector<int> &i);
+
+	bool Contains(std::vector<int>& vec, int i);
 
     bool Contains(std::vector<ControlPress *> presses, int control);
 
@@ -87,7 +102,9 @@ namespace Commands {
 
     void Execute(Control control, int value);
 
-    void Execute(Control control, int value, PressType pressType);
+	void Execute(Control control, int value, Controller controller);
+
+    void Execute(Control control, int value, Controller controller, PressType pressType);
 
     void Update();
 

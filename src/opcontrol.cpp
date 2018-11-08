@@ -6,13 +6,6 @@
 void Update() {
     Commands::Update();
     Components::Update();
-
-}
-
-bool skipConnectingController = false;
-
-void SkipConnectingController() {
-    skipConnectingController = true;
 }
 
 /**
@@ -32,15 +25,17 @@ void opcontrol() {
 
     pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
-    pros::lcd::register_btn0_cb(SkipConnectingController);	printf("tart5\n");
-
-    while (!master.is_connected() || skipConnectingController) {
+    while (!master.is_connected()) {
         pros::lcd::print(1, "Connect master controller!");
-        pros::lcd::print(1, "Press button on left to skip");
+        pros::lcd::print(2, "Press button on left to skip");
+		if (pros::lcd::read_buttons() == 4) {
+			break;
+		}
         pros::Task::delay(500);
     }
     master.rumble("..");
-    pros::c::controller_print(pros::E_CONTROLLER_MASTER, 1, 1, "Lock and load lads");
+    pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Lock and load lads");
+	pros::lcd::clear();
     uint32_t time = pros::millis();
     while (true) {
         Update();

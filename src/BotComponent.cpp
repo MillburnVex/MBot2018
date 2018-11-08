@@ -19,7 +19,7 @@ public:
 		auto newval = pid.GetValue(-Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(), Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
 		//printf("pid value %d\n", newval);
 		//printf("clamped %d\n", std::clamp(newval, 0, 127));
-		Robot::GetMotor(BotMotorID::FLYWHEEL)->vectorVoltage(-std::clamp(newval, 100, 127));
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
         
     }
 };
@@ -65,18 +65,17 @@ public:
 class CapLiftComponent : public BotComponent {
 public:
     CapLiftComponent() : BotComponent("Cap lift component", {
-            ActionType::CAP_LIFT_DOWN, ActionType::CAP_LIFT_DROP, ActionType::CAP_LIFT_HOLD, ActionType::CAP_LIFT_UP
+            ActionType::CAP_LIFT_DOWN, ActionType::CAP_LIFT_HOLD, ActionType::CAP_LIFT_UP
     }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
         if(Components::IsActive(actions, ActionType::CAP_LIFT_UP)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(8);
+			printf("Received\n");
+			Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(127);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_HOLD)) {
             Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(0);
-        } else if(Components::IsActive(actions, ActionType::CAP_LIFT_DROP)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(0);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_DOWN)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(-8);
+            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(-127);
         }
     }
 };
@@ -158,7 +157,7 @@ void Components::Init() {
     new DriveComponent();
     new FlywheelComponent();
     new BallLiftComponent();
-    //new CapLiftComponent();
+    new CapLiftComponent();
     new ClawComponent();
 }
 
