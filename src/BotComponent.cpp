@@ -20,7 +20,6 @@ public:
 		//printf("pid value %d\n", newval);
 		//printf("clamped %d\n", std::clamp(newval, 0, 127));
 		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
-        
     }
 };
 
@@ -34,13 +33,10 @@ public:
     void Execute(std::vector<ComponentAction> &actions) override {
         int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
         int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
-		printf("linear: %d\n", linear);
-		printf("rotate: %d\n", rotate);
 		Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVelocity(std::clamp(linear+rotate, -200, 200));
 		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVelocity(std::clamp(linear+rotate, -200, 200));
 		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVelocity(std::clamp(-linear+rotate, -200, 200));
 		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVelocity(std::clamp(-linear+rotate, -200, 200));
-
     }
 };
 
@@ -71,11 +67,11 @@ public:
     void Execute(std::vector<ComponentAction> &actions) override {
         if(Components::IsActive(actions, ActionType::CAP_LIFT_UP)) {
 			printf("Received\n");
-			Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(127);
+			Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(-127);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_HOLD)) {
             Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVelocity(0);
         } else if(Components::IsActive(actions, ActionType::CAP_LIFT_DOWN)) {
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(-127);
+            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(127);
         }
     }
 };
@@ -92,7 +88,6 @@ public:
 
     void Execute(std::vector<ComponentAction>& actions) override {
         if(Components::IsActive(actions, ActionType::CLAW_FOLD_DOWN)) {
-            // this needs testing
 			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(-100);
 		}
 		else if (Components::IsActive(actions, ActionType::CLAW_FOLD_UP)) {

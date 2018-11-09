@@ -8,7 +8,7 @@ typedef enum {
     BALL_LIFT = 8,
     DRIVE_LEFT_FRONT = 2, DRIVE_LEFT_BACK = 1, DRIVE_RIGHT_FRONT = 10, DRIVE_RIGHT_BACK = 9,
     CAP_LIFT = 7,
-    CLAW = 6
+    CLAW = 20
 } BotMotorID;
 
 /**
@@ -27,7 +27,6 @@ struct BotMotorConfig {
      * The PROS motor gearset to use. Options are pros::E_MOTOR_gearset_<06|18|36>
      */
     pros::motor_gearset_e gearset;
-
 
     explicit BotMotorConfig(BotMotorID id) : BotMotorConfig(id, false, pros::E_MOTOR_GEARSET_18) {};
 

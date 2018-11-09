@@ -12,12 +12,17 @@ std::vector<ControlPress*> Command::executedControls;
 class DriveCommands : public Command {
 public:
 	DriveCommands() : Command(Controller::MASTER,
-		{ Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE, Control::C_AIM }) {}
+		{ Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE, Control::C_AIM, Control::C_SLOW_DRIVE }) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
 		int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
 		int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
 		bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
+		bool slow = (Commands::GetPressType(values, Control::C_SLOW_DRIVE) != PressType::PRESS_NOT_ACTIVE);
+		double slowMultiplier = 1.0;
+		if (slow) {
+			slowMultiplier = 0.5;
+		}
 		if (aim) {
 			Components::Execute(ActionType::DRIVE_LINEAR, 0);
 			return;
@@ -25,7 +30,7 @@ public:
 		else {
 			if (linear != CONTROL_NOT_ACTIVE)
 			{
-				Components::Execute(ActionType::DRIVE_LINEAR, linear * (1.57));
+				Components::Execute(ActionType::DRIVE_LINEAR, linear * (1.57) * slowMultiplier);
 			}
 			else
 			{
@@ -33,7 +38,7 @@ public:
 			}
 			if (rotation != CONTROL_NOT_ACTIVE)
 			{
-				Components::Execute(ActionType::DRIVE_ROTATE, rotation);
+				Components::Execute(ActionType::DRIVE_ROTATE, rotation * slowMultiplier);
 			}
 			else
 			{
@@ -68,7 +73,7 @@ class ShootCommand : public Command {
 public:
 	const int NUM_VISION_OBJECTS = 4;
 
-	ShootCommand() : Command(Controller::PARTNER, {
+	ShootCommand() : Command(Controller::MASTER, {
 			Control::C_SHOOT, Control::C_AIM
 		}) {}
 
@@ -90,13 +95,11 @@ public:
 				val = std::abs(objects[i].x_middle_coord);
 			}
 		}
-
 		if (aim && id != -1) {
 			Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
 		}
-
 		if (shoot) {
-			Components::Execute(ActionType::FLYWHEEL_RUN, 550);
+			Components::Execute(ActionType::FLYWHEEL_RUN, 600);
 		}
 		else
 		{
@@ -131,7 +134,7 @@ public:
 			Components::Execute(ActionType::CAP_LIFT_UP);
 		}
 		else if (Commands::GetPressType(values, Control::C_CAP_LIFT_DOWN) != PressType::PRESS_NOT_ACTIVE) {
-			Components::Execute(ActionType::CAP_LIFT_UP);
+			Components::Execute(ActionType::CAP_LIFT_DOWN);
 		}
 		else {
 			Components::Execute(ActionType::CAP_LIFT_HOLD);
