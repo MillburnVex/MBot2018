@@ -1,4 +1,5 @@
 #pragma once
+
 #include "api.h"
 #include <vector>
 
@@ -9,7 +10,7 @@ typedef enum {
 class Sensor {
 public:
 
-    static std::vector<Sensor*> allSensors;
+    static std::vector<Sensor *> allSensors;
 
     SensorID id;
 

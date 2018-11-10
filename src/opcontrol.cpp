@@ -28,14 +28,14 @@ void opcontrol() {
     while (!master.is_connected()) {
         pros::lcd::print(1, "Connect master controller!");
         pros::lcd::print(2, "Press button on left to skip");
-		if (pros::lcd::read_buttons() == 4) {
-			break;
-		}
+        if (pros::lcd::read_buttons() == 4) {
+            break;
+        }
         pros::Task::delay(500);
     }
     master.rumble("..");
     pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Lock and load lads");
-	pros::lcd::clear();
+    pros::lcd::clear();
     uint32_t time = pros::millis();
     while (true) {
         Update();
