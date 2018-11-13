@@ -54,9 +54,9 @@ public:
         if (!up && !down) {
             Components::Execute(ActionType::BALL_LIFT_RUN, 0);
         } else if (up) {
-            Components::Execute(ActionType::BALL_LIFT_RUN, -100);
+            Components::Execute(ActionType::BALL_LIFT_RUN, -127);
         } else {
-            Components::Execute(ActionType::BALL_LIFT_RUN, 100);
+            Components::Execute(ActionType::BALL_LIFT_RUN, 127);
         }
     }
 };
@@ -91,9 +91,9 @@ public:
             Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
         }
         if (shoot) {
-            Components::Execute(ActionType::FLYWHEEL_RUN, 600);
+            Components::Execute(ActionType::FLYWHEEL_RUN, 127);
         } else {
-            Components::Execute(ActionType::FLYWHEEL_RUN, 500);
+            Components::Execute(ActionType::FLYWHEEL_RUN, 100);
         }
     }
 };

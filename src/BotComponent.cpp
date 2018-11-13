@@ -16,11 +16,13 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
         //printf("%f\n", -Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity());
-        auto newval = pid.GetValue(-Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(),
-                                   Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
+        //auto newval = pid.GetValue(-Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(),
+        //                           Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
         //printf("pid value %d\n", newval);
         //printf("clamped %d\n", std::clamp(newval, 0, 127));
-        Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
+        //Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
+		// for now i'm removing PID because I don't think it's giving full voltage
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(Components::GetValue(actions, ActionType::FLYWHEEL_RUN), 100, 127));
     }
 };
 
@@ -34,10 +36,10 @@ public:
     void Execute(std::vector<ComponentAction> &actions) override {
         int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
         int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
-        Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVelocity(std::clamp(linear + rotate, -200, 200));
-        Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVelocity(std::clamp(linear + rotate, -200, 200));
-        Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVelocity(std::clamp(-linear + rotate, -200, 200));
-        Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVelocity(std::clamp(-linear + rotate, -200, 200));
+        Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(linear + rotate, -127, 127));
+		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(linear + rotate, -127, 127));
+		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
+        Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
     }
 };
 
@@ -89,11 +91,11 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
         if (Components::IsActive(actions, ActionType::CLAW_FOLD_DOWN)) {
-            Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(-100);
+            Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(-30);
         } else if (Components::IsActive(actions, ActionType::CLAW_FOLD_UP)) {
             Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(100);
         } else {
-            Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(0);
+            Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(10);
         }
     }
 };
