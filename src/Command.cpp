@@ -10,11 +10,13 @@ std::vector<std::pair<int, int>> Command::controlsLastActive;
 std::vector<ControlPress*> Command::executedControls;
 
 class DriveCommands : public Command {
+	const double MULTIPLIER = 200 / 127;
 public:
 	DriveCommands() : Command(Controller::MASTER,
 		{ Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE, Control::C_AIM }) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
+		
 		int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
 		int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
 		bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
@@ -69,12 +71,13 @@ public:
 	const int NUM_VISION_OBJECTS = 4;
 
 	ShootCommand() : Command(Controller::PARTNER, {
-			Control::C_SHOOT, Control::C_AIM
+			Control::C_SHOOT, Control::C_AIM, Control::C_INDEX
 		}) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
-		bool shoot = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::PRESS_NOT_ACTIVE);
+		bool fast = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::PRESS_NOT_ACTIVE);
 		bool aim   = (Commands::GetPressType(values, Control::C_AIM)   != PressType::PRESS_NOT_ACTIVE);
+		bool index = (Commands::GetPressType(values, Control::C_INDEX) != PressType::PRESS_NOT_ACTIVE);
 
 		pros::vision_object_s_t objects[NUM_VISION_OBJECTS];
 		std::int32_t objcount = Robot::GetCamera().read_by_size(0, NUM_VISION_OBJECTS, objects);
@@ -95,12 +98,19 @@ public:
 			Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
 		}
 
-		if (shoot) {
+		if (fast) {
 			Components::Execute(ActionType::FLYWHEEL_RUN, 550);
 		}
 		else
 		{
 			Components::Execute(ActionType::FLYWHEEL_RUN, 500);
+		}
+		if (index) {
+			Components::Execute(ActionType::INDEXER_UP);
+		}
+		else
+		{
+			Components::Execute(ActionType::INDEXER_DOWN);
 		}
 	}
 };
@@ -131,7 +141,7 @@ public:
 			Components::Execute(ActionType::CAP_LIFT_UP);
 		}
 		else if (Commands::GetPressType(values, Control::C_CAP_LIFT_DOWN) != PressType::PRESS_NOT_ACTIVE) {
-			Components::Execute(ActionType::CAP_LIFT_UP);
+			Components::Execute(ActionType::CAP_LIFT_DOWN);
 		}
 		else {
 			Components::Execute(ActionType::CAP_LIFT_HOLD);

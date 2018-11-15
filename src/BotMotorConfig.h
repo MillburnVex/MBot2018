@@ -4,11 +4,12 @@
 #include "api.h"
 
 typedef enum {
-    FLYWHEEL = 5,
-    BALL_LIFT = 8,
-    DRIVE_LEFT_FRONT = 2, DRIVE_LEFT_BACK = 1, DRIVE_RIGHT_FRONT = 10, DRIVE_RIGHT_BACK = 9,
-    CAP_LIFT = 7,
-    CLAW = 6
+	FLYWHEEL = 5,
+	BALL_LIFT = 8,
+	DRIVE_LEFT_FRONT = 2, DRIVE_LEFT_BACK = 1, DRIVE_RIGHT_FRONT = 10, DRIVE_RIGHT_BACK = 9,
+	CAP_LIFT = 7,
+	CLAW = 6,
+	INDEXER = 11
 } BotMotorID;
 
 /**
