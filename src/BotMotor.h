@@ -50,7 +50,7 @@ public:
 
     virtual bool IsRealMotor() = 0;
 
-    virtual pros::Motor* GetProsMotor() = 0;
+    virtual pros::Motor *GetProsMotor() = 0;
 
     BotMotorConfig GetConfig() {
         return config;
@@ -85,7 +85,7 @@ public:
         return true;
     }
 
-    pros::Motor* GetProsMotor() override {
+    pros::Motor *GetProsMotor() override {
         return motor;
     }
 };

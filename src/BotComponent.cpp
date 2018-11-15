@@ -7,20 +7,22 @@
 #include "PID.h"
 
 class FlywheelComponent : public BotComponent {
-	PID pid = PID(1, 0.0f, 1, 1000, -1000);
+    PID pid = PID(1, 0.0f, 1, 1000, -1000);
 public:
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {
                                                ActionType::FLYWHEEL_RUN
                                        }) {}
-	 
+
     void Execute(std::vector<ComponentAction> &actions) override {
-		//printf("%f\n", -Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity());
-		auto newval = pid.GetValue(-Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(), Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
-		//printf("pid value %d\n", newval);
-		//printf("clamped %d\n", std::clamp(newval, 0, 127));
+        //printf("%f\n", -Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity());
+        auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(),
+                                   Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
+        //printf("pid value %d\n", newval);
+        //printf("clamped %d\n", std::clamp(newval, 0, 127));
+        //Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
+		// for now i'm removing PID because I don't think it's giving full voltage
 		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
-        
     }
 };
 
@@ -52,13 +54,10 @@ public:
     void Execute(std::vector<ComponentAction> &actions) override {
         int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
         int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
-		printf("linear: %d\n", linear);
-		printf("rotate: %d\n", rotate);
-		Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVelocity(std::clamp(linear+rotate, -200, 200));
-		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVelocity(std::clamp(linear+rotate, -200, 200));
-		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVelocity(std::clamp(-linear+rotate, -200, 200));
-		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVelocity(std::clamp(-linear+rotate, -200, 200));
-
+        Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(linear + rotate, -127, 127));
+		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(linear + rotate, -127, 127));
+		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
+        Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
     }
 };
 
@@ -73,10 +72,10 @@ public:
     }
 
     void Execute(std::vector<ComponentAction> &actions) override {
-		//printf("VICTORY ROYALE %d\n");
-		int speed = Components::GetValue(actions, ActionType::BALL_LIFT_RUN);
+        //printf("VICTORY ROYALE %d\n");
+        int speed = Components::GetValue(actions, ActionType::BALL_LIFT_RUN);
         Robot::GetMotor(BotMotorID::BALL_LIFT)->SetVoltage(speed);
-      
+
     }
 };
 
@@ -95,13 +94,11 @@ public:
         }
 		else if(Components::IsActive(actions, ActionType::CAP_LIFT_HOLD)) {
 			auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::CAP_LIFT)->GetProsMotor()->get_position(), lastval);
-			printf("newval %d\n", newval);
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(std::clamp(newval, -127, 127));
+=            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(std::clamp(newval, -127, 127));
         }
-		else if(Components::IsActive(actions, ActionType::CAP_LIFT_DOWN)) {
+		else if (Components::IsActive(actions, ActionType::CAP_LIFT_DOWN)) {
 			lastval = Robot::GetMotor(BotMotorID::CAP_LIFT)->GetProsMotor()->get_position();
-            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(-127);
-        }
+		}
     }
 };
 
@@ -130,8 +127,10 @@ public:
 			auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::CLAW)->GetProsMotor()->get_position(), lastval);
 			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(std::clamp(newval, -127, 127));
 		}
+
     }
 };
+
 std::vector<BotComponent *> BotComponent::allComponents;
 std::vector<ComponentAction> BotComponent::queue;
 
@@ -167,9 +166,9 @@ void Components::Execute(ActionType actionType, int value) {
 }
 
 void Components::Update() {
-	std::vector<ComponentAction> actionsToSend;
+    std::vector<ComponentAction> actionsToSend;
     for (BotComponent *component : BotComponent::allComponents) {
-		actionsToSend.clear();
+        actionsToSend.clear();
         for (ComponentAction action : BotComponent::queue) {
             for (ActionType validActionType : component->validActions) {
                 if (action.type == validActionType) {
@@ -179,7 +178,7 @@ void Components::Update() {
         }
         component->Execute(actionsToSend);
     }
-	BotComponent::queue.clear();
+    BotComponent::queue.clear();
 }
 
 void Components::Init() {

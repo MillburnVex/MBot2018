@@ -25,22 +25,23 @@ typedef enum {
 	C_AIM = pros::E_CONTROLLER_DIGITAL_B,
 	C_CLAW_FOLD_UP = pros::E_CONTROLLER_DIGITAL_R1,
 	C_CLAW_FOLD_DOWN = pros::E_CONTROLLER_DIGITAL_R2,
-    C_CLAW_ROTATE_180 = pros::E_CONTROLLER_DIGITAL_UP
+
 } Control;
 
 typedef enum {
-	MASTER = pros::E_CONTROLLER_MASTER,
-	PARTNER = pros::E_CONTROLLER_PARTNER,
-	BOTH,
-	CONTOLLER_NOT_ACTIVE = -1
+    MASTER = pros::E_CONTROLLER_MASTER,
+    PARTNER = pros::E_CONTROLLER_PARTNER,
+    BOTH,
+    CONTOLLER_NOT_ACTIVE = -1
 } Controller;
 
 typedef struct {
-	PressType pressType;
-	int control;
-	int value;
-	Controller controller;
+    PressType pressType;
+    int control;
+    int value;
+    Controller controller;
 } ControlPress;
+
 /**
  * An abstract class that can be extended to create commands. On instantiation of a command, it is automatically added
  * to a static list which will be checked each tick with the latest values. Commands will be executed (each tick)
@@ -52,7 +53,7 @@ public:
     static std::vector<Command *> allCommands;
     static std::vector<std::pair<int, int>> controlsLastActive;
     // the ones that were created by calling Commands::Execute
-    static std::vector<ControlPress*> executedControls;
+    static std::vector<ControlPress *> executedControls;
 
     std::vector<int> controls;
     Controller type;
@@ -80,22 +81,22 @@ namespace Commands {
      */
     int GetValue(std::vector<ControlPress> &values, int control);
 
-	int GetValue(std::vector<ControlPress> &value, int control, Controller controller);
+    int GetValue(std::vector<ControlPress> &value, int control, Controller controller);
 
     /**
     * @return the press type of the ControlPress representing the control parameter
     */
     PressType GetPressType(std::vector<ControlPress> &values, int control);
 
-	PressType GetPressType(std::vector<ControlPress> &values, int control, Controller controller);
+    PressType GetPressType(std::vector<ControlPress> &values, int control, Controller controller);
 
-	Controller GetController(std::vector<ControlPress> &values, int control);
+    Controller GetController(std::vector<ControlPress> &values, int control);
 
     bool Contains(std::vector<std::pair<int, int>> &vec, int controller, int control);
 
     bool Contains(std::vector<int> &vec, std::vector<int> &i);
 
-	bool Contains(std::vector<int>& vec, int i);
+    bool Contains(std::vector<int> &vec, int i);
 
     bool Contains(std::vector<ControlPress *> presses, int control);
 
@@ -103,7 +104,7 @@ namespace Commands {
 
     void Execute(Control control, int value);
 
-	void Execute(Control control, int value, Controller controller);
+    void Execute(Control control, int value, Controller controller);
 
     void Execute(Control control, int value, Controller controller, PressType pressType);
 

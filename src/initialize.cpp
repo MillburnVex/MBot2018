@@ -12,7 +12,7 @@
 void initialize() {
     pros::lcd::initialize();
     Robot::Init();
-    Components::Init();	
+    Components::Init();
     Commands::Init();
 }
 
