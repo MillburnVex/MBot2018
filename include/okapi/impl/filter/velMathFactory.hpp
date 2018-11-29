@@ -15,7 +15,11 @@ namespace okapi {
 class VelMathFactory {
   public:
   /**
-   * Velocity math helper. Calculates filtered velocity. Throws a std::invalid_argument exception
+   * Velocity math helper. Calculates filtered velocity. 
+   
+   
+   
+   s a std::invalid_argument exception
    * if iticksPerRev is zero. Averages the last two readings.
    *
    * @param iticksPerRev number of ticks per revolution (or whatever units you are using)

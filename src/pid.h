@@ -9,6 +9,8 @@ public:
 
     int GetValue(int value, int goal);
 
+	void reset();
+
 };
 
 #endif

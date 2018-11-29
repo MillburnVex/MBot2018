@@ -7,7 +7,7 @@
 #include "PID.h"
 
 class FlywheelComponent : public BotComponent {
-    PID pid = PID(1, 0.0f, 1, 1000, -1000);
+    PID pid = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
 public:
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {
@@ -15,49 +15,74 @@ public:
                                        }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
-        //printf("%f\n", -Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity());
-        auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(),
+        auto newval = pid.GetValue(-Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(),
                                    Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
-        //printf("pid value %d\n", newval);
-        //printf("clamped %d\n", std::clamp(newval, 0, 127));
-        //Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
-		// for now i'm removing PID because I don't think it's giving full voltage
-		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-std::clamp(newval, 100, 127));
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);//-std::clamp(newval, 100, 127));
     }
 };
 
 class IndexerComponent : public BotComponent {
-	PID pid = PID(1, 0.0f, 1, 1000, -1000);
 	int target;
 public:
 	IndexerComponent() : BotComponent("Indexer Component",
 		{
-			ActionType::INDEXER_UP, ActionType::INDEXER_DOWN
+			ActionType::INDEXER_RUN
 		}) {}
 
 	void Execute(std::vector<ComponentAction> &actions) override {
-		if (Components::IsActive(actions, ActionType::INDEXER_DOWN)) target = 0;
-		if (Components::IsActive(actions, ActionType::INDEXER_UP)) target = 45;
-
-		auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::INDEXER)->GetProsMotor()->get_position(), target);
-		Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(std::clamp(newval, -127, 127));
+		Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(Components::GetValue(actions, ActionType::INDEXER_RUN));
 	}
 };
 
 class DriveComponent : public BotComponent {
+	PID left = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
+	PID right = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
+	double latestLeft = 0;
+	double latestRight = 0;
 public:
     DriveComponent() : BotComponent("Drive component",
                                     {
-                                            ActionType::DRIVE_LINEAR, ActionType::DRIVE_ROTATE
+											ActionType::DRIVE_LINEAR, ActionType::DRIVE_ROTATE, ActionType::DRIVE_TO, ActionType::ROTATE_TO
                                     }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
-        int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
-        int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
-        Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(linear + rotate, -127, 127));
-		Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(linear + rotate, -127, 127));
-		Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
-        Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
+		if (Components::IsActive(actions, ActionType::DRIVE_TO) || Components::IsActive(actions, ActionType::ROTATE_TO)) {
+			int leftval = 0;
+			int rightval = 0;
+			if (Components::IsActive(actions, ActionType::DRIVE_TO)) {
+				leftval = left.GetValue(
+					Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->get_position(),
+					latestLeft + Components::GetValue(actions, ActionType::DRIVE_TO));
+				rightval = -right.GetValue(
+					-Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->get_position(),
+					-latestRight + Components::GetValue(actions, ActionType::DRIVE_TO));
+
+			} else {
+				leftval = left.GetValue(
+					Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->get_position(),
+					latestLeft + Components::GetValue(actions, ActionType::ROTATE_TO));
+				rightval = -right.GetValue(
+					-Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->get_position(),
+					-latestRight - Components::GetValue(actions, ActionType::ROTATE_TO));
+			}
+
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(leftval, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(leftval, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(rightval, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(std::clamp(rightval, -127, 127));
+		} else {
+			latestLeft  = Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->get_position();
+			latestRight = Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->get_position();
+
+			int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
+			int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(linear + rotate, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(linear + rotate, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
+		}
+
+        
     }
 };
 
@@ -72,61 +97,7 @@ public:
     }
 
     void Execute(std::vector<ComponentAction> &actions) override {
-        //printf("VICTORY ROYALE %d\n");
-        int speed = Components::GetValue(actions, ActionType::BALL_LIFT_RUN);
-        Robot::GetMotor(BotMotorID::BALL_LIFT)->SetVoltage(speed);
-
-    }
-};
-
-class CapLiftComponent : public BotComponent {
-	PID pid = PID(1, 0.0f, 1, 1000, -1000);
-	int lastval = 0;
-public:
-    CapLiftComponent() : BotComponent("Cap lift component", {
-            ActionType::CAP_LIFT_DOWN, ActionType::CAP_LIFT_HOLD, ActionType::CAP_LIFT_UP
-    }) {}
-
-    void Execute(std::vector<ComponentAction> &actions) override {
-        if(Components::IsActive(actions, ActionType::CAP_LIFT_UP)) {
-			lastval = Robot::GetMotor(BotMotorID::CAP_LIFT)->GetProsMotor()->get_position();
-			Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(127);
-        }
-		else if(Components::IsActive(actions, ActionType::CAP_LIFT_HOLD)) {
-			auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::CAP_LIFT)->GetProsMotor()->get_position(), lastval);
-=            Robot::GetMotor(BotMotorID::CAP_LIFT)->SetVoltage(std::clamp(newval, -127, 127));
-        }
-		else if (Components::IsActive(actions, ActionType::CAP_LIFT_DOWN)) {
-			lastval = Robot::GetMotor(BotMotorID::CAP_LIFT)->GetProsMotor()->get_position();
-		}
-    }
-};
-
-class ClawComponent : public BotComponent {
-	PID pid = PID(1, 0.0f, 1, 1000, -1000);
-	int lastval = 0;
-public:
-    ClawComponent() : BotComponent("Claw component", {
-            ActionType::CLAW_FOLD_UP, ActionType::CLAW_FOLD_DOWN
-    }) {
-        //pros::motor_pid_s clawPID = pros::motor_pid_s();
-        // jav do this
-        //Robot::GetMotor(BotMotorID::CLAW)->vectorPID(clawPID);
-    }
-
-    void Execute(std::vector<ComponentAction>& actions) override {
-		if (Components::IsActive(actions, ActionType::CLAW_FOLD_UP)) {
-			lastval = Robot::GetMotor(BotMotorID::CLAW)->GetProsMotor()->get_position();
-			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(100);
-		}
-		else if (Components::IsActive(actions, ActionType::CLAW_FOLD_DOWN)) {
-			lastval = Robot::GetMotor(BotMotorID::CLAW)->GetProsMotor()->get_position();
-			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(-100);
-		}
-		else {
-			auto newval = pid.GetValue(Robot::GetMotor(BotMotorID::CLAW)->GetProsMotor()->get_position(), lastval);
-			Robot::GetMotor(BotMotorID::CLAW)->SetVoltage(std::clamp(newval, -127, 127));
-		}
+        Robot::GetMotor(BotMotorID::BALL_LIFT)->SetVoltage(Components::GetValue(actions, ActionType::BALL_LIFT_RUN));
 
     }
 };
@@ -185,8 +156,6 @@ void Components::Init() {
     new DriveComponent();
     new FlywheelComponent();
     new BallLiftComponent();
-    new CapLiftComponent();
-    new ClawComponent();
 	new IndexerComponent();
 }
 

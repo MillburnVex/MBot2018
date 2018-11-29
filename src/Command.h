@@ -14,18 +14,15 @@ typedef enum {
 #define ANALOG_CONTROL_ACTIVE_THRESHOLD 3
 
 typedef enum {
-	C_DRIVE_LINEAR = pros::E_CONTROLLER_ANALOG_LEFT_Y,
+	C_DRIVE_LINEAR = pros::E_CONTROLLER_ANALOG_RIGHT_Y,
+	C_DRIVE_LINEAR_TO = 100,
 	C_DRIVE_ROTATE = pros::E_CONTROLLER_ANALOG_LEFT_X,
+	C_DRIVE_ROTATE_TO = 101,
 	C_BALL_LIFT_UP = pros::E_CONTROLLER_DIGITAL_L1,
 	C_BALL_LIFT_DOWN = pros::E_CONTROLLER_DIGITAL_L2,
-	C_CAP_LIFT_UP = pros::E_CONTROLLER_DIGITAL_UP,
-	C_CAP_LIFT_DOWN = pros::E_CONTROLLER_DIGITAL_DOWN,
 	C_SHOOT = pros::E_CONTROLLER_DIGITAL_X,
-	C_INDEX = pros::E_CONTROLLER_DIGITAL_A,
-	C_AIM = pros::E_CONTROLLER_DIGITAL_B,
-	C_CLAW_FOLD_UP = pros::E_CONTROLLER_DIGITAL_R1,
-	C_CLAW_FOLD_DOWN = pros::E_CONTROLLER_DIGITAL_R2,
-
+	C_INDEX = pros::E_CONTROLLER_DIGITAL_R1,
+	C_AIM = pros::E_CONTROLLER_DIGITAL_B
 } Control;
 
 typedef enum {
@@ -53,7 +50,7 @@ public:
     static std::vector<Command *> allCommands;
     static std::vector<std::pair<int, int>> controlsLastActive;
     // the ones that were created by calling Commands::Execute
-    static std::vector<ControlPress *> executedControls;
+    static std::vector<ControlPress> executedControls;
 
     std::vector<int> controls;
     Controller type;
@@ -100,11 +97,17 @@ namespace Commands {
 
     bool Contains(std::vector<ControlPress *> presses, int control);
 
-    void Execute(Control control);
+    void Press(Control control);
 
-    void Execute(Control control, int value);
+    void Press(Control control, int value);
 
-    void Execute(Control control, int value, Controller controller);
+    void Press(Control control, int value, Controller controller);
+
+	void Release(Control control);
+
+	void Release(Control control, int value);
+
+	void Release(Control control, int value, Controller controller);
 
     void Execute(Control control, int value, Controller controller, PressType pressType);
 

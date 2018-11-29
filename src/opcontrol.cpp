@@ -36,9 +36,12 @@ void opcontrol() {
     master.rumble("..");
     pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Lock and load lads");
     pros::lcd::clear();
-    uint32_t time = pros::millis();
-    while (true) {
-        Update();
-        pros::Task::delay_until(&time, 20);
-    }
+	
+	uint32_t time = pros::millis();
+	while (true) {
+		Update();
+		pros::Task::delay_until(&time, 20);
+	}
+	
+    
 }

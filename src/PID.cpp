@@ -16,7 +16,10 @@ int PID::GetValue(int value, int goal) {
     last = value;
     int newval = pVal + iVal - dVal;
 
-    //if(P == 3.0f && goal!=-1) printf("goal: %d, current: %d, P: %d, I:%d D: %d\n", goal,
-    //	                         value, pVal, iVal, dVal);
     return newval;
+}
+
+void PID::reset() {
+	sum = 0;
+	last = 0;
 }

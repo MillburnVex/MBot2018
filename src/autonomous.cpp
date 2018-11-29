@@ -1,5 +1,8 @@
+
 #include "../include/main.h"
 #include "../include/api.h"
+#include "BotComponent.h"
+#include "Command.h"
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -12,6 +15,88 @@
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
+bool running = true;
+
+void AutonomousUpdate(void* params) {
+	uint32_t time = pros::millis();
+	while (running) {
+		Commands::Update();
+		Components::Update();
+		pros::Task::delay_until(&time, 20);
+	}
+}
+
+
+
+void frontauton(bool blue) {
+	pros::delay(200);
+	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
+	Commands::Press(C_BALL_LIFT_UP);
+	pros::delay(1800);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -1100);
+	pros::delay(1800);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_ROTATE_TO, -380);
+	pros::delay(800);
+	Commands::Release(C_DRIVE_ROTATE_TO);
+
+	Commands::Press(C_INDEX);
+	pros::delay(500);
+	Commands::Release(C_INDEX);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 800);//2nd shot
+	pros::delay(1000);
+	Commands::Release(C_DRIVE_LINEAR_TO);
+
+	Commands::Press(C_INDEX);
+	pros::delay(800);
+	Commands::Release(C_INDEX);
+	pros::delay(500);
+
+	Commands::Press(C_DRIVE_ROTATE_TO, -130);//1st bototm flag turn
+	pros::delay(900);
+	Commands::Release(C_DRIVE_ROTATE_TO);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 1000);//push in
+	pros::delay(1000);
+	Commands::Release(C_DRIVE_LINEAR_TO);
+	pros::delay(400);
+
+	Commands::Release(C_BALL_LIFT_UP);
+	pros::delay(100);
+
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -1100);//push out
+	pros::delay(1800);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(100);
+
+	Commands::Press(C_BALL_LIFT_DOWN);
+
+	Commands::Press(C_DRIVE_ROTATE_TO, 380);
+	pros::delay(1200);
+	Commands::Release(C_DRIVE_ROTATE_TO);
+
+	Commands::Press(C_DRIVE_LINEAR, 30);
+	pros::delay(1200);
+	Commands::Release(C_DRIVE_LINEAR, 30);
+	Commands::Release(C_BALL_LIFT_DOWN);
+
+
+}
+
+
 void autonomous() {
-    // example code
+	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
+		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
+
+	frontauton(true);
+
+	running = false;
 }
