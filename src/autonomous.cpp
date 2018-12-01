@@ -30,6 +30,8 @@ void AutonomousUpdate(void* params) {
 
 
 void frontauton(bool blue) {
+	int bluemult = blue ? 1 : -1;
+
 	pros::delay(200);
 	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
 	Commands::Press(C_BALL_LIFT_UP);
@@ -42,11 +44,11 @@ void frontauton(bool blue) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, -380);
+	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 380);//turn to shot
 	pros::delay(800);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 
-	Commands::Press(C_INDEX);
+	Commands::Press(C_INDEX); //shot 1
 	pros::delay(500);
 	Commands::Release(C_INDEX);
 
@@ -54,12 +56,12 @@ void frontauton(bool blue) {
 	pros::delay(1000);
 	Commands::Release(C_DRIVE_LINEAR_TO);
 
-	Commands::Press(C_INDEX);
+	Commands::Press(C_INDEX); //shot 2
 	pros::delay(800);
 	Commands::Release(C_INDEX);
 	pros::delay(500);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, -130);//1st bototm flag turn
+	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 130);//1st bototm flag turn
 	pros::delay(900);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 
@@ -79,16 +81,83 @@ void frontauton(bool blue) {
 
 	Commands::Press(C_BALL_LIFT_DOWN);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, 380);
+	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * -320);
 	pros::delay(1200);
 	Commands::Release(C_DRIVE_ROTATE_TO);
+
+	Commands::Press(C_DRIVE_LINEAR, 80);
+	pros::delay(1200);
+	Commands::Release(C_DRIVE_LINEAR, 80);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 500);
+	pros::delay(1000);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
+
+	Commands::Release(C_BALL_LIFT_DOWN);
+}
+
+void backauton(bool blue) {
+	int bluemult = blue ? 1 : -1;
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
+	Commands::Press(C_BALL_LIFT_UP);
+	pros::delay(1800);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -1100);
+	pros::delay(1800);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 380); //turn to flags
+	pros::delay(800);
+	Commands::Release(C_DRIVE_ROTATE_TO);
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 1100);//move to pos
+	pros::delay(1800);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
+
+	Commands::Press(C_INDEX);
+	pros::delay(800);
+	Commands::Release(C_INDEX);
+	pros::delay(500);
+
+	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * -120); //turn to flags
+	pros::delay(800);
+	Commands::Release(C_DRIVE_ROTATE_TO);
+	pros::delay(200);
+
+	Commands::Press(C_INDEX);
+	pros::delay(800);
+	Commands::Release(C_INDEX);
+	pros::delay(500);
+
+	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 120); //turn back
+	pros::delay(800);
+	Commands::Release(C_DRIVE_ROTATE_TO);
+	pros::delay(200);
+
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 1100);//move back to tile
+	pros::delay(1800);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * -760);// turn back away
+	pros::delay(800);
+	Commands::Release(C_DRIVE_ROTATE_TO);
+
+	Commands::Press(C_BALL_LIFT_DOWN); //flip cap proc
 
 	Commands::Press(C_DRIVE_LINEAR, 30);
 	pros::delay(1200);
 	Commands::Release(C_DRIVE_LINEAR, 30);
+
 	Commands::Release(C_BALL_LIFT_DOWN);
-
-
 }
 
 
