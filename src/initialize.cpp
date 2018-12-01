@@ -3,7 +3,7 @@
 #include "Robot.h"
 #include "../include/main.h"
 
-bool enableAutonSelector = true;
+bool enableAutonSelector = false;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -15,9 +15,10 @@ void initialize() {
     pros::lcd::initialize();
 	if (enableAutonSelector) {
 		int buttons = 0;
-		while (buttons != 4 || buttons != 1 || buttons != 2) {
-			pros::lcd::print(1, "Select team: Blue - Right, Red - Left, Skip - Mid");
+		pros::lcd::print(1, "Select team: Blue - Right, Red - Left, Skip - Mid");
+		while (buttons == 0) {
 			buttons = pros::lcd::read_buttons();
+			pros::delay(50);
 		}
 		if (buttons != 2) {
 			Team team = RED;
@@ -29,10 +30,15 @@ void initialize() {
 				// right - blue
 				team = BLUE;
 			}
+			while (pros::lcd::read_buttons() != 0) {
+				pros::delay(50);
+			}
 			Position pos = FRONT;
-			while (buttons != 4 || buttons != 1) {
-				pros::lcd::print(1, "Select pos: Front - Right, Back - Left");
+			pros::lcd::print(1, "Select pos: Front - Right, Back - Left");
+			buttons = 0;
+			while (buttons == 0) {
 				buttons = pros::lcd::read_buttons();
+				pros::delay(50);
 			}
 			if (buttons == 4) {
 				pos = BACK;

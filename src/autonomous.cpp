@@ -41,24 +41,30 @@ void frontauton(Team team) {
 	pros::delay(200);
 	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
 	Commands::Press(C_BALL_LIFT_UP);
-	pros::delay(1800);
+	pros::delay(1600);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
 	Commands::Press(C_DRIVE_LINEAR_TO, -1100);
-	pros::delay(1800);
+	pros::delay(1600);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
 	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 380);//turn to shot
-	pros::delay(800);
+	pros::delay(500);
 	Commands::Release(C_DRIVE_ROTATE_TO);
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -120);
+	pros::delay(200);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(200);
 
 	Commands::Press(C_INDEX); //shot 1
 	pros::delay(500);
 	Commands::Release(C_INDEX);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, 800);//2nd shot
+	Commands::Press(C_DRIVE_LINEAR_TO, 750);//2nd shot
 	pros::delay(1000);
 	Commands::Release(C_DRIVE_LINEAR_TO);
 
@@ -67,9 +73,10 @@ void frontauton(Team team) {
 	Commands::Release(C_INDEX);
 	pros::delay(500);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 130);//1st bototm flag turn
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 50);//1st bototm flag turn
 	pros::delay(900);
 	Commands::Release(C_DRIVE_ROTATE_TO);
+	pros::delay(200);
 
 	Commands::Press(C_DRIVE_LINEAR_TO, 1000);//push in
 	pros::delay(1000);
@@ -161,7 +168,7 @@ void backauton(Team team) {
 	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * -760);// turn back away
 	pros::delay(800);
 	Commands::Release(C_DRIVE_ROTATE_TO);
-
+	pros::delay(100);
 	Commands::Press(C_BALL_LIFT_DOWN); //flip cap proc
 
 	Commands::Press(C_DRIVE_LINEAR, 30);
@@ -181,5 +188,7 @@ void autonomous() {
 	else if (Robot::GetAutonPosition() == BACK) {
 		backauton(Robot::GetTeam());
 	}
+
+	Commands::Clear();
 	running = false;
 }

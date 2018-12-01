@@ -111,6 +111,8 @@ namespace Commands {
 
     void Execute(Control control, int value, Controller controller, PressType pressType);
 
+	void Clear();
+
     void Update();
 
     void Init();

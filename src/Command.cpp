@@ -362,3 +362,8 @@ void Commands::Execute(Control control, int value, Controller controller, PressT
     Command::executedControls.push_back(press);
 	commandMutex.give();
 }
+
+void Commands::Clear() {
+	Command::controlsLastActive.clear();
+		Command::executedControls.clear();
+}
