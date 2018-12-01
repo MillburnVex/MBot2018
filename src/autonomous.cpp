@@ -3,6 +3,7 @@
 #include "../include/api.h"
 #include "BotComponent.h"
 #include "Command.h"
+#include "Robot.h"
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -29,9 +30,14 @@ void AutonomousUpdate(void* params) {
 
 
 
-void frontauton(bool blue) {
-	int bluemult = blue ? 1 : -1;
-
+void frontauton(Team team) {
+	int teamMultiplier = 1;
+	if (team == BLUE) {
+		teamMultiplier = 1;
+	}
+	else if (team == RED) {
+		teamMultiplier = -1;
+	}
 	pros::delay(200);
 	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
 	Commands::Press(C_BALL_LIFT_UP);
@@ -44,7 +50,7 @@ void frontauton(bool blue) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 380);//turn to shot
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 380);//turn to shot
 	pros::delay(800);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 
@@ -61,7 +67,7 @@ void frontauton(bool blue) {
 	Commands::Release(C_INDEX);
 	pros::delay(500);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 130);//1st bototm flag turn
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 130);//1st bototm flag turn
 	pros::delay(900);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 
@@ -81,7 +87,7 @@ void frontauton(bool blue) {
 
 	Commands::Press(C_BALL_LIFT_DOWN);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * -320);
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * -320);
 	pros::delay(1200);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 
@@ -97,9 +103,14 @@ void frontauton(bool blue) {
 	Commands::Release(C_BALL_LIFT_DOWN);
 }
 
-void backauton(bool blue) {
-	int bluemult = blue ? 1 : -1;
-
+void backauton(Team team) {
+	int teamMultiplier = 1;
+	if (team == BLUE) {
+		teamMultiplier = 1;
+	}
+	else if (team == RED) {
+		teamMultiplier = -1;
+	}
 	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
 	Commands::Press(C_BALL_LIFT_UP);
 	pros::delay(1800);
@@ -111,7 +122,7 @@ void backauton(bool blue) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 380); //turn to flags
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 380); //turn to flags
 	pros::delay(800);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
@@ -126,7 +137,7 @@ void backauton(bool blue) {
 	Commands::Release(C_INDEX);
 	pros::delay(500);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * -120); //turn to flags
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * -120); //turn to flags
 	pros::delay(800);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
@@ -136,7 +147,7 @@ void backauton(bool blue) {
 	Commands::Release(C_INDEX);
 	pros::delay(500);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * 120); //turn back
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 120); //turn back
 	pros::delay(800);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
@@ -147,7 +158,7 @@ void backauton(bool blue) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, bluemult * -760);// turn back away
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * -760);// turn back away
 	pros::delay(800);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 
@@ -164,8 +175,11 @@ void backauton(bool blue) {
 void autonomous() {
 	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
 		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
-
-	frontauton(true);
-
+	if (Robot::GetAutonPosition() == FRONT) {
+		frontauton(Robot::GetTeam());
+	}
+	else if (Robot::GetAutonPosition() == BACK) {
+		backauton(Robot::GetTeam());
+	}
 	running = false;
 }

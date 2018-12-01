@@ -34,7 +34,7 @@ void opcontrol() {
         pros::Task::delay(500);
     }
     master.rumble("..");
-    pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Lock and load lads");
+    pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Lock and load");
     pros::lcd::clear();
 	
 	uint32_t time = pros::millis();

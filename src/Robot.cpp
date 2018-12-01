@@ -1,7 +1,25 @@
 #include "Robot.h"
 
-
 pros::Vision camera(4, pros::E_VISION_ZERO_CENTER);
+
+Team team = BLUE;
+Position autonPosition = FRONT;
+
+Team Robot::GetTeam() {
+	return team;
+}
+
+Position Robot::GetAutonPosition() {
+	return autonPosition;
+}
+
+void Robot::SetTeam(Team t) {
+	team = t;
+}
+
+void Robot::SetAutonPosition(Position pos) {
+	autonPosition = pos;
+}
 
 int Robot::GetState() {
     return 0;
