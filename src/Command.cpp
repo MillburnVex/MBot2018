@@ -95,18 +95,13 @@ public:
 			}
 		}
 
-		if (aim && id != -1) {
-			Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
-		}
-
-		Components::Execute(ActionType::FLYWHEEL_RUN, 590);
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);
 		
 		if (index) {
 			Components::Execute(ActionType::INDEXER_RUN, -100);
 		}
 		else
 		{
-
 			Components::Execute(ActionType::INDEXER_RUN, 0);
 		}
 	}

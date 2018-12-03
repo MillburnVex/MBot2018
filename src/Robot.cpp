@@ -2,7 +2,7 @@
 
 pros::Vision camera(4, pros::E_VISION_ZERO_CENTER);
 
-Team team = BLUE;
+Team team = RED;
 Position autonPosition = FRONT;
 
 Team Robot::GetTeam() {

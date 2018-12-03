@@ -15,8 +15,6 @@ public:
                                        }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
-        auto newval = pid.GetValue(-Robot::GetMotor(BotMotorID::FLYWHEEL)->GetProsMotor()->get_actual_velocity(),
-                                   Components::GetValue(actions, ActionType::FLYWHEEL_RUN));
 		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);//-std::clamp(newval, 100, 127));
     }
 };
