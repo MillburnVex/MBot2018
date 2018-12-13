@@ -6,7 +6,9 @@ typedef enum {
 
 	BALL_LIFT_RUN,
 
-	INDEXER_RUN
+	INDEXER_RUN,
+	ARM_SET
+
 } ActionType;
 
 struct ComponentAction {

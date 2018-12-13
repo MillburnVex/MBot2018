@@ -19,6 +19,21 @@ public:
     }
 };
 
+class ArmComponent : public BotComponent {
+	PID pid = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
+public:
+	ArmComponent() : BotComponent("Arm component",
+		{
+			ActionType::ARM_SET
+		}) {}
+
+	void Execute(std::vector<ComponentAction> &actions) override {
+		Robot::GetMotor(BotMotorID::ARM)->SetVoltage(pid.GetValue(
+			Robot::GetMotor(BotMotorID::ARM)->GetProsMotor()->get_position(),
+			Components::GetValue(actions, ActionType::ARM_SET)));//-std::clamp(newval, 100, 127));
+	}
+};
+
 class IndexerComponent : public BotComponent {
 	int target;
 public:
@@ -155,6 +170,7 @@ void Components::Init() {
     new FlywheelComponent();
     new BallLiftComponent();
 	new IndexerComponent();
+	new ArmComponent();
 }
 
 void Components::Execute(ActionType actionType) {

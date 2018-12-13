@@ -49,6 +49,39 @@ public:
 
 };
 
+class ArmCommands : public Command {
+	const int HOLDANGLE = 70;
+	const int SCOREANGLE = 120;
+	const int DOWNANGLE = 0;
+	int pos = DOWNANGLE;
+public:
+	ArmCommands() : Command(Controller::BOTH,
+		{ Control::C_HOLD, Control::C_RESET_HOLD }) {}
+
+	void Execute(std::vector<ControlPress> &values) override {
+		bool hold = (Commands::GetPressType(values, Control::C_BALL_LIFT_UP) != PressType::PRESS_NOT_ACTIVE);
+		bool down = (Commands::GetPressType(values, Control::C_BALL_LIFT_DOWN) != PressType::PRESS_NOT_ACTIVE);
+		// here's where we check sensor values
+		if (down) {
+			pos = DOWNANGLE;
+			Components::Execute(ActionType::ARM_SET, pos);
+		}
+		else if (hold) {
+			if(pos == HOLDANGLE)
+			{
+				pos = SCOREANGLE;
+			}else
+			{
+				pos = HOLDANGLE;
+			}
+			Components::Execute(ActionType::ARM_SET, pos);
+		}
+		else {
+			Components::Execute(ActionType::ARM_SET, pos);
+		}
+	}
+};
+
 class BallLiftCommands : public Command {
 public:
     BallLiftCommands() : Command(Controller::BOTH,
@@ -112,6 +145,8 @@ void Commands::Init() {
     new DriveCommands();
     new BallLiftCommands();
     new ShootCommand();
+	new ArmCommands();
+
 }
 
 Command::Command(Controller type, std::vector<int> controls) : type(type), controls(std::move(controls)) {
