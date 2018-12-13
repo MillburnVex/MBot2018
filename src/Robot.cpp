@@ -37,6 +37,7 @@ void Robot::Init() {
     new RealMotor(BotMotorConfig(BotMotorID::FLYWHEEL, false, pros::E_MOTOR_GEARSET_06));
     new RealMotor(BotMotorID::BALL_LIFT);
 	new RealMotor(BotMotorID::INDEXER);
+	new RealMotor(BotMotorID::ARM);
 }
 
 Sensor *Robot::GetSensor(SensorID id) {

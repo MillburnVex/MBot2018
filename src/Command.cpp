@@ -51,22 +51,21 @@ public:
 
 class ArmCommands : public Command {
 	const int HOLDANGLE = 70;
-	const int SCOREANGLE = 120;
+	const int SCOREANGLE = 300;
 	const int DOWNANGLE = 0;
 	int pos = DOWNANGLE;
 public:
 	ArmCommands() : Command(Controller::BOTH,
-		{ Control::C_HOLD, Control::C_RESET_HOLD }) {}
+		{ Control::C_ARM_UP, Control::C_ARM_DOWN }) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
-		bool hold = (Commands::GetPressType(values, Control::C_BALL_LIFT_UP) != PressType::PRESS_NOT_ACTIVE);
-		bool down = (Commands::GetPressType(values, Control::C_BALL_LIFT_DOWN) != PressType::PRESS_NOT_ACTIVE);
+		bool up = (Commands::GetPressType(values, Control::C_ARM_UP) == PressType::PRESSED);
+		bool down = (Commands::GetPressType(values, Control::C_ARM_DOWN) != PressType::PRESS_NOT_ACTIVE);
 		// here's where we check sensor values
 		if (down) {
 			pos = DOWNANGLE;
-			Components::Execute(ActionType::ARM_SET, pos);
 		}
-		else if (hold) {
+		else if (up) {
 			if(pos == HOLDANGLE)
 			{
 				pos = SCOREANGLE;
@@ -74,11 +73,8 @@ public:
 			{
 				pos = HOLDANGLE;
 			}
-			Components::Execute(ActionType::ARM_SET, pos);
 		}
-		else {
-			Components::Execute(ActionType::ARM_SET, pos);
-		}
+		Components::Execute(ActionType::ARM_SET, pos);
 	}
 };
 
@@ -146,7 +142,6 @@ void Commands::Init() {
     new BallLiftCommands();
     new ShootCommand();
 	new ArmCommands();
-
 }
 
 Command::Command(Controller type, std::vector<int> controls) : type(type), controls(std::move(controls)) {

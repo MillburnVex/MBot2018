@@ -20,7 +20,7 @@ public:
 };
 
 class ArmComponent : public BotComponent {
-	PID pid = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
+	PID pid = PID(1.0f, 0.1f, 0.6f, 1000, -1000);
 public:
 	ArmComponent() : BotComponent("Arm component",
 		{
@@ -28,9 +28,11 @@ public:
 		}) {}
 
 	void Execute(std::vector<ComponentAction> &actions) override {
-		Robot::GetMotor(BotMotorID::ARM)->SetVoltage(pid.GetValue(
+		int voltage = pid.GetValue(
 			Robot::GetMotor(BotMotorID::ARM)->GetProsMotor()->get_position(),
-			Components::GetValue(actions, ActionType::ARM_SET)));//-std::clamp(newval, 100, 127));
+			Components::GetValue(actions, ActionType::ARM_SET));
+		Robot::GetMotor(BotMotorID::ARM)->SetVoltage(std::clamp(voltage, -100, 100));
+		printf("arm voltage: %d, goal: %d, curr: %f\n", voltage, Components::GetValue(actions, ActionType::ARM_SET), Robot::GetMotor(BotMotorID::ARM)->GetProsMotor()->get_position());
 	}
 };
 
@@ -88,7 +90,7 @@ public:
 			latestRight = Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->get_position();
 
 			int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
-			int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE) * 0.7;
+			int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE);
 			Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(linear + rotate, -127, 127));
 			Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(linear + rotate, -127, 127));
 			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(-linear + rotate, -127, 127));
