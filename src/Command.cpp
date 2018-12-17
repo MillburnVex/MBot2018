@@ -10,6 +10,18 @@ std::vector<std::pair<int, int>> Command::controlsLastActive;
 std::vector<ControlPress> Command::executedControls;
 pros::Mutex commandMutex;
 
+class TestCommand : public Command {
+public:
+	TestCommand() : Command(Controller::BOTH, { Control::C_TEST }) {}
+
+	void Execute(std::vector<ControlPress> &values) override {
+		if (Commands::GetPressType(values, Control::C_TEST) == PressType::PRESSED) {
+			pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
+			master.rumble("...");
+		}
+	}
+};
+
 class DriveCommands : public Command {
 	const double MULTIPLIER = 200 / 127;
 public:
@@ -36,7 +48,7 @@ public:
 				Components::Execute(ActionType::DRIVE_LINEAR, 0);
 			}
 			if (rotation != CONTROL_NOT_ACTIVE){
-				rotation = (rotation > 0 ? 127.0 : -127.0) * pow(std::abs(rotation) / 127.0, 11.0 / 7.0);
+				rotation = (rotation > 0 ? 127.0 : -127.0) * pow(std::abs(rotation) / 127.0, 17.0 / 7.0);
 				Components::Execute(ActionType::DRIVE_ROTATE, rotation);
 			}else if(rotateTo != CONTROL_NOT_ACTIVE){
 				Components::Execute(ActionType::ROTATE_TO, rotateTo);
@@ -142,6 +154,7 @@ void Commands::Init() {
     new BallLiftCommands();
     new ShootCommand();
 	new ArmCommands();
+	new TestCommand();
 }
 
 Command::Command(Controller type, std::vector<int> controls) : type(type), controls(std::move(controls)) {

@@ -20,19 +20,23 @@ public:
 };
 
 class ArmComponent : public BotComponent {
-	PID pid = PID(1.0f, 0.1f, 0.6f, 1000, -1000);
+	PID pid = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
 public:
 	ArmComponent() : BotComponent("Arm component",
 		{
 			ActionType::ARM_SET
-		}) {}
+		}) {
+		Robot::GetMotor(BotMotorID::ARM)->GetProsMotor()->tare_position();
+	}
 
 	void Execute(std::vector<ComponentAction> &actions) override {
 		int voltage = pid.GetValue(
 			Robot::GetMotor(BotMotorID::ARM)->GetProsMotor()->get_position(),
 			Components::GetValue(actions, ActionType::ARM_SET));
-		Robot::GetMotor(BotMotorID::ARM)->SetVoltage(std::clamp(voltage, -100, 100));
+		Robot::GetMotor(BotMotorID::ARM)->SetVoltage(std::clamp(voltage, -127, 127));
 		printf("arm voltage: %d, goal: %d, curr: %f\n", voltage, Components::GetValue(actions, ActionType::ARM_SET), Robot::GetMotor(BotMotorID::ARM)->GetProsMotor()->get_position());
+		pros::lcd::print(2, "test");
+		pros::lcd::print(1, "arm position: %d", Robot::GetMotor(BotMotorID::ARM)->GetProsMotor()->get_position());
 	}
 };
 
