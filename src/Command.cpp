@@ -62,8 +62,8 @@ public:
 };
 
 class ArmCommands : public Command {
-	const int HOLDANGLE = 70;
-	const int SCOREANGLE = 300;
+	const int HOLDANGLE = 300;
+	const int SCOREANGLE = 470;
 	const int DOWNANGLE = 0;
 	int pos = DOWNANGLE;
 public:

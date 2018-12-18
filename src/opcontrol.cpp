@@ -3,9 +3,28 @@
 #include "BotComponent.h"
 #include "Command.h"
 
+
+pros::ADIUltrasonic sonic(1, 2);
+pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
+
+int timer = 0;
 void Update() {
     Commands::Update();
     Components::Update();
+
+	if(sonic.get_value() > 2 && sonic.get_value() < 100)
+	{
+		if(timer == -1)
+		{
+			if(timer < 20)
+			{
+				timer++;
+				master.rumble("..");
+			}
+		}
+	}else{
+		timer = -1;
+	}
 }
 
 /**
@@ -22,8 +41,6 @@ void Update() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-
-    pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
     while (!master.is_connected()) {
         pros::lcd::print(1, "Connect master controller!");
