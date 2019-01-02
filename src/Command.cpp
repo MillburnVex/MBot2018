@@ -122,7 +122,12 @@ public:
 		bool aim   = (Commands::GetPressType(values, Control::C_AIM)   != PressType::PRESS_NOT_ACTIVE);
 		bool index = (Commands::GetPressType(values, Control::C_INDEX) != PressType::PRESS_NOT_ACTIVE);
 		pros::vision_object_s_t objects[NUM_VISION_OBJECTS];
-		std::int32_t objcount = Robot::GetCamera().read_by_size(0, NUM_VISION_OBJECTS, objects);
+
+		int team = Robot::GetTeam() == RED ? 1 : 0;
+
+		std::int32_t objcount = Robot::GetCamera().read_by_sig(0, NUM_VISION_OBJECTS, team, objects);
+
+		printf("yeetus fetus %d\n", objcount);
 
 		if (objcount > NUM_VISION_OBJECTS) objcount = 0;
 
@@ -134,6 +139,10 @@ public:
 				id = i;
 				val = std::abs(objects[i].x_middle_coord);
 			}
+		}
+
+		if (aim && id != -1) {
+			Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
 		}
 
 		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);

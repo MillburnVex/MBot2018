@@ -1,6 +1,6 @@
 #include "Robot.h"
 
-pros::Vision camera(4, pros::E_VISION_ZERO_CENTER);
+pros::Vision camera(13, pros::E_VISION_ZERO_CENTER);
 
 Team team = RED;
 Position autonPosition = FRONT;
