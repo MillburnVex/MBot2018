@@ -50,31 +50,31 @@ void frontauton(Team team) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 380);//turn to shot
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 350);//turn to shot
 	pros::delay(500);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, -120);
+	Commands::Press(C_DRIVE_LINEAR_TO, 160); //line up for shot
 	pros::delay(200);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
 	Commands::Press(C_INDEX); //shot 1
-	pros::delay(500);
+	pros::delay(250);
 	Commands::Release(C_INDEX);
 	pros::delay(500);
-
-	Commands::Press(C_DRIVE_LINEAR_TO, 750);//2nd shot
+	//                                  nice
+	Commands::Press(C_DRIVE_LINEAR_TO, 690);//2nd shot
 	pros::delay(1000);
 	Commands::Release(C_DRIVE_LINEAR_TO);
 
 	Commands::Press(C_INDEX); //shot 2
-	pros::delay(800);
+	pros::delay(500);
 	Commands::Release(C_INDEX);
 	pros::delay(500);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 50);//1st bototm flag turn
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 50);//1st bottom flag turn
 	pros::delay(900);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
@@ -93,6 +93,9 @@ void frontauton(Team team) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(100);
 
+
+	//below is flipping the cap. doesn't work for now because of the hood
+	/*
 	Commands::Press(C_BALL_LIFT_DOWN);
 
 	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * -300);
@@ -108,6 +111,8 @@ void frontauton(Team team) {
 	pros::delay(300);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
+	*/
+	
 
 }
 
@@ -165,7 +170,7 @@ void backauton(Team team) {
 void autonomous() {
 	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
 		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
-	backauton(BLUE);
+	frontauton(RED);
 
 	Commands::Clear();
 	running = false;
