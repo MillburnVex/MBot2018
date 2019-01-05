@@ -29,5 +29,7 @@ namespace Robot {
 
     Sensor *GetSensor(SensorID id);
 
+	bool IsInManualMode();
+
     void Init();
 };

@@ -5,12 +5,18 @@ pros::Vision camera(13, pros::E_VISION_ZERO_CENTER);
 Team team = RED;
 Position autonPosition = FRONT;
 
+bool manualMode = false;
+
 Team Robot::GetTeam() {
 	return team;
 }
 
 Position Robot::GetAutonPosition() {
 	return autonPosition;
+}
+
+bool Robot::IsInManualMode() {
+    return manualMode;
 }
 
 void Robot::SetTeam(Team t) {
@@ -36,11 +42,13 @@ void Robot::Init() {
     new RealMotor(BotMotorID::DRIVE_RIGHT_FRONT);
     new RealMotor(BotMotorConfig(BotMotorID::FLYWHEEL, false, pros::E_MOTOR_GEARSET_06));
     new RealMotor(BotMotorID::BALL_LIFT);
-	new RealMotor(BotMotorID::INDEXER);
+    (new RealMotor(BotMotorConfig(BotMotorID::INDEXER, false, pros::E_MOTOR_GEARSET_06)))->GetProsMotor()->set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	new RealMotor(BotMotorID::ARM);
+    new SensorButton(SensorID::BUTTON_INDEXER);
 }
 
 Sensor *Robot::GetSensor(SensorID id) {
+
     for (auto sensor : Sensor::allSensors) {
         if (sensor->id == id) {
             return sensor;

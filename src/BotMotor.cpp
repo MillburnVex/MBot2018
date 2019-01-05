@@ -28,6 +28,14 @@ pros::motor_pid_full_s_t RealMotor::GetPID() {
     return motor->get_vel_pid();
 }
 
+double RealMotor::GetVelocity() {
+    return motor->get_actual_velocity();
+}
+
+double RealMotor::GetPosition() {
+    return motor->get_position();
+}
+
 BotMotor::BotMotor(BotMotorConfig config) : config(config) {
     allMotors.push_back(this);
 };

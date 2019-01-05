@@ -40,11 +40,11 @@ public:
  */
     virtual void SetPositionRelative(double pos, int vel) = 0;
 
-/**
- *
- * @param pid
- */
     virtual void SetPID(pros::motor_pid_s_t pid) = 0;
+
+    virtual double GetPosition() = 0;
+
+    virtual double GetVelocity() = 0;
 
     virtual pros::motor_pid_full_s_t GetPID() = 0;
 
@@ -78,6 +78,10 @@ public:
     void SetPositionRelative(double pos, int vel) override;
 
     void SetPID(pros::motor_pid_s_t pid) override;
+
+    double GetPosition() override;
+
+    double GetVelocity() override;
 
     pros::motor_pid_full_s_t GetPID() override;
 

@@ -60,18 +60,18 @@ void frontauton(Team team) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_INDEX); //shot 1
+	Commands::Press(C_SHOOT); //shot 1
 	pros::delay(250);
-	Commands::Release(C_INDEX);
+	Commands::Release(C_SHOOT);
 	pros::delay(500);
 	//                                  nice
 	Commands::Press(C_DRIVE_LINEAR_TO, 690);//2nd shot
 	pros::delay(1000);
 	Commands::Release(C_DRIVE_LINEAR_TO);
 
-	Commands::Press(C_INDEX); //shot 2
+	Commands::Press(C_SHOOT); //shot 2
 	pros::delay(500);
-	Commands::Release(C_INDEX);
+	Commands::Release(C_SHOOT);
 	pros::delay(500);
 
 	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 50);//1st bottom flag turn

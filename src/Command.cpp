@@ -12,158 +12,201 @@ pros::Mutex commandMutex;
 
 class TestCommand : public Command {
 public:
-	TestCommand() : Command(Controller::BOTH, { Control::C_TEST }) {}
+    TestCommand() : Command(Controller::BOTH, {Control::C_TEST}) {}
 
-	void Execute(std::vector<ControlPress> &values) override {
-		if (Commands::GetPressType(values, Control::C_TEST) == PressType::PRESSED) {
-			pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
-			master.rumble("...");
-		}
-	}
+    void Execute(std::vector<ControlPress> &values) override {
+        if (Commands::GetPressType(values, Control::C_TEST) == PressType::PRESSED) {
+            pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
+            master.rumble("...");
+        }
+    }
 };
 
 class DriveCommands : public Command {
-	const double MULTIPLIER = 200 / 127;
 public:
-	DriveCommands() : Command(Controller::MASTER,
-		{ Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE, Control::C_DRIVE_LINEAR_TO, Control::C_DRIVE_ROTATE_TO, Control::C_AIM }) {}
+    DriveCommands() : Command(Controller::MASTER,
+                              {Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE, Control::C_DRIVE_LINEAR_TO,
+                               Control::C_DRIVE_ROTATE_TO, Control::C_AIM}) {}
 
-	void Execute(std::vector<ControlPress> &values) override {
-		
-		int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
-		int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
-		int linearTo = Commands::GetValue(values, Control::C_DRIVE_LINEAR_TO);
-		int rotateTo = Commands::GetValue(values, Control::C_DRIVE_ROTATE_TO);
-		bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
-		if (aim) {
-			Components::Execute(ActionType::DRIVE_LINEAR, 0);
-		} else {
-			if (linear != CONTROL_NOT_ACTIVE){
-				linear = (linear > 0 ? 127.0 : -127.0) * pow(std::abs(linear) / 127.0, 11.0 / 7.0);
-				Components::Execute(ActionType::DRIVE_LINEAR, linear);
-			}
-			else if (linearTo != CONTROL_NOT_ACTIVE) {
-				Components::Execute(ActionType::DRIVE_TO, linearTo);
-			}else {
-				Components::Execute(ActionType::DRIVE_LINEAR, 0);
-			}
-			if (rotation != CONTROL_NOT_ACTIVE){
-				rotation = (rotation > 0 ? 127.0 : -127.0) * pow(std::abs(rotation) / 127.0, 17.0 / 7.0);
-				Components::Execute(ActionType::DRIVE_ROTATE, rotation);
-			}else if(rotateTo != CONTROL_NOT_ACTIVE){
-				Components::Execute(ActionType::ROTATE_TO, rotateTo);
-			}else{
-				Components::Execute(ActionType::DRIVE_ROTATE, 0);
+    void Execute(std::vector<ControlPress> &values) override {
 
-			}
-		}
-	}
+        int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
+        int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
+        int linearTo = Commands::GetValue(values, Control::C_DRIVE_LINEAR_TO);
+        int rotateTo = Commands::GetValue(values, Control::C_DRIVE_ROTATE_TO);
+        bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
+        if (aim) {
+            Components::Execute(ActionType::DRIVE_LINEAR, 0);
+        } else {
+            if (linear != CONTROL_NOT_ACTIVE) {
+                linear = (linear > 0 ? 127.0 : -127.0) * pow(std::abs(linear) / 127.0, 11.0 / 7.0);
+                Components::Execute(ActionType::DRIVE_LINEAR, linear);
+            } else if (linearTo != CONTROL_NOT_ACTIVE) {
+                Components::Execute(ActionType::DRIVE_TO, linearTo);
+            } else {
+                Components::Execute(ActionType::DRIVE_LINEAR, 0);
+            }
+            if (rotation != CONTROL_NOT_ACTIVE) {
+                rotation = (rotation > 0 ? 127.0 : -127.0) * pow(std::abs(rotation) / 127.0, 17.0 / 7.0);
+                Components::Execute(ActionType::DRIVE_ROTATE, rotation);
+            } else if (rotateTo != CONTROL_NOT_ACTIVE) {
+                Components::Execute(ActionType::ROTATE_TO, rotateTo);
+            } else {
+                Components::Execute(ActionType::DRIVE_ROTATE, 0);
+
+            }
+        }
+    }
 
 };
 
 class ArmCommands : public Command {
-	const int HOLDANGLE = 300;
-	const int SCOREANGLE = 470;
-	const int DOWNANGLE = 0;
-	int pos = DOWNANGLE;
+    const int HOLDANGLE = 300;
+    const int SCOREANGLE = 470;
+    const int DOWNANGLE = 0;
+    int pos = DOWNANGLE;
 public:
-	ArmCommands() : Command(Controller::BOTH,
-		{ Control::C_ARM_UP, Control::C_ARM_DOWN }) {}
+    ArmCommands() : Command(Controller::BOTH,
+                            {Control::C_ARM_UP, Control::C_ARM_DOWN}) {}
 
-	void Execute(std::vector<ControlPress> &values) override {
-		bool up = (Commands::GetPressType(values, Control::C_ARM_UP) == PressType::PRESSED);
-		bool down = (Commands::GetPressType(values, Control::C_ARM_DOWN) != PressType::PRESS_NOT_ACTIVE);
-		// here's where we check sensor values
-		if (down) {
-			pos = DOWNANGLE;
-		}
-		else if (up) {
-			if(pos == HOLDANGLE)
-			{
-				pos = SCOREANGLE;
-			}else
-			{
-				pos = HOLDANGLE;
-			}
-		}
-		Components::Execute(ActionType::ARM_SET, pos);
-	}
+    void Execute(std::vector<ControlPress> &values) override {
+        bool up = (Commands::GetPressType(values, Control::C_ARM_UP) == PressType::PRESSED);
+        bool down = (Commands::GetPressType(values, Control::C_ARM_DOWN) != PressType::PRESS_NOT_ACTIVE);
+        // here's where we check sensor values
+        if(Robot::IsInManualMode()) {
+            if(up) {
+                pos += 10;
+            } else if(down) {
+                pos -= 10;
+            }
+        } else {
+            if (down) {
+                pos = DOWNANGLE;
+            } else if (up) {
+                if (pos == HOLDANGLE) {
+                    pos = SCOREANGLE;
+                } else {
+                    pos = HOLDANGLE;
+                }
+            }
+        }
+        Components::Execute(ActionType::ARM_SET, pos);
+    }
 };
 
-class BallLiftCommands : public Command {
+class ReaperCommands : public Command {
 public:
-    BallLiftCommands() : Command(Controller::BOTH,
+    ReaperCommands() : Command(Controller::BOTH,
                                  {Control::C_BALL_LIFT_DOWN, Control::C_BALL_LIFT_UP}) {}
 
     void Execute(std::vector<ControlPress> &values) override {
         bool up = (Commands::GetPressType(values, Control::C_BALL_LIFT_UP) != PressType::PRESS_NOT_ACTIVE);
         bool down = (Commands::GetPressType(values, Control::C_BALL_LIFT_DOWN) != PressType::PRESS_NOT_ACTIVE);
-        // here's where we check sensor values
         if (!up && !down) {
-            Components::Execute(ActionType::BALL_LIFT_RUN, -25);
+            Components::Execute(ActionType::REAPER_RUN, -25);
         } else if (up) {
-            Components::Execute(ActionType::BALL_LIFT_RUN, -127);
+            Components::Execute(ActionType::REAPER_RUN, -127);
         } else {
-            Components::Execute(ActionType::BALL_LIFT_RUN, 127);
+            Components::Execute(ActionType::REAPER_RUN, 127);
         }
     }
 };
 
 class ShootCommand : public Command {
 public:
-	const int NUM_VISION_OBJECTS = 4;
+    const int NUM_VISION_OBJECTS = 4;
 
-	ShootCommand() : Command(Controller::BOTH, {
-			Control::C_SHOOT, Control::C_AIM, Control::C_INDEX
-		}) {}
+    bool shooting = false;
+    bool hadBallOnInitialPress = false;
 
-	void Execute(std::vector<ControlPress> &values) override {
-		bool fast  = (Commands::GetPressType(values, Control::C_SHOOT) != PressType::PRESS_NOT_ACTIVE);
-		bool aim   = (Commands::GetPressType(values, Control::C_AIM)   != PressType::PRESS_NOT_ACTIVE);
-		bool index = (Commands::GetPressType(values, Control::C_INDEX) != PressType::PRESS_NOT_ACTIVE);
-		pros::vision_object_s_t objects[NUM_VISION_OBJECTS];
+    ShootCommand() : Command(Controller::BOTH, {
+            Control::C_SHOOT, Control::C_AIM
+    }) {}
 
-		int team = Robot::GetTeam() == RED ? 1 : 0;
+    void Execute(std::vector<ControlPress> &values) override {
+        bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
+        bool ballLoaded = Robot::GetSensor(SensorID::BUTTON_INDEXER)->GetValue() != 0;
+        if((Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED)) {
+            shooting = true;
+            hadBallOnInitialPress = ballLoaded;
+        } else if((Commands::GetPressType(values, Control::C_SHOOT) == PressType::RELEASED)) {
+            shooting = false;
+        }
 
-		std::int32_t objcount = Robot::GetCamera().read_by_sig(0, NUM_VISION_OBJECTS, team, objects);
+        pros::vision_object_s_t objects[NUM_VISION_OBJECTS];
+        int team = Robot::GetTeam() == RED ? 1 : 0;
+        std::int32_t objcount = Robot::GetCamera().read_by_sig(0, NUM_VISION_OBJECTS, team, objects);
+        if (objcount > NUM_VISION_OBJECTS)  {
+            objcount = 0;
+        }
+        int id = -1;
+        int val = 10000;
+        for (int i = 0; i < objcount; i++) {
+            if (val > std::abs(objects[i].x_middle_coord)) {
+                id = i;
+                val = std::abs(objects[i].x_middle_coord);
+            }
+        }
 
-		printf("yeetus fetus %d\n", objcount);
+        if (aim && id != -1) {
+            Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
+        }
 
-		if (objcount > NUM_VISION_OBJECTS) objcount = 0;
+        if(Robot::IsInManualMode()) {
+            if((Commands::GetPressType(values, Control::C_SHOOT) != PressType::PRESS_NOT_ACTIVE)) {
+                Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(-100);
+            } else {
+                Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(0);
+            }
+        } else {
+            // if the user has pressed the shoot button and a ball has not been shot yet
+            if (shooting) {
+                if(ballLoaded) {
+                    // if a ball is loaded
+                    Components::Execute(ActionType::INDEXER_RUN, -127);
+                    // run the indexer until the ball is gone
+                } else {
+                    // there is no ball loaded. this could be because there never was one, or the ball was shot
+                    // check if there initially was a ball
+                    if(hadBallOnInitialPress) {
+                        // the ball is gone now, so you have shot once
+                        pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
+                        // get that sweet feedback
+                        master.rumble(".");
+                        shooting = false;
+                        // the indexer will now behave as if the shooting button isn't being pressed
+                        // this means it will continuously intake at a slower speed until it is loaded again, then it will stop
+                    } else {
+                        // no ball was loaded already, but the user still wants to fire. At this point we're just going to
+                        // blindly obey their wishes and run the indexer
+                        Components::Execute(ActionType::INDEXER_RUN, -127);
+                        // this will happen until a ball is loaded and fired, or they release the shooting button
+                    }
+                }
+            }
+            if(!shooting) {
+                if(ballLoaded) {
+                    // if a ball is loaded, don't let it go anywhere. The motor is set to actively brake when power is set to
+                    // 0, so it won't coast into the flywheel
+                    Components::Execute(ActionType::INDEXER_RUN, 0);
+                } else {
+                    //prepare the next ball (this will run until a ball is in the indexer)
+                    Components::Execute(ActionType::INDEXER_RUN, -60);
+                }
+            }
+        }
 
-		int id = -1;
-		int val = 10000;
-
-		for (int i = 0; i < objcount; i++) {
-			if (val > std::abs(objects[i].x_middle_coord)) {
-				id = i;
-				val = std::abs(objects[i].x_middle_coord);
-			}
-		}
-
-		if (aim && id != -1) {
-			Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
-		}
-
-		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);
-		
-		if (index) {
-			Components::Execute(ActionType::INDEXER_RUN, -100);
-		}
-		else
-		{
-			Components::Execute(ActionType::INDEXER_RUN, 0);
-		}
-	}
+        Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);
+    }
 
 };
 
 void Commands::Init() {
     new DriveCommands();
-    new BallLiftCommands();
+    new ReaperCommands();
     new ShootCommand();
-	new ArmCommands();
-	new TestCommand();
+    new ArmCommands();
+    new TestCommand();
 }
 
 Command::Command(Controller type, std::vector<int> controls) : type(type), controls(std::move(controls)) {
@@ -259,7 +302,7 @@ void Commands::Update() {
     // controls that are getting sent
     std::vector<ControlPress> controlsToSend;
 
-	std::vector<int> controlsToRemove;
+    std::vector<int> controlsToRemove;
 
     for (int controllerID = pros::E_CONTROLLER_MASTER; controllerID <= pros::E_CONTROLLER_PARTNER; controllerID++) {
 
@@ -324,26 +367,24 @@ void Commands::Update() {
 
 
     // add controls that were created through Commands::Execute
-	commandMutex.take(1000);
-	for(int i = 0; i < Command::executedControls.size(); ){
-		ControlPress executedControl = Command::executedControls.at(i);
+    commandMutex.take(1000);
+    for (int i = 0; i < Command::executedControls.size();) {
+        ControlPress executedControl = Command::executedControls.at(i);
         controlPresses.push_back(executedControl);
-		//printf("COLOR_HONEYDEW %d\n", executedControl.pressType);
-		if (executedControl.pressType == PressType::PRESSED) {
-			executedControl.pressType = PressType::REPEATED;
-			Command::executedControls.at(i) = executedControl;
-		}
+        //printf("COLOR_HONEYDEW %d\n", executedControl.pressType);
+        if (executedControl.pressType == PressType::PRESSED) {
+            executedControl.pressType = PressType::REPEATED;
+            Command::executedControls.at(i) = executedControl;
+        }
 
-		if (executedControl.pressType == PressType::RELEASED)
-		{
-			Command::executedControls.erase(Command::executedControls.begin() + i);
+        if (executedControl.pressType == PressType::RELEASED) {
+            Command::executedControls.erase(Command::executedControls.begin() + i);
 
-		}
-		else
-			++i;
-		
+        } else
+            ++i;
+
     }
-	commandMutex.give();
+    commandMutex.give();
 
     for (Command *command : Command::allCommands) {
         // determine which commands are active and then send the controls to their execute function
@@ -377,40 +418,40 @@ void Commands::Press(Control control, int value, Controller controller) {
 }
 
 void Commands::Release(Control control) {
-	Commands::Release(control, 0);
+    Commands::Release(control, 0);
 }
 
 void Commands::Release(Control control, int value) {
-	Commands::Release(control, value, Controller::MASTER);
+    Commands::Release(control, value, Controller::MASTER);
 }
 
 void Commands::Release(Control control, int value, Controller controller) {
-	commandMutex.take(1000);
-	std::vector<int> controlsToRemove;
-	int i = 0;
-	for (int i = 0; i < Command::executedControls.size(); i++) {
-		ControlPress command = Command::executedControls.at(i);
-		if (command.control == control && command.controller == controller) {
-			command.pressType = RELEASED;
-			Command::executedControls.at(i) = command;
-		}
-	}
+    commandMutex.take(1000);
+    std::vector<int> controlsToRemove;
+    int i = 0;
+    for (int i = 0; i < Command::executedControls.size(); i++) {
+        ControlPress command = Command::executedControls.at(i);
+        if (command.control == control && command.controller == controller) {
+            command.pressType = RELEASED;
+            Command::executedControls.at(i) = command;
+        }
+    }
 
-	commandMutex.give();
+    commandMutex.give();
 }
 
 void Commands::Execute(Control control, int value, Controller controller, PressType pressType) {
-	commandMutex.take(1000);
+    commandMutex.take(1000);
     ControlPress press = {};
     press.controller = controller;
     press.pressType = pressType;
     press.control = control;
     press.value = value;
     Command::executedControls.push_back(press);
-	commandMutex.give();
+    commandMutex.give();
 }
 
 void Commands::Clear() {
-	Command::controlsLastActive.clear();
-		Command::executedControls.clear();
+    Command::controlsLastActive.clear();
+    Command::executedControls.clear();
 }

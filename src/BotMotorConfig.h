@@ -12,7 +12,7 @@ typedef enum {
 } BotMotorID;
 
 /**
- * A class that contains information and vectortings about a motor
+ * A class that contains information and settings about a motor
  */
 struct BotMotorConfig {
     /**
@@ -24,7 +24,7 @@ struct BotMotorConfig {
      */
     bool reverse;
     /**
-     * The PROS motor gearset to use. Options are pros::E_MOTOR_gearset_<06|18|36>
+     * The PROS motor gearset to use. Options are pros::E_MOTOR_GEARSET_<06|18|36>
      */
     pros::motor_gearset_e gearset;
 
