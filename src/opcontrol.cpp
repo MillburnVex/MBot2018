@@ -3,28 +3,12 @@
 #include "BotComponent.h"
 #include "Command.h"
 
-
-pros::ADIUltrasonic sonic(1, 2);
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 
 int timer = 0;
 void Update() {
     Commands::Update();
     Components::Update();
-
-	if(sonic.get_value() > 2 && sonic.get_value() < 100)
-	{
-		if(timer == -1)
-		{
-			if(timer < 20)
-			{
-				timer++;
-				master.rumble("..");
-			}
-		}
-	}else{
-		timer = -1;
-	}
 }
 
 /**
@@ -53,10 +37,9 @@ void opcontrol() {
     pros::lcd::clear();
 	
 	uint32_t time = pros::millis();
+
 	while (true) {
 		Update();
-		pros::Task::delay_until(&time, 20);
+		pros::Task::delay_until(&time, 15);
 	}
-	
-    
 }

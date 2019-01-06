@@ -4,7 +4,7 @@
 #include <vector>
 
 typedef enum {
-    BUTTON_INDEXER
+    BUTTON_INDEXER = 1
 } SensorID;
 
 class Sensor {

@@ -24,7 +24,7 @@ void AutonomousUpdate(void* params) {
 	while (running) {
 		Commands::Update();
 		Components::Update();
-		pros::Task::delay_until(&time, 20);
+		pros::Task::delay_until(&time, 15);
 	}
 }
 
@@ -39,9 +39,9 @@ void frontauton(Team team) {
 		teamMultiplier = -1;
 	}
 	pros::delay(200);
-	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
+	Commands::Press(C_DRIVE_LINEAR_TO, 1250);
 	Commands::Press(C_BALL_LIFT_UP);
-	pros::delay(1500);
+	pros::delay(3000);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
@@ -50,12 +50,12 @@ void frontauton(Team team) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 350);//turn to shot
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * (350 + ((team == BLUE) ? 20 : 0)));//turn to shot
 	pros::delay(500);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, 160); //line up for shot
+	Commands::Press(C_DRIVE_LINEAR_TO, ((team == RED) ? 160 : 0)); //line up for shot
 	pros::delay(200);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
@@ -64,8 +64,8 @@ void frontauton(Team team) {
 	pros::delay(250);
 	Commands::Release(C_SHOOT);
 	pros::delay(500);
-	//                                  nice
-	Commands::Press(C_DRIVE_LINEAR_TO, 690);//2nd shot
+	//                                  
+	Commands::Press(C_DRIVE_LINEAR_TO, 670 - ((team == BLUE) ? 80 : 0));//2nd shot
 	pros::delay(1000);
 	Commands::Release(C_DRIVE_LINEAR_TO);
 
@@ -74,7 +74,7 @@ void frontauton(Team team) {
 	Commands::Release(C_SHOOT);
 	pros::delay(500);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 50);//1st bottom flag turn
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * (65 - ((team == BLUE) ? 17 : 0)));//1st bottom flag turn
 	pros::delay(900);
 	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
@@ -87,13 +87,36 @@ void frontauton(Team team) {
 	Commands::Release(C_BALL_LIFT_UP);
 	pros::delay(100);
 
+	if (team == BLUE) {
+		Commands::Press(C_DRIVE_LINEAR_TO, -100);
+		pros::delay(500);
+		Commands::Release(C_DRIVE_LINEAR_TO);
+		pros::delay(100);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, -1100);//push out
-	pros::delay(1800);
+		Commands::Press(C_DRIVE_ROTATE_TO, 60);
+		pros::delay(200);
+		Commands::Release(C_DRIVE_ROTATE_TO);
+		pros::delay(100);
+	}
+	Commands::Press(C_DRIVE_LINEAR_TO, -2050 + ((team == BLUE) ? 100 : 0));//push out
+	pros::delay(3000);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(100);
 
+	Commands::Press(C_DRIVE_ROTATE_TO, -370 * teamMultiplier); // rotate to platform
+	pros::delay(1000);
+	Commands::Release(C_DRIVE_ROTATE_TO, 0);
+	pros::delay(100);
 
+	Commands::Press(C_DRIVE_LINEAR_TO, -1500); // hit the back wall
+	pros::delay(2000);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(100);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 1800); // drive onto platform
+	pros::delay(2000);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(100);
 	//below is flipping the cap. doesn't work for now because of the hood
 	/*
 	Commands::Press(C_BALL_LIFT_DOWN);

@@ -191,7 +191,7 @@ public:
                     Components::Execute(ActionType::INDEXER_RUN, 0);
                 } else {
                     //prepare the next ball (this will run until a ball is in the indexer)
-                    Components::Execute(ActionType::INDEXER_RUN, -60);
+                    Components::Execute(ActionType::INDEXER_RUN, -40);
                 }
             }
         }
