@@ -2,6 +2,7 @@
 #include "../include/main.h"
 #include "BotComponent.h"
 #include "Command.h"
+#include "Robot.h"
 
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 
@@ -25,6 +26,8 @@ void Update() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	Robot::SetBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
     while (!master.is_connected()) {
         pros::lcd::print(1, "Connect master controller!");
@@ -40,6 +43,6 @@ void opcontrol() {
 
 	while (true) {
 		Update();
-		pros::Task::delay_until(&time, 15);
+		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
 	}
 }

@@ -62,7 +62,7 @@ public:
 
 class ArmCommands : public Command {
     const int HOLDANGLE = 300;
-    const int SCOREANGLE = 470;
+    const int SCOREANGLE = 540;
     const int DOWNANGLE = 0;
     int pos = DOWNANGLE;
 public:
@@ -120,12 +120,17 @@ public:
     bool hadBallOnInitialPress = false;
 
     ShootCommand() : Command(Controller::BOTH, {
-            Control::C_SHOOT, Control::C_AIM
+            Control::C_SHOOT, Control::C_AIM, Control::C_SPEED_SET
     }) {}
 
-    void Execute(std::vector<ControlPress> &values) override {
+	void Execute(std::vector<ControlPress> &values) override {
+		if ((Commands::GetPressType(values, Control::C_SPEED_SET) == PressType::PRESSED)){
+			Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_SPEED_SET));
+		}
+
         bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
         bool ballLoaded = Robot::GetSensor(SensorID::BUTTON_INDEXER)->GetValue() != 0;
+
         if((Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED)) {
             shooting = true;
             hadBallOnInitialPress = ballLoaded;
@@ -176,6 +181,7 @@ public:
                         shooting = false;
                         // the indexer will now behave as if the shooting button isn't being pressed
                         // this means it will continuously intake at a slower speed until it is loaded again, then it will stop
+						Commands::Release(Control::C_SHOOT);
                     } else {
                         // no ball was loaded already, but the user still wants to fire. At this point we're just going to
                         // blindly obey their wishes and run the indexer
@@ -191,12 +197,10 @@ public:
                     Components::Execute(ActionType::INDEXER_RUN, 0);
                 } else {
                     //prepare the next ball (this will run until a ball is in the indexer)
-                    Components::Execute(ActionType::INDEXER_RUN, -40);
+                    Components::Execute(ActionType::INDEXER_RUN, -25);
                 }
             }
         }
-
-        Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);
     }
 
 };
@@ -211,6 +215,23 @@ void Commands::Init() {
 
 Command::Command(Controller type, std::vector<int> controls) : type(type), controls(std::move(controls)) {
     Command::allCommands.push_back(this);
+}
+
+void Commands::ExecuteUntilFinished(Control control, int value) {
+	Commands::ExecuteUntilFinished(control, value, -1);
+}
+
+void Commands::ExecuteUntilFinished(Control control, int value, int millisBeforeCancel) {
+	Commands::Press(control, value);
+	int millisTaken = 0;
+	while (Commands::Contains(Command::executedControls, control)) {
+		pros::delay(Robot::GetUpdateMillis());
+		millisTaken += Robot::GetUpdateMillis();
+		if (millisBeforeCancel >= 0 && millisTaken >= millisBeforeCancel) {
+			Commands::Release(control);
+			return;
+		}
+	}
 }
 
 int Commands::GetValue(std::vector<ControlPress> &vec, int control) {
@@ -268,6 +289,15 @@ bool Commands::Contains(std::vector<std::pair<int, int>> &vec, int controller, i
         }
     }
     return false;
+}
+
+bool Commands::Contains(std::vector<ControlPress> presses, Control control) {
+	for (ControlPress press : presses) {
+		if (static_cast<Control>(press.control) == control) {
+			return true;
+		}
+	}
+	return false;
 }
 
 bool Commands::Contains(std::vector<ControlPress *> presses, int control) {

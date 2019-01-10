@@ -24,11 +24,9 @@ void AutonomousUpdate(void* params) {
 	while (running) {
 		Commands::Update();
 		Components::Update();
-		pros::Task::delay_until(&time, 15);
+		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
 	}
 }
-
-
 
 void frontauton(Team team) {
 	int teamMultiplier = 1;
@@ -38,84 +36,62 @@ void frontauton(Team team) {
 	else if (team == RED) {
 		teamMultiplier = -1;
 	}
-	pros::delay(200);
-	Commands::Press(C_DRIVE_LINEAR_TO, 1250);
+
+	pros::delay(30);
 	Commands::Press(C_BALL_LIFT_UP);
-	pros::delay(3000);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
-	pros::delay(200);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 1250);
+	pros::delay(400);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, -1100);
-	pros::delay(1500);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
-	pros::delay(200);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -1100);
+	pros::delay(400);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * (350 + ((team == BLUE) ? 20 : 0)));//turn to shot
-	pros::delay(500);
-	Commands::Release(C_DRIVE_ROTATE_TO);
-	pros::delay(200);
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, teamMultiplier * (350));//turn to shot
+	pros::delay(400);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, ((team == RED) ? 160 : 0)); //line up for shot
-	pros::delay(200);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
-	pros::delay(200);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, ((team == RED) ? 160 : 0)); //line up for shot
+	pros::delay(100);
 
-	Commands::Press(C_SHOOT); //shot 1
-	pros::delay(250);
-	Commands::Release(C_SHOOT);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 100);
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_SHOOT, 0, 700); //shot 1
 	pros::delay(500);
 	//                                  
-	Commands::Press(C_DRIVE_LINEAR_TO, 670 - ((team == BLUE) ? 80 : 0));//2nd shot
-	pros::delay(1000);
-	Commands::Release(C_DRIVE_LINEAR_TO);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 670 - ((team == BLUE) ? 80 : 0));//2nd shot
+	pros::delay(100);
 
-	Commands::Press(C_SHOOT); //shot 2
-	pros::delay(500);
-	Commands::Release(C_SHOOT);
-	pros::delay(500);
+	Commands::ExecuteUntilFinished(C_SHOOT, 0, 700); //shot 2
+	pros::delay(100);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * (65 - ((team == BLUE) ? 17 : 0)));//1st bottom flag turn
-	pros::delay(900);
-	Commands::Release(C_DRIVE_ROTATE_TO);
-	pros::delay(200);
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, teamMultiplier * (65 - ((team == BLUE) ? 17 : 0)));//1st bottom flag turn
+	pros::delay(100);
 
 	Commands::Press(C_DRIVE_LINEAR_TO, 1000);//push in
 	pros::delay(1000);
 	Commands::Release(C_DRIVE_LINEAR_TO);
-	pros::delay(400);
+	pros::delay(100);
 
 	Commands::Release(C_BALL_LIFT_UP);
 	pros::delay(100);
 
-	if (team == BLUE) {
-		Commands::Press(C_DRIVE_LINEAR_TO, -100);
-		pros::delay(500);
-		Commands::Release(C_DRIVE_LINEAR_TO);
-		pros::delay(100);
-
-		Commands::Press(C_DRIVE_ROTATE_TO, 60);
-		pros::delay(200);
-		Commands::Release(C_DRIVE_ROTATE_TO);
-		pros::delay(100);
-	}
-	Commands::Press(C_DRIVE_LINEAR_TO, -2050 + ((team == BLUE) ? 100 : 0));//push out
-	pros::delay(3000);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -100);
 	pros::delay(100);
 
-	Commands::Press(C_DRIVE_ROTATE_TO, -370 * teamMultiplier); // rotate to platform
-	pros::delay(1000);
-	Commands::Release(C_DRIVE_ROTATE_TO, 0);
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, teamMultiplier * 45, 500);
 	pros::delay(100);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, -1500); // hit the back wall
-	pros::delay(2000);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -1950);//back out to cap
 	pros::delay(100);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, 1800); // drive onto platform
-	pros::delay(2000);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, -370 * teamMultiplier); // rotate to platform
+	pros::delay(100);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -1500);//push in
+	pros::delay(800);
+	Commands::Release(C_DRIVE_LINEAR_TO);
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 1800); // drive onto platform
 	pros::delay(100);
 	//below is flipping the cap. doesn't work for now because of the hood
 	/*
@@ -147,53 +123,52 @@ void backauton(Team team) {
 	else if (team == RED) {
 		teamMultiplier = -1;
 	}
-	
+
+
+
 	pros::delay(200);
-	Commands::Press(C_DRIVE_LINEAR_TO, 1350);
+	Commands::Press(C_DRIVE_LINEAR_TO, 1400);
 	Commands::Press(C_BALL_LIFT_UP);
-	pros::delay(1500);
+	pros::delay(2000);	Commands::Press(C_SPEED_SET, 90);
+	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	pros::delay(500);
+
+	
+	Commands::Press(C_DRIVE_LINEAR_TO, -150);//drive back
+	pros::delay(500);
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(200);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, -1500);
-	pros::delay(1500);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
+	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 350);//turn to shot
+	pros::delay(500);
+	Commands::Release(C_DRIVE_ROTATE_TO);
 	pros::delay(200);
+
+	Commands::Release(C_SPEED_SET);
+	Commands::Press(C_SHOOT); 
+	pros::delay(250);//shoot 1
+	Commands::Release(C_SHOOT);
+	pros::delay(500);
+
+	Commands::Press(C_SPEED_SET, 112);
+	pros::delay(1000);
+
+	Commands::Press(C_SHOOT);//shoot 2
+	pros::delay(750);
+	Commands::Release(C_SHOOT);
+	pros::delay(500);
 
 	Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, 400);
-	pros::delay(1500);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
-	pros::delay(200);
-
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 380);//turn to shot
-	pros::delay(500);
-	Commands::Release(C_DRIVE_ROTATE_TO);
-	pros::delay(200);
-
-	Commands::Press(C_DRIVE_LINEAR_TO, 790);
-	pros::delay(1500);
-	Commands::Release(C_DRIVE_LINEAR_TO, 0);
-	pros::delay(200);
-
-	Commands::Press(C_DRIVE_ROTATE_TO, teamMultiplier * 360);//turn to shot
-	pros::delay(500);
-	Commands::Release(C_DRIVE_ROTATE_TO);
-	pros::delay(200);
-
-	Commands::Press(C_DRIVE_LINEAR, -127);
-	pros::delay(1500);
-	Commands::Release(C_DRIVE_LINEAR);
-	pros::delay(200);
-
+	pros::delay(100);
 }
 
 
 void autonomous() {
+	Robot::SetBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
 		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
-	frontauton(RED);
+	frontauton(BLUE);
 
 	Commands::Clear();
 	running = false;

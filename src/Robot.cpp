@@ -2,10 +2,16 @@
 
 pros::Vision camera(13, pros::E_VISION_ZERO_CENTER);
 
+int updateMillis = 15;
+
 Team team = RED;
 Position autonPosition = FRONT;
 
 bool manualMode = false;
+
+int Robot::GetUpdateMillis() {
+	return updateMillis;
+}
 
 Team Robot::GetTeam() {
 	return team;
@@ -25,6 +31,13 @@ void Robot::SetTeam(Team t) {
 
 void Robot::SetAutonPosition(Position pos) {
 	autonPosition = pos;
+}
+
+void Robot::SetBrakeMode(pros::motor_brake_mode_e_t mode) {
+	Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->GetProsMotor()->set_brake_mode(mode);
+	Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->set_brake_mode(mode);
+	Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->GetProsMotor()->set_brake_mode(mode);
+	Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->set_brake_mode(mode);
 }
 
 int Robot::GetState() {

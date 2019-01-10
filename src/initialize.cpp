@@ -62,6 +62,8 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
+	Robot::SetBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+
     // print("javier coindreau")
 }
 

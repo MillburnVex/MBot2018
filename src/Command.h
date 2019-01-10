@@ -18,6 +18,7 @@ typedef enum {
 	C_DRIVE_LINEAR_TO = 100,
 	C_DRIVE_ROTATE = pros::E_CONTROLLER_ANALOG_LEFT_X,
 	C_DRIVE_ROTATE_TO = 101,
+	C_SPEED_SET = 102,
 	C_BALL_LIFT_UP = pros::E_CONTROLLER_DIGITAL_L1,
 	C_BALL_LIFT_DOWN = pros::E_CONTROLLER_DIGITAL_L2,
 	C_SHOOT = pros::E_CONTROLLER_DIGITAL_R1,
@@ -99,6 +100,8 @@ namespace Commands {
 
     bool Contains(std::vector<ControlPress *> presses, int control);
 
+	bool Contains(std::vector<ControlPress> presses, Control control);
+
     void Press(Control control);
 
     void Press(Control control, int value);
@@ -112,6 +115,10 @@ namespace Commands {
 	void Release(Control control, int value, Controller controller);
 
     void Execute(Control control, int value, Controller controller, PressType pressType);
+
+	void ExecuteUntilFinished(Control control, int value);
+
+	void ExecuteUntilFinished(Control control, int value, int millisBeforeCancel);
 
 	void Clear();
 

@@ -13,9 +13,13 @@ typedef enum {
 
 namespace Robot {
 
+	int GetUpdateMillis();
+
 	void SetTeam(Team team);
 
 	void SetAutonPosition(Position pos);
+
+	void SetBrakeMode(pros::motor_brake_mode_e_t mode);
 
 	Team GetTeam();
 

@@ -4,10 +4,12 @@
 #include "api.h"
 #include "BotComponent.h"
 #include "Robot.h"
+#include "Command.h"
 #include "PID.h"
 
 class FlywheelComponent : public BotComponent {
     PID pid = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
+	int speed = 127;
 public:
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {
@@ -15,7 +17,10 @@ public:
                                        }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
-		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-127);
+		if (Components::IsActive(actions, ActionType::FLYWHEEL_RUN)) {
+			speed = Components::GetValue(actions, ActionType::FLYWHEEL_RUN);
+		}
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-speed);
     }
 };
 
@@ -51,14 +56,21 @@ public:
 };
 
 class DriveComponent : public BotComponent {
-	PID leftFront = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
-    PID leftBack = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
-	PID rightFront = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
-    PID rightBack = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
+	const int maxChange = 15;
+
+	PID leftFront = PID(0.8f, 0.0f, 1.0f, 1000, -1000);
+    PID leftBack = PID(0.8f, 0.0f, 1.0f, 1000, -1000);
+	PID rightFront = PID(0.8f, 0.0f, 1.0f, 1000, -1000);
+    PID rightBack = PID(0.8f, 0.0f, 1.0f, 1000, -1000);
 	double latestLeftFront = 0;
     double latestLeftBack = 0;
 	double latestRightFront = 0;
     double latestRightBack = 0;
+
+	int lastLeftBackSpeed = 0;
+	int lastLeftFrontSpeed = 0;
+	int lastRightBackSpeed = 0;
+	int lastRightFrontSpeed = 0;
 public:
     DriveComponent() : BotComponent("Drive component",
                                     {
@@ -66,52 +78,95 @@ public:
                                     }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
+		int leftBackVal = Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->GetPosition();
+		int leftFrontVal = Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetPosition();
+		int rightBackVal = Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->GetPosition();
+		int rightFrontVal = Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetPosition();
 		if (Components::IsActive(actions, ActionType::DRIVE_TO) || Components::IsActive(actions, ActionType::ROTATE_TO)) {
-			int leftBackVal = 0;
-            int leftFrontVal = 0;
-            int rightBackVal = 0;
-            int rightFrontVal = 0;
-            /*
-             * THIS CODE IS BAD. I know I shouldn't be copying and pasting this much, but honestly I think I've done goddamn
-             * well enough on making my code idiomatic and so this is staying until it breaks.
-             */
-			if (Components::IsActive(actions, ActionType::DRIVE_TO)) {
-				leftBackVal = leftBack.GetValue(
-					Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->GetPosition(),
-					latestLeftBack + Components::GetValue(actions, ActionType::DRIVE_TO));
-                leftFrontVal = leftFront.GetValue(
-                        Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetPosition(),
-                        latestLeftFront + Components::GetValue(actions, ActionType::DRIVE_TO));
-				rightBackVal = -rightBack.GetValue(
-					-Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->GetPosition(),
-					-latestRightBack + Components::GetValue(actions, ActionType::DRIVE_TO));
-                rightFrontVal = -rightFront.GetValue(
-                        -Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetPosition(),
-                        -latestRightFront + Components::GetValue(actions, ActionType::DRIVE_TO));
-			} else {
-                leftBackVal = leftBack.GetValue(
-                        Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->GetPosition(),
-                        latestLeftBack + Components::GetValue(actions, ActionType::ROTATE_TO));
-                leftFrontVal = leftFront.GetValue(
-                        Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetPosition(),
-                        latestLeftFront + Components::GetValue(actions, ActionType::ROTATE_TO));
-                rightBackVal = -rightBack.GetValue(
-                        -Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->GetPosition(),
-                        -latestRightBack - Components::GetValue(actions, ActionType::ROTATE_TO));
-                rightFrontVal = -rightFront.GetValue(
-                        -Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetPosition(),
-                        -latestRightFront - Components::GetValue(actions, ActionType::ROTATE_TO));
-			}
+			int leftBackSpeed = 0;
+            int leftFrontSpeed = 0;
+            int rightBackSpeed = 0;
+            int rightFrontSpeed = 0;
 
-			Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(leftFrontVal, -127, 127));
-			Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(leftBackVal, -127, 127));
-			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(rightFrontVal, -127, 127));
-			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(std::clamp(rightBackVal, -127, 127));
+			if (Components::IsActive(actions, ActionType::DRIVE_TO)) {
+				int driveTo = Components::GetValue(actions, ActionType::DRIVE_TO);
+				int leftBackError = latestLeftBack + driveTo - leftBackVal;
+				int leftFrontError = latestLeftFront + driveTo - leftFrontVal;
+				int rightBackError = -latestRightBack + driveTo + rightBackVal;
+				int rightFrontError = -latestRightFront + driveTo + rightFrontVal;
+				if ((std::abs(leftBackError) + std::abs(leftFrontError) + std::abs(rightBackError) + std::abs(rightFrontError)) / 4.0 < 30.0) {
+					// we in the right place
+					Commands::Release(C_DRIVE_LINEAR_TO);
+					Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(0);
+					Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(0);
+					Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(0);
+					Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(0);
+					lastLeftBackSpeed = 0;
+					lastLeftFrontSpeed = 0;
+					lastRightBackSpeed = 0;
+					lastRightFrontSpeed = 0;
+					return;
+				}
+				leftBackSpeed = leftBack.GetValue(
+					leftBackVal,
+					latestLeftBack + driveTo);
+                leftFrontSpeed = leftFront.GetValue(
+                        leftFrontVal,
+                        latestLeftFront + driveTo);
+				rightBackSpeed = -rightBack.GetValue(
+					-rightBackVal,
+					-latestRightBack + driveTo);
+                rightFrontSpeed = -rightFront.GetValue(
+                        -rightFrontVal,
+                        -latestRightFront + driveTo);
+			} else {
+				int rotateTo = Components::GetValue(actions, ActionType::ROTATE_TO);
+				int leftBackError = latestLeftBack + rotateTo - leftBackVal;
+				int leftFrontError = latestLeftFront + rotateTo - leftFrontVal;
+				int rightBackError = -latestRightBack - rotateTo + rightBackVal;
+				int rightFrontError = -latestRightFront - rotateTo + rightFrontVal;
+				if ((std::abs(leftBackError) + std::abs(leftFrontError) + std::abs(leftFrontError) + std::abs(rightFrontError)) / 4.0 < 10.0) {
+					// we in the right place
+					Commands::Release(C_DRIVE_ROTATE_TO);
+					Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(0);
+					Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(0);
+					Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(0);
+					Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(0);
+					lastLeftBackSpeed = 0;
+					lastLeftFrontSpeed = 0;
+					lastRightBackSpeed = 0;
+					lastRightFrontSpeed = 0;
+					return;
+				}
+                leftBackSpeed = leftBack.GetValue(
+                        leftBackVal,
+                        latestLeftBack + rotateTo);
+                leftFrontSpeed = leftFront.GetValue(
+                        leftFrontVal,
+                        latestLeftFront + rotateTo);
+                rightBackSpeed = -rightBack.GetValue(
+                        -rightBackVal,
+                        -latestRightBack - rotateTo);
+                rightFrontSpeed = -rightFront.GetValue(
+                        -rightFrontVal,
+                        -latestRightFront - rotateTo);
+			}
+			// to smooth: Math.ceil(desired speed - previous speedo * 0.1) + previous speed
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->SetVoltage(std::clamp(std::clamp(leftFrontSpeed, lastLeftFrontSpeed - maxChange, lastLeftFrontSpeed + maxChange), -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->SetVoltage(std::clamp(std::clamp(leftBackSpeed, lastLeftBackSpeed - maxChange, lastLeftBackSpeed + maxChange), -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->SetVoltage(std::clamp(std::clamp(rightFrontSpeed, lastRightFrontSpeed - maxChange, lastRightFrontSpeed + maxChange), -127, 127));
+			Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->SetVoltage(std::clamp(std::clamp(rightBackSpeed, lastRightBackSpeed - maxChange, lastRightBackSpeed + maxChange), -127, 127));
+
+			lastLeftBackSpeed = std::clamp(leftBackSpeed, lastLeftBackSpeed - maxChange, lastLeftBackSpeed + maxChange);
+			lastLeftFrontSpeed = std::clamp(leftFrontSpeed, lastLeftFrontSpeed - maxChange, lastLeftFrontSpeed + maxChange);
+			lastRightBackSpeed = std::clamp(rightBackSpeed, lastRightBackSpeed - maxChange, lastRightBackSpeed + maxChange);
+			lastRightFrontSpeed = std::clamp(rightFrontSpeed, lastRightFrontSpeed - maxChange, lastRightFrontSpeed + maxChange);
+			
 		} else {
-			latestLeftFront  = Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetPosition();
-			latestRightFront = Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetPosition();
-            latestLeftBack  = Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->GetPosition();
-            latestRightBack = Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->GetPosition();
+			latestLeftFront = leftFrontVal;
+			latestRightFront = rightFrontVal;
+            latestLeftBack  = leftBackVal;
+            latestRightBack = rightBackVal;
 
 			int linear = Components::GetValue(actions, ActionType::DRIVE_LINEAR);
 			int rotate = Components::GetValue(actions, ActionType::DRIVE_ROTATE);
