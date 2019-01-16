@@ -47,7 +47,7 @@ void frontauton(Team team) {
 	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -1100);
 	pros::delay(400);
 
-	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, teamMultiplier * (345 - (team == RED ? 10 : 0)), 800);//turn to shot
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, teamMultiplier * (335), 800);//turn to shot
 	pros::delay(400);
 
 	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 100, 800);
@@ -185,35 +185,91 @@ void backauton(Team team) {
 
 
 void skillsauton() {
-	frontauton(RED);
-
-
-	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -2000);
+	pros::delay(30);
+	Commands::Press(C_BALL_LIFT_UP);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 1250);
 	pros::delay(400);
 
-	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, (343), 800);//turn to shot
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -1100);
 	pros::delay(400);
 
-	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 300);
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, -335, 800);//turn to shot
 	pros::delay(400);
 
-	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, (-343), 800);//turn to shot
-	pros::delay(120);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 100, 800);
+	pros::delay(100);
 
-	Commands::Press(C_DRIVE_LINEAR, -100);//push in
-	pros::delay(600);  
+	Commands::ExecuteUntilFinished(C_SHOOT, 0, 275); //shot 1
+	pros::delay(500);
+	//                                  
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 670);//2nd shot
+	pros::delay(100);
 
+	Commands::ExecuteUntilFinished(C_SHOOT, 0, 1500); //shot 2
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, -68);//1st bottom flag turn
+	pros::delay(100);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 1000);//push in
+	pros::delay(1000);
+	Commands::Release(C_DRIVE_LINEAR_TO);
+	pros::delay(100);
+
+	Commands::Release(C_BALL_LIFT_UP);
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -100);
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -500);//back out to cap 1
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, -330, 500);//turn to pick up cap 1
+	pros::delay(100);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -1000);//pick up cap 1
+	pros::delay(800);
+	Commands::Press(C_ARM_UP);
+	pros::delay(500);
+	Commands::Release(C_DRIVE_LINEAR_TO);// cap 1 acquired
+
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -1000);//go forward to align
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, 335, 800);//turn to store cap 1
+	pros::delay(400);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -1500);//back out to score cap 1
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, -335, 800);//turn to score cap 1 finally
+	pros::delay(400);
+
+	Commands::Press(C_DRIVE_LINEAR, 100);
+	pros::delay(1000);
 	Commands::Release(C_DRIVE_LINEAR);
 	pros::delay(100);
 
-	backauton(RED);
+	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, 150);//back out to cap 2
+	pros::delay(100);
+
+	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, -335, 800);//turn to shot
+	pros::delay(400);
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -1400);
+	pros::delay(1000);
+	Commands::Press(C_ARM_UP);
+	pros::delay(500);
+	Commands::Release(C_DRIVE_LINEAR_TO);
+
 }
 
 void autonomous() {
 	Robot::SetBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
 		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
-	frontauton(BLUE);
+	frontauton(RED);
 
 	Commands::Clear();
 	running = false;

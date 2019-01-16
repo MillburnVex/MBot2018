@@ -120,12 +120,17 @@ public:
     bool hadBallOnInitialPress = false;
 
     ShootCommand() : Command(Controller::BOTH, {
-            Control::C_SHOOT, Control::C_AIM, Control::C_SPEED_SET
+            Control::C_SHOOT, Control::C_AIM, Control::C_SPEED_SET, Control::C_SLOW
     }) {}
 
 	void Execute(std::vector<ControlPress> &values) override {
 		if ((Commands::GetPressType(values, Control::C_SPEED_SET) == PressType::PRESSED)){
 			Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_SPEED_SET));
+		}
+		else if (Commands::GetPressType(values, Control::C_SLOW) == PressType::PRESSED) {
+			Components::Execute(ActionType::FLYWHEEL_RUN, 105);
+		}else {
+			Components::Execute(ActionType::FLYWHEEL_RUN, 127);
 		}
 
         bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);

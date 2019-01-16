@@ -9,7 +9,6 @@
 
 class FlywheelComponent : public BotComponent {
     PID pid = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
-	int speed = 127;
 public:
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {
@@ -17,9 +16,7 @@ public:
                                        }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
-		if (Components::IsActive(actions, ActionType::FLYWHEEL_RUN)) {
-			speed = Components::GetValue(actions, ActionType::FLYWHEEL_RUN);
-		}
+		int speed = Components::GetValue(actions, ActionType::FLYWHEEL_RUN);
 		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-speed);
     }
 };
