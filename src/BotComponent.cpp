@@ -44,6 +44,8 @@ public:
 
 class IndexerComponent : public BotComponent {
 	int target;
+	PID pid = PID(5.0f, 0.0f, 0.5f, 1000, -1000);
+
 public:
 	IndexerComponent() : BotComponent("Indexer component",
 		{
@@ -51,7 +53,17 @@ public:
 		}) {}
 
 	void Execute(std::vector<ComponentAction> &actions) override {
-		Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(Components::GetValue(actions, ActionType::INDEXER_RUN));
+		if (Components::IsActive(actions, ActionType::INDEXER_RUN)) {
+			Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(Components::GetValue(actions, ActionType::INDEXER_RUN));
+			target = Robot::GetMotor(BotMotorID::INDEXER)->GetProsMotor()->get_position();
+
+		}
+		else {
+			int voltage = pid.GetValue(
+				Robot::GetMotor(BotMotorID::INDEXER)->GetPosition(),
+				target);
+			Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(std::clamp(voltage, -127, 127));
+		}
 	}
 };
 

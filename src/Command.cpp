@@ -129,7 +129,8 @@ public:
 		}
 
         bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
-        bool ballLoaded = Robot::GetSensor(SensorID::BUTTON_INDEXER)->GetValue() != 0;
+        bool ballLoaded = Robot::GetSensor(SensorID::INDEXER_BUTTON)->GetValue() < 2300; 
+		printf("E %d\n", Robot::GetSensor(SensorID::INDEXER_BUTTON)->GetValue());
 
         if((Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED)) {
             shooting = true;
@@ -197,7 +198,7 @@ public:
                     Components::Execute(ActionType::INDEXER_RUN, 0);
                 } else {
                     //prepare the next ball (this will run until a ball is in the indexer)
-                    Components::Execute(ActionType::INDEXER_RUN, -25);
+                    Components::Execute(ActionType::INDEXER_RUN, -40);
                 }
             }
         }

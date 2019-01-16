@@ -55,9 +55,9 @@ void Robot::Init() {
     new RealMotor(BotMotorID::DRIVE_RIGHT_FRONT);
     new RealMotor(BotMotorConfig(BotMotorID::FLYWHEEL, false, pros::E_MOTOR_GEARSET_06));
     new RealMotor(BotMotorID::BALL_LIFT);
-    (new RealMotor(BotMotorConfig(BotMotorID::INDEXER, false, pros::E_MOTOR_GEARSET_06)))->GetProsMotor()->set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    new RealMotor(BotMotorConfig(BotMotorID::INDEXER, false, pros::E_MOTOR_GEARSET_06));
 	new RealMotor(BotMotorID::ARM);
-    new SensorButton(SensorID::BUTTON_INDEXER);
+    new AnalogSensor(SensorID::INDEXER_BUTTON);
 }
 
 Sensor *Robot::GetSensor(SensorID id) {

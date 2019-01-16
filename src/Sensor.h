@@ -4,7 +4,7 @@
 #include <vector>
 
 typedef enum {
-    BUTTON_INDEXER = 1
+    INDEXER_BUTTON = 1
 } SensorID;
 
 class Sensor {
@@ -26,4 +26,13 @@ public:
     explicit SensorButton(SensorID id);
 
     std::int32_t GetValue() override;
+};
+
+class AnalogSensor : public Sensor {
+private:
+	pros::ADIAnalogIn sensor;
+public:
+	explicit AnalogSensor(SensorID id);
+
+	std::int32_t GetValue() override;
 };
