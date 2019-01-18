@@ -8,7 +8,7 @@
 #include "PID.h"
 
 class FlywheelComponent : public BotComponent {
-    PID pid = PID(0.5f, 0.0f, 0.5f, 1000, -1000);
+    PID pid = PID(0.5f, 0.1f, 0.5f, 1000, -1000);
 public:
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {

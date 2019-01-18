@@ -119,6 +119,8 @@ public:
     bool shooting = false;
     bool hadBallOnInitialPress = false;
 
+	bool pastFirst = false;
+
     ShootCommand() : Command(Controller::BOTH, {
             Control::C_SHOOT, Control::C_AIM, Control::C_SPEED_SET, Control::C_SLOW
     }) {}
@@ -127,8 +129,8 @@ public:
 		if ((Commands::GetPressType(values, Control::C_SPEED_SET) == PressType::PRESSED)){
 			Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_SPEED_SET));
 		}
-		else if (Commands::GetPressType(values, Control::C_SLOW) == PressType::PRESSED) {
-			Components::Execute(ActionType::FLYWHEEL_RUN, 105);
+		else if (Commands::GetPressType(values, Control::C_SLOW) != PressType::PRESS_NOT_ACTIVE) {
+			Components::Execute(ActionType::FLYWHEEL_RUN, 107);
 		}else {
 			Components::Execute(ActionType::FLYWHEEL_RUN, 127);
 		}
@@ -174,7 +176,7 @@ public:
         } else {
             // if the user has pressed the shoot button and a ball has not been shot yet
             if (shooting) {
-                if(ballLoaded) {
+                if(ballLoaded && !pastFirst) {
                     // if a ball is loaded
                     Components::Execute(ActionType::INDEXER_RUN, -127);
                     // run the indexer until the ball is gone
@@ -182,14 +184,18 @@ public:
                     // there is no ball loaded. this could be because there never was one, or the ball was shot
                     // check if there initially was a ball
                     if(hadBallOnInitialPress) {
-                        // the ball is gone now, so you have shot once
-                        pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
-                        // get that sweet feedback
-                        master.rumble(".");
-                        shooting = false;
-                        // the indexer will now behave as if the shooting button isn't being pressed
-                        // this means it will continuously intake at a slower speed until it is loaded again, then it will stop
-						Commands::Release(Control::C_SHOOT);
+						pastFirst = true;
+						if (!ballPast) {
+							// the ball is gone now, so you have shot once
+							pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
+							// get that sweet feedback
+							master.rumble(".");
+							shooting = false;
+							pastFirst = false;
+							// the indexer will now behave as if the shooting button isn't being pressed
+							// this means it will continuously intake at a slower speed until it is loaded again, then it will stop
+							Commands::Release(Control::C_SHOOT);
+						}
                     } else {
                         // no ball was loaded already, but the user still wants to fire. At this point we're just going to
                         // blindly obey their wishes and run the indexer
@@ -199,20 +205,18 @@ public:
                 }
             }
             if(!shooting) {
-                if(ballLoaded) {
-					if (ballPast) {
-						Components::Execute(ActionType::INDEXER_RUN, 20);
-					}
-					else {
-						// if a ball is loaded, don't let it go anywhere. The motor is set to actively brake when power is set to
-						// 0, so it won't coast into the flywheel
-						Components::Execute(ActionType::INDEXER_RUN, 0);
-					}
+				if (ballPast) {
+					Components::Execute(ActionType::INDEXER_RUN, 40);
+				} else if (ballLoaded) {
+					
+					// if a ball is loaded, don't let it go anywhere. The motor is set to actively brake when power is set to
+					// 0, so it won't coast into the flywheel
+					Components::Execute(ActionType::INDEXER_RUN, 0);
                     
 
                 } else {
                     //prepare the next ball (this will run until a ball is in the indexer)
-                    Components::Execute(ActionType::INDEXER_RUN, -40);
+                    Components::Execute(ActionType::INDEXER_RUN, -70);
                 }
             }
         }
