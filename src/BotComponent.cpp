@@ -128,6 +128,18 @@ public:
                 rightFrontSpeed = -rightFront.GetValue(
                         -rightFrontVal,
                         -latestRightFront + driveTo);
+
+				auto rightDriveSpeed = (Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetVelocity() + Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->GetVelocity()) / 2;
+				auto leftDriveSpeed  = (Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetVelocity()  + Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->GetVelocity())  / 2;
+
+				auto rightVelError = rightDriveSpeed - leftDriveSpeed;
+				auto leftVelError = leftDriveSpeed - rightDriveSpeed;
+
+				leftBackSpeed -= leftVelError;
+				leftFrontSpeed -= leftVelError;
+
+				rightBackSpeed -= rightVelError;
+				rightFrontSpeed -= rightVelError;
 			} else {
 				int rotateTo = Components::GetValue(actions, ActionType::ROTATE_TO);
 				int leftBackError = latestLeftBack + rotateTo - leftBackVal;

@@ -58,6 +58,8 @@ void Robot::Init() {
     new RealMotor(BotMotorConfig(BotMotorID::INDEXER, false, pros::E_MOTOR_GEARSET_06));
 	new RealMotor(BotMotorID::ARM);
     new AnalogSensor(SensorID::INDEXER_BUTTON);
+	new AnalogSensor(SensorID::INDEXER_BUTTON2);
+
 }
 
 Sensor *Robot::GetSensor(SensorID id) {

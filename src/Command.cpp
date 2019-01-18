@@ -135,6 +135,8 @@ public:
 
         bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
         bool ballLoaded = Robot::GetSensor(SensorID::INDEXER_BUTTON)->GetValue() < 2300; 
+		bool ballPast = Robot::GetSensor(SensorID::INDEXER_BUTTON2)->GetValue() < 2350;
+
 		printf("E %d\n", Robot::GetSensor(SensorID::INDEXER_BUTTON)->GetValue());
 
         if((Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED)) {
@@ -198,9 +200,16 @@ public:
             }
             if(!shooting) {
                 if(ballLoaded) {
-                    // if a ball is loaded, don't let it go anywhere. The motor is set to actively brake when power is set to
-                    // 0, so it won't coast into the flywheel
-                    Components::Execute(ActionType::INDEXER_RUN, 0);
+					if (ballPast) {
+						Components::Execute(ActionType::INDEXER_RUN, 20);
+					}
+					else {
+						// if a ball is loaded, don't let it go anywhere. The motor is set to actively brake when power is set to
+						// 0, so it won't coast into the flywheel
+						Components::Execute(ActionType::INDEXER_RUN, 0);
+					}
+                    
+
                 } else {
                     //prepare the next ball (this will run until a ball is in the indexer)
                     Components::Execute(ActionType::INDEXER_RUN, -40);
