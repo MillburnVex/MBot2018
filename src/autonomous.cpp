@@ -132,7 +132,7 @@ void backauton(Team team) {
 	Commands::Release(C_DRIVE_LINEAR_TO, 0);
 	pros::delay(500);
 
-	Commands::Press(C_SPEED_SET, 110);
+	Commands::Press(C_FLYWHEEL_SET, 110);
 
 	Commands::ExecuteUntilFinished(C_DRIVE_LINEAR_TO, -150);//drive back
 	pros::delay(200);
@@ -140,17 +140,17 @@ void backauton(Team team) {
 	Commands::ExecuteUntilFinished(C_DRIVE_ROTATE_TO, teamMultiplier * 320);//turn to shot
 	pros::delay(200);
 
-	Commands::Release(C_SPEED_SET);
+	Commands::Release(C_FLYWHEEL_SET);
 	Commands::ExecuteUntilFinished(C_SHOOT, 0, 1000);
 	pros::delay(100);
 
-	Commands::Press(C_SPEED_SET, 127);
+	Commands::Press(C_FLYWHEEL_SET, 127);
 	pros::delay(1000);
 
 	Commands::ExecuteUntilFinished(C_SHOOT, 0, 1000);//shoot 2
 	pros::delay(200);
 
-	Commands::Release(C_SPEED_SET);
+	Commands::Release(C_FLYWHEEL_SET);
 	Commands::Release(C_BALL_LIFT_UP);
 	pros::delay(100);
 

@@ -8,16 +8,25 @@
 #include "PID.h"
 
 class FlywheelComponent : public BotComponent {
-    PID pid = PID(0.5f, 0.1f, 0.5f, 1000, -1000);
+    PID pid = PID(1.5f, 0.0f, 0.7f, 1000, -1000);
 public:
+
+    int rpm = 600;
+	int voltage = 127;
+
     FlywheelComponent() : BotComponent("Flywheel component",
                                        {
                                                ActionType::FLYWHEEL_RUN
                                        }) {}
 
     void Execute(std::vector<ComponentAction> &actions) override {
-		int speed = Components::GetValue(actions, ActionType::FLYWHEEL_RUN);
-		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-speed);
+        if(Components::IsActive(actions, ActionType::FLYWHEEL_RUN)) {
+            rpm = Components::GetValue(actions, ActionType::FLYWHEEL_RUN);
+        }
+        double actualRpm = Robot::GetMotor(BotMotorID::FLYWHEEL)->GetVelocity();
+        int voltageChange = pid.GetValue(actualRpm, rpm);
+        voltage += voltageChange;
+		Robot::GetMotor(BotMotorID::FLYWHEEL)->SetVoltage(-voltage);
     }
 };
 
@@ -52,8 +61,7 @@ public:
 	void Execute(std::vector<ComponentAction> &actions) override {
 		if (Components::IsActive(actions, ActionType::INDEXER_RUN)) {
 			Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(Components::GetValue(actions, ActionType::INDEXER_RUN));
-			target = Robot::GetMotor(BotMotorID::INDEXER)->GetProsMotor()->get_position();
-
+			target = Robot::GetMotor(BotMotorID::INDEXER)->GetPosition();
 		}
 		else {
 			int voltage = pid.GetValue(
@@ -209,7 +217,6 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
         Robot::GetMotor(BotMotorID::BALL_LIFT)->SetVoltage(Components::GetValue(actions, ActionType::REAPER_RUN));
-
     }
 };
 
