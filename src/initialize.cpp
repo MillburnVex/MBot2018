@@ -1,4 +1,4 @@
-#include "BotComponent.h"
+#include "Component.h"
 #include "Command.h"
 #include "Robot.h"
 #include "../include/main.h"
@@ -62,7 +62,7 @@ void initialize() {
  * the robot is enabled, this task will exit.
  */
 void disabled() {
-	Robot::SetBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 
     // print("javier coindreau")
 }

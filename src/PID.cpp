@@ -14,9 +14,7 @@ int PID::GetValue(int value, int goal) {
     int iVal = I * sum;
     int dVal = D * (value - last);
     last = value;
-    int newval = pVal + iVal - dVal;
-
-    return newval;
+    return pVal + iVal - dVal;
 }
 
 void PID::reset() {

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "Sensor.h"
-#include "BotMotor.h"
+#include "Motor.h"
 
 typedef enum {
 	RED, BLUE
@@ -19,7 +19,7 @@ namespace Robot {
 
 	void SetAutonPosition(Position pos);
 
-	void SetBrakeMode(pros::motor_brake_mode_e_t mode);
+	void SetDriveBrakeMode(pros::motor_brake_mode_e_t mode);
 
 	Team GetTeam();
 
@@ -29,7 +29,7 @@ namespace Robot {
 
     pros::Vision GetCamera();
 
-    BotMotor *GetMotor(BotMotorID id);
+    Motor *GetMotor(MotorID id);
 
     Sensor *GetSensor(SensorID id);
 

@@ -1,6 +1,6 @@
 
 #include "../include/main.h"
-#include "BotComponent.h"
+#include "Component.h"
 #include "Command.h"
 #include "Robot.h"
 
@@ -26,7 +26,7 @@ void Update() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	Robot::SetBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+    Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
     while (!master.is_connected()) {

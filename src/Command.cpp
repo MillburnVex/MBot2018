@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "Command.h"
 #include "Robot.h"
-#include "BotComponent.h"
+#include "Component.h"
 #include "../include/main.h"
 
 std::vector<Command *> Command::allCommands;
@@ -42,7 +42,7 @@ public:
                 linear = (linear > 0 ? 127.0 : -127.0) * pow(std::abs(linear) / 127.0, 11.0 / 7.0);
                 Components::Execute(ActionType::DRIVE_LINEAR, linear);
             } else if (linearTo != CONTROL_NOT_ACTIVE) {
-                Components::Execute(ActionType::DRIVE_TO, linearTo);
+                Components::Execute(ActionType::LINEAR_TO, linearTo);
             } else {
                 Components::Execute(ActionType::DRIVE_LINEAR, 0);
             }
@@ -175,9 +175,9 @@ public:
 
         if (Robot::IsInManualMode()) {
             if ((Commands::GetPressType(values, Control::C_SHOOT) != PressType::PRESS_NOT_ACTIVE)) {
-                Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(-100);
+                Robot::GetMotor(MotorID::INDEXER)->SetVoltage(-100);
             } else {
-                Robot::GetMotor(BotMotorID::INDEXER)->SetVoltage(0);
+                Robot::GetMotor(MotorID::INDEXER)->SetVoltage(0);
             }
         } else {
             // if the user has pressed the shoot button and a ball has not been shot yet
@@ -240,23 +240,6 @@ void Commands::Init() {
 
 Command::Command(Controller type, std::vector<int> controls) : type(type), controls(std::move(controls)) {
     Command::allCommands.push_back(this);
-}
-
-void Commands::ExecuteUntilFinished(Control control, int value) {
-    Commands::ExecuteUntilFinished(control, value, -1);
-}
-
-void Commands::ExecuteUntilFinished(Control control, int value, int millisBeforeCancel) {
-    Commands::Press(control, value);
-    int millisTaken = 0;
-    while (Commands::Contains(Command::executedControls, control)) {
-        pros::delay(Robot::GetUpdateMillis());
-        millisTaken += Robot::GetUpdateMillis();
-        if (millisBeforeCancel >= 0 && millisTaken >= millisBeforeCancel) {
-            Commands::Release(control);
-            return;
-        }
-    }
 }
 
 int Commands::GetValue(std::vector<ControlPress> &vec, int control) {
@@ -469,7 +452,14 @@ void Commands::Press(Control control, int value) {
 }
 
 void Commands::Press(Control control, int value, Controller controller) {
-    Commands::Execute(control, value, controller, PressType::PRESSED);
+    commandMutex.take(1000);
+    ControlPress press = {};
+    press.controller = controller;
+    press.pressType = PressType::PRESSED;
+    press.control = control;
+    press.value = value;
+    Command::executedControls.push_back(press);
+    commandMutex.give();
 }
 
 void Commands::Release(Control control) {
@@ -495,15 +485,21 @@ void Commands::Release(Control control, int value, Controller controller) {
     commandMutex.give();
 }
 
-void Commands::Execute(Control control, int value, Controller controller, PressType pressType) {
-    commandMutex.take(1000);
-    ControlPress press = {};
-    press.controller = controller;
-    press.pressType = pressType;
-    press.control = control;
-    press.value = value;
-    Command::executedControls.push_back(press);
-    commandMutex.give();
+void Commands::Execute(Control control, int value) {
+    Commands::Execute(control, value, -1);
+}
+
+void Commands::Execute(Control control, int value, int millisBeforeCancel) {
+    Commands::Press(control, value);
+    int millisTaken = 0;
+    while (Commands::Contains(Command::executedControls, control)) {
+        pros::delay(Robot::GetUpdateMillis());
+        millisTaken += Robot::GetUpdateMillis();
+        if (millisBeforeCancel >= 0 && millisTaken >= millisBeforeCancel) {
+            Commands::Release(control);
+            return;
+        }
+    }
 }
 
 void Commands::Clear() {

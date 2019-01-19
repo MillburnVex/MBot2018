@@ -33,11 +33,11 @@ void Robot::SetAutonPosition(Position pos) {
 	autonPosition = pos;
 }
 
-void Robot::SetBrakeMode(pros::motor_brake_mode_e_t mode) {
-	Robot::GetMotor(BotMotorID::DRIVE_LEFT_BACK)->GetProsMotor()->set_brake_mode(mode);
-	Robot::GetMotor(BotMotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->set_brake_mode(mode);
-	Robot::GetMotor(BotMotorID::DRIVE_RIGHT_BACK)->GetProsMotor()->set_brake_mode(mode);
-	Robot::GetMotor(BotMotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->set_brake_mode(mode);
+void Robot::SetDriveBrakeMode(pros::motor_brake_mode_e_t mode) {
+	Robot::GetMotor(MotorID::DRIVE_LEFT_BACK)->GetProsMotor()->set_brake_mode(mode);
+	Robot::GetMotor(MotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->set_brake_mode(mode);
+	Robot::GetMotor(MotorID::DRIVE_RIGHT_BACK)->GetProsMotor()->set_brake_mode(mode);
+	Robot::GetMotor(MotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->set_brake_mode(mode);
 }
 
 int Robot::GetState() {
@@ -49,14 +49,14 @@ pros::Vision Robot::GetCamera() {
 }
 
 void Robot::Init() {
-    new RealMotor(BotMotorID::DRIVE_LEFT_BACK);
-    new RealMotor(BotMotorID::DRIVE_LEFT_FRONT);
-    new RealMotor(BotMotorID::DRIVE_RIGHT_BACK);
-    new RealMotor(BotMotorID::DRIVE_RIGHT_FRONT);
-    new RealMotor(BotMotorConfig(BotMotorID::FLYWHEEL, false, pros::E_MOTOR_GEARSET_06));
-    new RealMotor(BotMotorID::BALL_LIFT);
-    new RealMotor(BotMotorConfig(BotMotorID::INDEXER, false, pros::E_MOTOR_GEARSET_06));
-	new RealMotor(BotMotorID::ARM);
+    new Motor(MotorID::DRIVE_LEFT_BACK);
+    new Motor(MotorID::DRIVE_LEFT_FRONT);
+    new Motor(MotorConfig(MotorID::DRIVE_RIGHT_BACK, true, pros::E_MOTOR_GEARSET_18));
+    new Motor(MotorConfig(MotorID::DRIVE_RIGHT_FRONT, true, pros::E_MOTOR_GEARSET_18));
+    new Motor(MotorConfig(MotorID::FLYWHEEL, true, pros::E_MOTOR_GEARSET_06));
+    new Motor(MotorID::BALL_LIFT);
+    new Motor(MotorConfig(MotorID::INDEXER, false, pros::E_MOTOR_GEARSET_06));
+	new Motor(MotorID::ARM);
     new AnalogSensor(SensorID::INDEXER_FIRST);
 	new AnalogSensor(SensorID::INDEXER_SECOND);
 
@@ -72,9 +72,9 @@ Sensor *Robot::GetSensor(SensorID id) {
     throw "Sensor ID not found, it may not have been initialized";
 }
 
-BotMotor *Robot::GetMotor(BotMotorID id) {
+Motor *Robot::GetMotor(MotorID id) {
 
-    for (auto motor : BotMotor::allMotors) {
+    for (auto motor : Motor::allMotors) {
         if (motor->GetConfig().id == id) {
             return motor;
         }

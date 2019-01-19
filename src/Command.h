@@ -115,11 +115,9 @@ namespace Commands {
 
 	void Release(Control control, int value, Controller controller);
 
-    void Execute(Control control, int value, Controller controller, PressType pressType);
+	void Execute(Control control, int value);
 
-	void ExecuteUntilFinished(Control control, int value);
-
-	void ExecuteUntilFinished(Control control, int value, int millisBeforeCancel);
+	void Execute(Control control, int value, int millisBeforeCancel);
 
 	void Clear();
 
