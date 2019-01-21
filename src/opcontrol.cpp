@@ -4,9 +4,6 @@
 #include "Command.h"
 #include "Robot.h"
 
-pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
-
-int timer = 0;
 void Update() {
     Commands::Update();
     Components::Update();
@@ -29,7 +26,7 @@ void opcontrol() {
     Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
-    while (!master.is_connected()) {
+    while (!Robot::GetMasterController().is_connected()) {
         pros::lcd::print(1, "Connect master controller!");
         pros::lcd::print(2, "Press button on left to skip");
         if (pros::lcd::read_buttons() == 4) {

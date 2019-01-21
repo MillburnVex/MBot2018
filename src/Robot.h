@@ -36,4 +36,8 @@ namespace Robot {
 	bool IsInManualMode();
 
     void Init();
+
+    pros::Controller GetMasterController();
+
+	pros::Controller GetPartnerController();
 };

@@ -4,6 +4,9 @@ pros::Vision camera(13, pros::E_VISION_ZERO_CENTER);
 
 int updateMillis = 15;
 
+pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
+pros::Controller partner = pros::Controller(pros::E_CONTROLLER_PARTNER);
+
 Team team = RED;
 Position autonPosition = FRONT;
 
@@ -31,6 +34,14 @@ void Robot::SetTeam(Team t) {
 
 void Robot::SetAutonPosition(Position pos) {
 	autonPosition = pos;
+}
+
+pros::Controller Robot::GetMasterController() {
+    return master;
+}
+
+pros::Controller Robot::GetPartnerController() {
+    return partner;
 }
 
 void Robot::SetDriveBrakeMode(pros::motor_brake_mode_e_t mode) {

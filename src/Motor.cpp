@@ -28,6 +28,10 @@ pros::motor_pid_full_s_t Motor::GetPID() {
     return motor->get_vel_pid();
 }
 
+int Motor::GetVoltage() {
+    return (int) std::floor((motor->get_voltage() / 12000.0) * 127);
+}
+
 double Motor::GetVelocity() {
     return motor->get_actual_velocity();
 }

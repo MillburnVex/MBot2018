@@ -46,6 +46,8 @@ public:
 
     void SetPID(pros::motor_pid_s_t pid);
 
+    int GetVoltage();
+
     double GetPosition();
 
     double GetVelocity();

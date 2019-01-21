@@ -16,8 +16,7 @@ public:
 
     void Execute(std::vector<ControlPress> &values) override {
         if (Commands::GetPressType(values, Control::C_TEST) == PressType::PRESSED) {
-            pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
-            master.rumble("...");
+            Robot::GetMasterController().rumble("...");
         }
     }
 };
@@ -29,7 +28,6 @@ public:
                                Control::C_DRIVE_ROTATE_TO, Control::C_AIM}) {}
 
     void Execute(std::vector<ControlPress> &values) override {
-
         int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
         int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
         int linearTo = Commands::GetValue(values, Control::C_DRIVE_LINEAR_TO);
@@ -118,41 +116,31 @@ public:
             Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW
     }) {}
 
+    bool slowMode = false;
+
     void Execute(std::vector<ControlPress> &values) override {
         if ((Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::PRESSED)) {
             Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_FLYWHEEL_SET));
         } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_SLOW) == PressType::PRESSED) {
-            Components::Execute(ActionType::FLYWHEEL_RUN, 107);
-        } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_SLOW) == PressType::PRESS_NOT_ACTIVE) {
-            Components::Execute(ActionType::FLYWHEEL_RUN, 127);
+            slowMode = !slowMode;
+            Robot::GetMasterController().rumble(".");
+            Robot::GetMasterController().print(0, 1,
+                                               (slowMode) ? std::string("560").c_str() : std::string("600").c_str());
         }
+        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 560 : 600);
     }
 };
 
-class ShootCommand : public Command {
+class VisionCommand : public Command {
 public:
     const int NUM_VISION_OBJECTS = 4;
 
-    bool shooting = false;
-    bool hadBallOnInitialPress = false;
-
-    bool pastFirst = false;
-
-    ShootCommand() : Command(Controller::BOTH, {
-            Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW
+    VisionCommand() : Command(Controller::BOTH, {
+            Control::C_AIM
     }) {}
 
     void Execute(std::vector<ControlPress> &values) override {
         bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
-        bool ballLoaded = Robot::GetSensor(SensorID::INDEXER_FIRST)->GetValue() < 2300;
-        bool ballPast = Robot::GetSensor(SensorID::INDEXER_SECOND)->GetValue() < 2350;
-
-        if ((Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED)) {
-            shooting = true;
-            hadBallOnInitialPress = ballLoaded;
-        } else if ((Commands::GetPressType(values, Control::C_SHOOT) == PressType::RELEASED)) {
-            shooting = false;
-        }
 
         pros::vision_object_s_t objects[NUM_VISION_OBJECTS];
         int team = Robot::GetTeam() == RED ? 1 : 0;
@@ -172,6 +160,45 @@ public:
         if (aim && id != -1) {
             Components::Execute(ActionType::DRIVE_ROTATE, objects[id].x_middle_coord);
         }
+    }
+};
+
+class ShootCommand : public Command {
+public:
+
+    bool shooting = false;
+    // used to determine if the ball has been actually shot
+    bool ballGoneThroughSecondZoneWhileShooting = false;
+
+    int ticksHeldDown = 0;
+
+    const int GUARANTEED_SHOOT_TICKS = 100;
+
+    ShootCommand() : Command(Controller::BOTH, {
+            Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW
+    }) {}
+
+    void Execute(std::vector<ControlPress> &values) override {
+
+        bool firstZone = Robot::GetSensor(SensorID::INDEXER_FIRST)->GetValue() < 2300;
+        bool secondZone = Robot::GetSensor(SensorID::INDEXER_SECOND)->GetValue() < 2350;
+
+        if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED) {
+            shooting = true;
+            ticksHeldDown = 0;
+        } else if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::REPEATED) {
+            ticksHeldDown++;
+        } else if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESS_NOT_ACTIVE) {
+            if(ticksHeldDown > GUARANTEED_SHOOT_TICKS) {
+                shooting = false;
+                ticksHeldDown = 0;
+            } else {
+                ticksHeldDown++;
+            }
+        }
+        if(shooting && secondZone) {
+             ballGoneThroughSecondZoneWhileShooting = true;
+        }
 
         if (Robot::IsInManualMode()) {
             if ((Commands::GetPressType(values, Control::C_SHOOT) != PressType::PRESS_NOT_ACTIVE)) {
@@ -180,49 +207,32 @@ public:
                 Robot::GetMotor(MotorID::INDEXER)->SetVoltage(0);
             }
         } else {
-            // if the user has pressed the shoot button and a ball has not been shot yet
-            if (shooting) {
-                if (ballLoaded && !pastFirst) {
-                    // if a ball is loaded
-                    Components::Execute(ActionType::INDEXER_RUN, -127);
-                    // run the indexer until the ball is gone
-                } else {
-                    // there is no ball loaded. this could be because there never was one, or the ball was shot
-                    // check if there initially was a ball
-                    if (hadBallOnInitialPress) {
-                        pastFirst = true;
-                        if (!ballPast) {
-                            // the ball is gone now, so you have shot once
-                            pros::Controller master = pros::Controller(pros::controller_id_e_t::E_CONTROLLER_MASTER);
-                            // get that sweet feedback
-                            master.rumble(".");
-                            shooting = false;
-                            pastFirst = false;
-                            // the indexer will now behave as if the shooting button isn't being pressed
-                            // this means it will continuously intake at a slower speed until it is loaded again, then it will stop
-                            Commands::Release(Control::C_SHOOT);
-                        }
-                    } else {
-                        // no ball was loaded already, but the user still wants to fire. At this point we're just going to
-                        // blindly obey their wishes and run the indexer
-                        Components::Execute(ActionType::INDEXER_RUN, -127);
-                        // this will happen until a ball is loaded and fired, or they release the shooting button
-                    }
-                }
-            }
-            if (!shooting) {
-                if (ballPast) {
-                    Components::Execute(ActionType::INDEXER_RUN, 40);
-                } else if (ballLoaded) {
-
-                    // if a ball is loaded, don't let it go anywhere. The motor is set to actively brake when power is set to
-                    // 0, so it won't coast into the flywheel
+            if(shooting) {
+                if(!secondZone && ballGoneThroughSecondZoneWhileShooting) {
+                    // the ball has totally passed the second zone, meaning it has been shot
+                    shooting = false;
+                    ballGoneThroughSecondZoneWhileShooting = false;
+                    ticksHeldDown = 0;
+                    Commands::Release(C_SHOOT);
+                    Robot::GetMasterController().rumble(".");
                     Components::Execute(ActionType::INDEXER_RUN, 0);
-
-
                 } else {
-                    //prepare the next ball (this will run until a ball is in the indexer)
-                    Components::Execute(ActionType::INDEXER_RUN, -70);
+                    // in the process of firing
+                    Components::Execute(ActionType::INDEXER_RUN, -127);
+                }
+            } else {
+                // if there is no ball
+                if(!firstZone && !secondZone) {
+                    // preload
+                    Components::Execute(ActionType::INDEXER_RUN, -80);
+                } else {
+                    // ball is too far in
+                    if(secondZone) {
+                        Components::Execute(ActionType::INDEXER_RUN, 40);
+                    } else {
+                        // just right
+                        Components::Execute(ActionType::INDEXER_RUN, 0);
+                    }
                 }
             }
         }
@@ -234,6 +244,8 @@ void Commands::Init() {
     new DriveCommands();
     new ReaperCommands();
     new ShootCommand();
+    new FlywheelCommand();
+    new VisionCommand();
     new ArmCommands();
     new TestCommand();
 }
@@ -409,7 +421,6 @@ void Commands::Update() {
     for (int i = 0; i < Command::executedControls.size();) {
         ControlPress executedControl = Command::executedControls.at(i);
         controlPresses.push_back(executedControl);
-        //printf("COLOR_HONEYDEW %d\n", executedControl.pressType);
         if (executedControl.pressType == PressType::PRESSED) {
             executedControl.pressType = PressType::REPEATED;
             Command::executedControls.at(i) = executedControl;
