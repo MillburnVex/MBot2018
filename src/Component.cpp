@@ -80,7 +80,7 @@ class DriveComponent : public BotComponent {
 
     const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
 
-    const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 5;
+    const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 1;
 
     PID linearRotationCorrection = PID(0.07f, 0.0f, 0.0f, 1000, -1000);
 
@@ -186,7 +186,7 @@ public:
         double clampedGoalAcceleration = std::clamp(goalAcceleration, -MAX_ACCELERATION, MAX_ACCELERATION);
 
         double smoothedGoalVoltage = currentVoltage + clampedGoalAcceleration;
-        return smoothedGoalVoltage;
+        return std::clamp(smoothedGoalVoltage, 127.0, -127.0);
     }
 
     bool NotMoving() {
