@@ -7,7 +7,7 @@ class PID {
 public:
     PID(float nP, float nI, float nD, float nIMAX, float nIMIN);
 
-    int GetValue(int value, int goal);
+    double GetValue(double value, double goal);
 
 	void reset();
 

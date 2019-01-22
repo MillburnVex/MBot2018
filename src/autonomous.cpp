@@ -40,10 +40,10 @@ void FrontAuton(Team team) {
 	}
 
 	pros::delay(30);
-	Commands::Press(C_BALL_LIFT_UP);
-	Commands::Execute(C_DRIVE_LINEAR_TO, 1250);
+	//Commands::Press(C_BALL_LIFT_UP);
+	Commands::Execute(C_DRIVE_LINEAR_TO, 3000);
 	pros::delay(400);
-
+	return;
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 	pros::delay(400);
 

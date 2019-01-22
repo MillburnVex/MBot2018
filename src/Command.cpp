@@ -120,14 +120,16 @@ public:
 
     void Execute(std::vector<ControlPress> &values) override {
         if ((Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::PRESSED)) {
+			printf("setting flywheel speed\n");
             Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_FLYWHEEL_SET));
         } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_SLOW) == PressType::PRESSED) {
+			printf("slowing flywheel speed\n");
             slowMode = !slowMode;
             Robot::GetMasterController().rumble(".");
             Robot::GetMasterController().print(0, 1,
-                                               (slowMode) ? std::string("560").c_str() : std::string("600").c_str());
+                                               (slowMode) ? std::string("547").c_str() : std::string("600").c_str());
         }
-        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 560 : 600);
+        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 547 : 600);
     }
 };
 
@@ -170,7 +172,7 @@ public:
     // used to determine if the ball has been actually shot
     bool ballGoneThroughSecondZoneWhileShooting = false;
 
-    int ticksHeldDown = 0;
+    int ticksHeldDown = -1;
 
     const int GUARANTEED_SHOOT_TICKS = 100;
 
@@ -189,12 +191,15 @@ public:
         } else if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::REPEATED) {
             ticksHeldDown++;
         } else if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESS_NOT_ACTIVE) {
-            if(ticksHeldDown > GUARANTEED_SHOOT_TICKS) {
-                shooting = false;
-                ticksHeldDown = 0;
-            } else {
-                ticksHeldDown++;
-            }
+			if (ticksHeldDown != -1) {
+				if (ticksHeldDown > GUARANTEED_SHOOT_TICKS) {
+					shooting = false;
+					ticksHeldDown = 0;
+				}
+				else {
+					ticksHeldDown++;
+				}
+			}
         }
         if(shooting && secondZone) {
              ballGoneThroughSecondZoneWhileShooting = true;
