@@ -67,7 +67,7 @@ public:
 
 class DriveComponent : public BotComponent {
 
-    const double MAX_ACCELERATION = 10;
+    const double MAX_ACCELERATION = 7;
 
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
@@ -220,18 +220,31 @@ public:
         }
 
         double rightVoltage = (GetGoalVoltage(DRIVE_RIGHT_FRONT, goalPositionRelative) + GetGoalVoltage(DRIVE_RIGHT_BACK, goalPositionRelative)) / 2;
+        // -127
         double leftVoltage = (GetGoalVoltage(DRIVE_LEFT_FRONT, goalPositionRelative) + GetGoalVoltage(DRIVE_LEFT_BACK, goalPositionRelative)) / 2;
-
+        // -127
 
         double rightRpm = (GetRPM(DRIVE_RIGHT_FRONT) + GetRPM(DRIVE_RIGHT_BACK)) / 2;
+        // -200
         double leftRpm = (GetRPM(DRIVE_LEFT_FRONT) + GetRPM(DRIVE_LEFT_BACK)) / 2;
+        // -170
 
         double rpmDifference = rightRpm - leftRpm;
+        // -30
         double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
+        // positive value
 		printf("voltage r: %f, l: %f, rpm r: %f, l: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, voltageChange);
 
-        rightVoltage += voltageChange / 2;
-        leftVoltage -= voltageChange / 2;
+		if(std::abs(rightVoltage + voltageChange / 2) < 127) {
+		    if(std::abs(leftVoltage - voltageChange / 2) < 127) {
+                rightVoltage += voltageChange / 2;
+                leftVoltage -= voltageChange / 2;
+		    } else {
+                rightVoltage += voltageChange;
+		    }
+        } else {
+            leftVoltage -= voltageChange;
+		}
 
         Drive(rightVoltage, leftVoltage);
     }
@@ -260,8 +273,16 @@ public:
         // if negative, right is going faster than it should be (more negative). else, left is too fast
         double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
         // returns positive if right is too fast
-        rightVoltage -= voltageChange / 2;
-        leftVoltage -= voltageChange / 2;
+        if(std::abs(rightVoltage - voltageChange / 2) < 127) {
+            if(std::abs(leftVoltage - voltageChange / 2) < 127) {
+                rightVoltage -= voltageChange / 2;
+                leftVoltage -= voltageChange / 2;
+            } else {
+                rightVoltage -= voltageChange;
+            }
+        } else {
+            leftVoltage -= voltageChange;
+        }
 
         Drive(rightVoltage, leftVoltage);
     }
