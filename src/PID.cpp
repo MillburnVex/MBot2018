@@ -17,7 +17,7 @@ double PID::GetValue(double value, double goal) {
     return pVal + iVal - dVal;
 }
 
-void PID::reset() {
+void PID::Reset() {
 	sum = 0;
 	last = 0;
 }

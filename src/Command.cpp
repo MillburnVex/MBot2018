@@ -125,9 +125,9 @@ public:
             slowMode = !slowMode;
             Robot::GetMasterController().rumble(".");
             Robot::GetMasterController().print(0, 1,
-                                               (slowMode) ? std::string("543").c_str() : std::string("600").c_str());
+                                               (slowMode) ? std::string("532").c_str() : std::string("600").c_str());
         }
-        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 543 : 600);
+        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 532 : 600);
     }
 };
 

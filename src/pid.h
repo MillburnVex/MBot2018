@@ -9,7 +9,7 @@ public:
 
     double GetValue(double value, double goal);
 
-	void reset();
+	void Reset();
 
 };
 

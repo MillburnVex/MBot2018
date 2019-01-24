@@ -24,7 +24,7 @@ void Update() {
  */
 void opcontrol() {
     Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-
+	Commands::Clear();
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
     while (!Robot::GetMasterController().is_connected()) {
         pros::lcd::print(1, "Connect master controller!");

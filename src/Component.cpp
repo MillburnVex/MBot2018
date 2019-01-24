@@ -67,15 +67,17 @@ public:
 
 class DriveComponent : public BotComponent {
 
-    const double MAX_ACCELERATION = 30;
+    const double MAX_ACCELERATION = 5;
 
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
-    const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
+    const double ROTATE_TOTAL_ERROR_THRESHOLD = 20;
 
     const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 1;
-
-    PID linearRotationCorrection = PID(0.3f, 0.2f, 0.1f, 1000, -1000);
+	//1210.800000 1300.800000 1244.800000 1248.800000
+	//1213.200000 1298.400000 1240.000000 1245.200000
+	//1214.400000 1303.600000 1239.600000 1251.200000
+    PID linearRotationCorrection = PID(0.4f, 0.1f, 0.12f, 1000, -1000);
 
     std::array<std::pair<MotorID, double> *, 4> initialPositions{
             new std::pair<MotorID, double>(DRIVE_RIGHT_FRONT, 0),
@@ -96,10 +98,10 @@ class DriveComponent : public BotComponent {
             new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
     };
     std::array<std::pair<MotorID, PID> *, 4> pids{
-            new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.4f, 0.0f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.4f, 0.0f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.4f, 0.0f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.4f, 0.0f, 0.0f, 1000, -1000))
+            new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.3f, 0.01f, 0.0f, 1000, -1000)),
+            new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.3f, 0.01f, 0.0f, 1000, -1000)),
+            new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.3f, 0.01f, 0.0f, 1000, -1000)),
+            new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.3f, 0.01f, 0.0f, 1000, -1000))
     };
 public:
     DriveComponent() : BotComponent("Drive component",
@@ -136,14 +138,18 @@ public:
         }
     }
 
-    PID GetPID(MotorID id) {
+    PID* GetPID(MotorID id) {
         for (auto motorAndValue : pids) {
             if (motorAndValue->first == id) {
-                return motorAndValue->second;
+                return &motorAndValue->second;
             }
         }
         throw "PID does not exist";
     }
+
+	double GetRelativePosition(MotorID id) {
+		return Robot::GetMotor(id)->GetPosition() - GetValue(initialPositions, id);
+	}
 
     void UpdatePositions() {
 		SetValue(currentPositions, DRIVE_RIGHT_FRONT, Robot::GetMotor(DRIVE_RIGHT_FRONT)->GetPosition());
@@ -152,11 +158,18 @@ public:
 		SetValue(currentPositions, DRIVE_LEFT_BACK, Robot::GetMotor(DRIVE_LEFT_BACK)->GetPosition());
     }
 
-	void UpdateGoalVoltages(double leftVoltage, double rightVoltage) {
+	void UpdateGoalVoltages(double rightVoltage, double leftVoltage) {
 		SetValue(goalVoltages, DRIVE_RIGHT_FRONT, rightVoltage);
 		SetValue(goalVoltages, DRIVE_RIGHT_BACK, rightVoltage);
 		SetValue(goalVoltages, DRIVE_LEFT_FRONT, leftVoltage);
 		SetValue(goalVoltages, DRIVE_LEFT_BACK, leftVoltage);
+	}
+
+	void ResetPIDS() {
+		GetPID(DRIVE_RIGHT_FRONT)->Reset();
+		GetPID(DRIVE_RIGHT_BACK)->Reset();
+		GetPID(DRIVE_LEFT_FRONT)->Reset();
+		GetPID(DRIVE_LEFT_BACK)->Reset();
 	}
 
     /**
@@ -181,7 +194,7 @@ public:
     double GetGoalVoltage(MotorID id, int relativeGoalPosition) {
 		double currentPosition = Robot::GetMotor(id)->GetPosition();
 
-        double pidValue = GetPID(id).GetValue(currentPosition, relativeGoalPosition + GetValue(initialPositions, id));
+        double pidValue = GetPID(id)->GetValue(currentPosition, relativeGoalPosition + GetValue(initialPositions, id));
         double currentVoltage = GetGoalVoltage(id);
         double unsmoothedGoalVoltage = std::clamp(pidValue, -127.0, 127.0);
 
@@ -189,7 +202,7 @@ public:
         double clampedGoalAcceleration = std::clamp(goalAcceleration, -MAX_ACCELERATION, MAX_ACCELERATION);
 
         double smoothedGoalVoltage = currentVoltage + clampedGoalAcceleration;
-		printf("current pos: %f, goal pos: %f, pid value: %f\n", currentPosition, relativeGoalPosition, pidValue);
+		printf("current pos: %f, goal pos: %f, pid value: %f, current volt: %f, unsmoothed goal volt: %f smoothed: %f\n", currentPosition, relativeGoalPosition, pidValue, currentVoltage, unsmoothedGoalVoltage, std::clamp(smoothedGoalVoltage, -127.0, 127.0));
         return std::clamp(smoothedGoalVoltage, -127.0, 127.0);
     }
 
@@ -208,15 +221,11 @@ public:
     }
 
     bool WithinThreshold(int rightGoalPositionRelative, int leftGoalPositionRelative, double threshold) {
-        double rightFrontError = std::abs((GetValue(initialPositions, DRIVE_RIGHT_FRONT) + rightGoalPositionRelative) -
-                                          (GetValue(currentPositions, DRIVE_RIGHT_FRONT)));
-        double rightBackError = std::abs((GetValue(initialPositions, DRIVE_RIGHT_BACK) + rightGoalPositionRelative) -
-                                         (GetValue(currentPositions, DRIVE_RIGHT_BACK)));
-        double leftFrontError = std::abs((GetValue(initialPositions, DRIVE_LEFT_FRONT) + leftGoalPositionRelative) -
-                                         (GetValue(currentPositions, DRIVE_LEFT_FRONT)));
-        double leftBackError = std::abs((GetValue(initialPositions, DRIVE_LEFT_BACK) + leftGoalPositionRelative) -
-                                        (GetValue(currentPositions, DRIVE_LEFT_BACK)));
-        return (rightFrontError + rightBackError + leftFrontError + leftBackError) / 4 < threshold;
+        double rightError = std::abs(rightGoalPositionRelative -
+                                          (GetRelativePosition(DRIVE_RIGHT_FRONT) + GetRelativePosition(DRIVE_RIGHT_BACK)) / 2);
+        double leftError = std::abs(leftGoalPositionRelative -
+                                         (GetRelativePosition(DRIVE_LEFT_FRONT) + GetRelativePosition(DRIVE_LEFT_BACK)) / 2);
+        return (rightError + leftError) / 2 < threshold;
     }
 
     void LinearTo(int goalPositionRelative) {
@@ -225,9 +234,13 @@ public:
 
         if (WithinThreshold(goalPositionRelative, goalPositionRelative, LINEAR_TOTAL_ERROR_THRESHOLD)) {
             Drive(0, 0);
+			printf("trying to stop\n");
             if (NotMoving()) {
+				printf("stopped\n");
+				printf("%f %f %f %f\n", GetRelativePosition(DRIVE_RIGHT_FRONT), GetRelativePosition(DRIVE_RIGHT_BACK), GetRelativePosition(DRIVE_LEFT_FRONT), GetRelativePosition(DRIVE_LEFT_BACK));
                 Commands::Release(C_DRIVE_LINEAR_TO);
                 UpdateInitialPositions();
+				ResetPIDS();
             }
             return;
         }
@@ -258,8 +271,8 @@ public:
             leftVoltage -= voltageChange;
 		}
 
-		//printf("voltage r: %f, l: %f, rpm r: %f, l: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, voltageChange);
-
+		
+		
 		UpdateGoalVoltages(rightVoltage, leftVoltage);
 
         Drive(rightVoltage, leftVoltage);
@@ -268,12 +281,16 @@ public:
     void RotateTo(int goalPositionRelative) {
 
         UpdatePositions();
+		printf("right voltage is %f\n", GetValue(goalVoltages, DRIVE_RIGHT_FRONT));
 
         if (WithinThreshold(-goalPositionRelative, goalPositionRelative, ROTATE_TOTAL_ERROR_THRESHOLD)) {
             Drive(0, 0);
+			printf("stopping\n");
             if (NotMoving()) {
+				printf("stopped\n");
                 Commands::Release(C_DRIVE_ROTATE_TO);
                 UpdateInitialPositions();
+				ResetPIDS();
             }
             return;
         }
@@ -286,20 +303,26 @@ public:
 
         // right should be opposite
         double rpmDifference = rightRpm + leftRpm;
-        // if negative, right is going faster than it should be (more negative). else, left is too fast
+        // 
         double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
+		printf("voltage r: %f, l: %f, rpm r: %f, l: %f, diff: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, rpmDifference, voltageChange);
         // returns positive if right is too fast
-        if(std::abs(rightVoltage - voltageChange / 2) < 127) {
-            if(std::abs(leftVoltage - voltageChange / 2) < 127) {
-                rightVoltage -= voltageChange / 2;
-                leftVoltage -= voltageChange / 2;
-            } else {
-                rightVoltage -= voltageChange;
-            }
-        } else {
-            leftVoltage -= voltageChange;
-        }
 
+		if (std::abs(rightVoltage + voltageChange / 2) < 127) {
+			if (std::abs(leftVoltage + voltageChange / 2) < 127) {
+				rightVoltage += voltageChange / 2;
+				leftVoltage += voltageChange / 2;
+			}
+			else {
+				rightVoltage += voltageChange;
+			}
+		}
+		else {
+			leftVoltage += voltageChange;
+		}
+
+
+		printf("updating goal voltage of right to %f\n", rightVoltage);
 		UpdateGoalVoltages(rightVoltage, leftVoltage);
 
         Drive(rightVoltage, leftVoltage);

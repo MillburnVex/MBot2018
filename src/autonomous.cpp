@@ -29,34 +29,32 @@ void FrontAuton(Team team) {
 	}
 
 	pros::delay(30);
-	//Commands::Press(C_BALL_LIFT_UP);
+	Commands::Press(C_BALL_LIFT_UP);
 	Commands::Execute(C_DRIVE_LINEAR_TO, 1250);
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (335), 800);//turn to shot
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (370));//turn to shot
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 100, 800);
+	Commands::Execute(C_DRIVE_LINEAR_TO, 100);
 
-	Commands::Execute(C_SHOOT, 0, 300); //shot 1
+	Commands::Execute(C_SHOOT, 0, 350); //shot 1
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 670);//2nd shot
+	Commands::Execute(C_DRIVE_LINEAR_TO, 600);//2nd shot
 
-	Commands::Execute(C_SHOOT, 0, 300); //shot 2
+	Commands::Execute(C_SHOOT, 0, 350); //shot 2
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (68));//1st bottom flag turn
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 80);//1st bottom flag turn
 
-	Commands::Press(C_DRIVE_LINEAR_TO, 1000);//push in
+	Commands::Execute(C_DRIVE_LINEAR_TO, 500, 1000);//push in
 
-	Commands::Release(C_DRIVE_LINEAR_TO);
-
-	Commands::Execute(C_DRIVE_LINEAR_TO, -100); // back out a little bit
+	Commands::Execute(C_DRIVE_LINEAR_TO, -30, 800); // back out a little bit
 
     Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 30, 500); // rotate before fully backing out
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * -80, 500); // rotate before fully backing out
 
-	if(Robot::BallLoaded()) {
+	if(false) {
 	    // there is a ball that was recollected
 
 		Commands::Execute(C_DRIVE_LINEAR_TO, -1000); // back out halfway
@@ -83,15 +81,11 @@ void FrontAuton(Team team) {
 	} else {
 		// no ball was loaded
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, -1950); //back out to
+		Commands::Execute(C_DRIVE_LINEAR_TO, -1400, 2500); //back out to platform
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -370 * teamMultiplier, 800); // rotate to platform
+		Commands::Execute(C_DRIVE_ROTATE_TO, -360 * teamMultiplier, 800); // rotate to platform
 
-		Commands::Press(C_DRIVE_LINEAR, -127);//push in
-		pros::delay(600);
-		Commands::Release(C_DRIVE_LINEAR);
-
-		Commands::Execute(C_DRIVE_LINEAR_TO, 1800); // drive onto platform
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1200); // drive onto platform
 	}
 }
 
@@ -263,6 +257,7 @@ void autonomous() {
 	} else if(Robot::GetAutonPosition() == BACK) {
 	    BackAuton(Robot::GetTeam());
 	}
+	pros::delay(100);
     Commands::Clear();
     running = false;
 	

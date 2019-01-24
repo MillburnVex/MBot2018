@@ -63,7 +63,7 @@ void initialize() {
  */
 void disabled() {
 	Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-
+	Commands::Clear();
     // print("javier coindreau")
 }
 
