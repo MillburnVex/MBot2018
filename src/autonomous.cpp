@@ -19,10 +19,6 @@
 
 bool running = true;
 
-
-
-
-
 void FrontAuton(Team team) {
 	int teamMultiplier = 1;
 	if (team == BLUE) {
@@ -35,55 +31,68 @@ void FrontAuton(Team team) {
 	pros::delay(30);
 	//Commands::Press(C_BALL_LIFT_UP);
 	Commands::Execute(C_DRIVE_LINEAR_TO, 1250);
-	pros::delay(400);
+
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
-	pros::delay(400);
 
 	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (335), 800);//turn to shot
-	pros::delay(400);
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, 100, 800);
-	pros::delay(100);
 
-	Commands::Execute(C_SHOOT, 0, 275); //shot 1
-	pros::delay(500);
-	//                                  
+	Commands::Execute(C_SHOOT, 0, 300); //shot 1
+
 	Commands::Execute(C_DRIVE_LINEAR_TO, 670);//2nd shot
-	pros::delay(100);
 
-	Commands::Execute(C_SHOOT, 0, 1500); //shot 2
-	pros::delay(100);
+	Commands::Execute(C_SHOOT, 0, 300); //shot 2
 
 	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (68));//1st bottom flag turn
-	pros::delay(100);
 
 	Commands::Press(C_DRIVE_LINEAR_TO, 1000);//push in
-	pros::delay(1000);
+
 	Commands::Release(C_DRIVE_LINEAR_TO);
-	pros::delay(100);
 
-	Commands::Release(C_BALL_LIFT_UP);
-	pros::delay(100);
+	Commands::Execute(C_DRIVE_LINEAR_TO, -100); // back out a little bit
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, -100);
-	pros::delay(100);
+    Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 30, 500);
-	pros::delay(100);
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 30, 500); // rotate before fully backing out
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, -1950);//back out to cap
-	pros::delay(100);
+	if(Robot::BallLoaded()) {
+	    // there is a ball that was recollected
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, -370 * teamMultiplier, 800); // rotate to platform
-	pros::delay(100);
+		Commands::Execute(C_DRIVE_LINEAR_TO, -1000); // back out halfway
 
-	Commands::Press(C_DRIVE_LINEAR, -127);//push in
-	pros::delay(600);
-	Commands::Release(C_DRIVE_LINEAR);
-	pros::delay(100);
+		Commands::Press(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 1800); // drive onto platform
-	pros::delay(100);
+		Commands::Execute(C_DRIVE_ROTATE_TO, -180 * teamMultiplier); // turn to flag
+
+	    Commands::Execute(C_DRIVE_LINEAR_TO, 250); // move forward to flag
+
+	    Commands::Execute(C_SHOOT, 0, 300); // hit top flag
+
+	    if(Robot::BallLoaded()) {
+			Commands::Execute(C_DRIVE_LINEAR_TO, 670); // move forward to bottom flag
+
+			Commands::Execute(C_SHOOT, 0, 300); // hit bottom flag
+
+			Commands::Execute(C_DRIVE_LINEAR_TO, 500); // push in bottom flag
+	    } else {
+			Commands::Execute(C_DRIVE_ROTATE_TO, -120 * teamMultiplier); // turn to cap
+
+			// continue to flip cap, maybe park instead?
+	    }
+	} else {
+		// no ball was loaded
+
+		Commands::Execute(C_DRIVE_LINEAR_TO, -1950); //back out to
+
+		Commands::Execute(C_DRIVE_ROTATE_TO, -370 * teamMultiplier, 800); // rotate to platform
+
+		Commands::Press(C_DRIVE_LINEAR, -127);//push in
+		pros::delay(600);
+		Commands::Release(C_DRIVE_LINEAR);
+
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1800); // drive onto platform
+	}
 }
 
 void BackAuton(Team team) {
@@ -235,22 +244,26 @@ void skillsauton() {
 
 }
 
-void AutonomousRun(void* params) {
-	FrontAuton(RED);
-	Commands::Clear();
-	running = false;
+void AutonomousUpdate(void *params) {
+    uint32_t time = pros::millis();
+    while (running) {
+        Commands::Update();
+        Components::Update();
+        pros::Task::delay_until(&time, Robot::GetUpdateMillis());
+    }
 }
 
 void autonomous() {
 	Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
-	pros::Task updateTask(AutonomousRun, (void*) "i'd dab to that",
+	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
 		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
-	
-	uint32_t time = pros::millis();
-	while (running) {
-		Commands::Update();
-		Components::Update();
-		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
+
+	if(Robot::GetAutonPosition() == FRONT) {
+	    FrontAuton(Robot::GetTeam());
+	} else if(Robot::GetAutonPosition() == BACK) {
+	    BackAuton(Robot::GetTeam());
 	}
+    Commands::Clear();
+    running = false;
 	
 }

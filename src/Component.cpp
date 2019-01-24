@@ -69,13 +69,13 @@ class DriveComponent : public BotComponent {
 
     const double MAX_ACCELERATION = 30;
 
-    const double LINEAR_TOTAL_ERROR_THRESHOLD = 50;
+    const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
     const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
 
     const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 1;
 
-    PID linearRotationCorrection = PID(0.4f, 0.2f, 0.1f, 1000, -1000);
+    PID linearRotationCorrection = PID(0.3f, 0.2f, 0.1f, 1000, -1000);
 
     std::array<std::pair<MotorID, double> *, 4> initialPositions{
             new std::pair<MotorID, double>(DRIVE_RIGHT_FRONT, 0),
@@ -96,10 +96,10 @@ class DriveComponent : public BotComponent {
             new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
     };
     std::array<std::pair<MotorID, PID> *, 4> pids{
-            new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.2f, 0.0f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.2f, 0.0f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.2f, 0.0f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.2f, 0.0f, 0.0f, 1000, -1000))
+            new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.4f, 0.0f, 0.0f, 1000, -1000)),
+            new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.4f, 0.0f, 0.0f, 1000, -1000)),
+            new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.4f, 0.0f, 0.0f, 1000, -1000)),
+            new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.4f, 0.0f, 0.0f, 1000, -1000))
     };
 public:
     DriveComponent() : BotComponent("Drive component",
@@ -246,7 +246,6 @@ public:
         // -30
         double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
         // positive value
-		
 
 		if(std::abs(rightVoltage + voltageChange / 2) < 127) {
 		    if(std::abs(leftVoltage - voltageChange / 2) < 127) {

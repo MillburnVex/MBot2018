@@ -120,16 +120,14 @@ public:
 
     void Execute(std::vector<ControlPress> &values) override {
         if ((Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::PRESSED)) {
-			printf("setting flywheel speed\n");
             Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_FLYWHEEL_SET));
         } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_SLOW) == PressType::PRESSED) {
-			printf("slowing flywheel speed\n");
             slowMode = !slowMode;
             Robot::GetMasterController().rumble(".");
             Robot::GetMasterController().print(0, 1,
-                                               (slowMode) ? std::string("547").c_str() : std::string("600").c_str());
+                                               (slowMode) ? std::string("543").c_str() : std::string("600").c_str());
         }
-        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 547 : 600);
+        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 543 : 600);
     }
 };
 
@@ -182,8 +180,8 @@ public:
 
     void Execute(std::vector<ControlPress> &values) override {
 
-        bool firstZone = Robot::GetSensor(SensorID::INDEXER_FIRST)->GetValue() < 2300;
-        bool secondZone = Robot::GetSensor(SensorID::INDEXER_SECOND)->GetValue() < 2350;
+        bool firstZone = Robot::BallInFirstZone();
+        bool secondZone = Robot::BallInSecondZone();
 
         if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED) {
             shooting = true;
@@ -217,7 +215,7 @@ public:
                     // the ball has totally passed the second zone, meaning it has been shot
                     shooting = false;
                     ballGoneThroughSecondZoneWhileShooting = false;
-                    ticksHeldDown = 0;
+                    ticksHeldDown = -1;
                     Commands::Release(C_SHOOT);
                     Robot::GetMasterController().rumble(".");
                     Components::Execute(ActionType::INDEXER_RUN, 0);

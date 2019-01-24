@@ -59,6 +59,18 @@ pros::Vision Robot::GetCamera() {
 	return camera;
 }
 
+bool Robot::BallInSecondZone() {
+    return GetSensor(SensorID::INDEXER_SECOND)->GetValue() < 2350;
+}
+
+bool Robot::BallInFirstZone() {
+    return GetSensor(SensorID::INDEXER_FIRST)->GetValue() < 2300;
+}
+
+bool Robot::BallLoaded() {
+    return BallInSecondZone() || BallInFirstZone();
+}
+
 void Robot::Init() {
     new Motor(MotorID::DRIVE_LEFT_BACK);
     new Motor(MotorID::DRIVE_LEFT_FRONT);

@@ -33,6 +33,12 @@ namespace Robot {
 
     Sensor *GetSensor(SensorID id);
 
+    bool BallInFirstZone();
+
+    bool BallInSecondZone();
+
+    bool BallLoaded();
+
 	bool IsInManualMode();
 
     void Init();
