@@ -67,15 +67,15 @@ public:
 
 class DriveComponent : public BotComponent {
 
-    const double MAX_ACCELERATION = 7;
+    const double MAX_ACCELERATION = 30;
 
-    const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
+    const double LINEAR_TOTAL_ERROR_THRESHOLD = 50;
 
     const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
 
     const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 1;
 
-    PID linearRotationCorrection = PID(0.3f, 0.0f, 0.0f, 1000, -1000);
+    PID linearRotationCorrection = PID(0.4f, 0.2f, 0.1f, 1000, -1000);
 
     std::array<std::pair<MotorID, double> *, 4> initialPositions{
             new std::pair<MotorID, double>(DRIVE_RIGHT_FRONT, 0),
@@ -83,6 +83,12 @@ class DriveComponent : public BotComponent {
             new std::pair<MotorID, double>(DRIVE_LEFT_FRONT, 0),
             new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
     };
+	std::array<std::pair<MotorID, double> *, 4> goalVoltages{
+		new std::pair<MotorID, double>(DRIVE_RIGHT_FRONT, 0),
+		new std::pair<MotorID, double>(DRIVE_RIGHT_BACK, 0),
+		new std::pair<MotorID, double>(DRIVE_LEFT_FRONT, 0),
+		new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
+	};
     std::array<std::pair<MotorID, double> *, 4> currentPositions{
             new std::pair<MotorID, double>(DRIVE_RIGHT_FRONT, 0),
             new std::pair<MotorID, double>(DRIVE_RIGHT_BACK, 0),
@@ -146,6 +152,13 @@ public:
 		SetValue(currentPositions, DRIVE_LEFT_BACK, Robot::GetMotor(DRIVE_LEFT_BACK)->GetPosition());
     }
 
+	void UpdateGoalVoltages(double leftVoltage, double rightVoltage) {
+		SetValue(goalVoltages, DRIVE_RIGHT_FRONT, rightVoltage);
+		SetValue(goalVoltages, DRIVE_RIGHT_BACK, rightVoltage);
+		SetValue(goalVoltages, DRIVE_LEFT_FRONT, leftVoltage);
+		SetValue(goalVoltages, DRIVE_LEFT_BACK, leftVoltage);
+	}
+
     /**
      * This stores the positions of the motors when not being used in LINEAR/ROTATE_TO, so that when they are called,
      * they can rotate relative to their positions and not absolute from starting position
@@ -157,8 +170,8 @@ public:
 		SetValue(initialPositions, DRIVE_LEFT_BACK, Robot::GetMotor(DRIVE_LEFT_BACK)->GetPosition());
     }
 
-    double GetActualVoltage(MotorID id) {
-        return Robot::GetMotor(id)->GetVoltage();
+    double GetGoalVoltage(MotorID id) {
+		return GetValue(goalVoltages, id);
     }
 
     double GetRPM(MotorID id) {
@@ -169,7 +182,7 @@ public:
 		double currentPosition = Robot::GetMotor(id)->GetPosition();
 
         double pidValue = GetPID(id).GetValue(currentPosition, relativeGoalPosition + GetValue(initialPositions, id));
-        double currentVoltage = GetActualVoltage(id);
+        double currentVoltage = GetGoalVoltage(id);
         double unsmoothedGoalVoltage = std::clamp(pidValue, -127.0, 127.0);
 
         double goalAcceleration = unsmoothedGoalVoltage - currentVoltage;
@@ -233,7 +246,7 @@ public:
         // -30
         double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
         // positive value
-		printf("voltage r: %f, l: %f, rpm r: %f, l: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, voltageChange);
+		
 
 		if(std::abs(rightVoltage + voltageChange / 2) < 127) {
 		    if(std::abs(leftVoltage - voltageChange / 2) < 127) {
@@ -245,6 +258,10 @@ public:
         } else {
             leftVoltage -= voltageChange;
 		}
+
+		//printf("voltage r: %f, l: %f, rpm r: %f, l: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, voltageChange);
+
+		UpdateGoalVoltages(rightVoltage, leftVoltage);
 
         Drive(rightVoltage, leftVoltage);
     }
@@ -263,7 +280,7 @@ public:
         }
 
         double rightVoltage = (GetGoalVoltage(DRIVE_RIGHT_FRONT, -goalPositionRelative) + GetGoalVoltage(DRIVE_RIGHT_BACK, -goalPositionRelative)) / 2;
-        double leftVoltage = (GetGoalVoltage(DRIVE_LEFT_FRONT, goalPositionRelative) + GetGoalVoltage(DRIVE_LEFT_BACK, goalPositionRelative)) / 2;
+		double leftVoltage = (GetGoalVoltage(DRIVE_LEFT_FRONT, goalPositionRelative) + GetGoalVoltage(DRIVE_LEFT_BACK, goalPositionRelative)) / 2;
 
         double rightRpm = (GetRPM(DRIVE_RIGHT_FRONT) + GetRPM(DRIVE_RIGHT_BACK)) / 2;
         double leftRpm = (GetRPM(DRIVE_LEFT_FRONT) + GetRPM(DRIVE_LEFT_BACK)) / 2;
@@ -283,6 +300,8 @@ public:
         } else {
             leftVoltage -= voltageChange;
         }
+
+		UpdateGoalVoltages(rightVoltage, leftVoltage);
 
         Drive(rightVoltage, leftVoltage);
     }

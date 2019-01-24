@@ -19,14 +19,7 @@
 
 bool running = true;
 
-void AutonomousUpdate(void* params) {
-	uint32_t time = pros::millis();
-	while (running) {
-		Commands::Update();
-		Components::Update();
-		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
-	}
-}
+
 
 
 
@@ -41,9 +34,8 @@ void FrontAuton(Team team) {
 
 	pros::delay(30);
 	//Commands::Press(C_BALL_LIFT_UP);
-	Commands::Execute(C_DRIVE_LINEAR_TO, 3000);
+	Commands::Execute(C_DRIVE_LINEAR_TO, 1250);
 	pros::delay(400);
-	return;
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 	pros::delay(400);
 
@@ -243,12 +235,22 @@ void skillsauton() {
 
 }
 
-void autonomous() {
-	Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
-	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
-		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
+void AutonomousRun(void* params) {
 	FrontAuton(RED);
-
 	Commands::Clear();
 	running = false;
+}
+
+void autonomous() {
+	Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
+	pros::Task updateTask(AutonomousRun, (void*) "i'd dab to that",
+		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
+	
+	uint32_t time = pros::millis();
+	while (running) {
+		Commands::Update();
+		Components::Update();
+		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
+	}
+	
 }
