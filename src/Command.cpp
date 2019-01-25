@@ -28,6 +28,8 @@ public:
                                Control::C_DRIVE_ROTATE_TO, Control::C_AIM}) {}
 
     void Execute(std::vector<ControlPress> &values) override {
+		bool linearReleased = Commands::GetPressType(values, Control::C_DRIVE_LINEAR) == RELEASED;
+		bool rotateReleased = Commands::GetPressType(values, Control::C_DRIVE_ROTATE) == RELEASED;
         int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
         int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
         int linearTo = Commands::GetValue(values, Control::C_DRIVE_LINEAR_TO);
@@ -41,7 +43,7 @@ public:
                 Components::Execute(ActionType::DRIVE_LINEAR, linear);
             } else if (linearTo != CONTROL_NOT_ACTIVE) {
                 Components::Execute(ActionType::LINEAR_TO, linearTo);
-            } else {
+            } else if(linearReleased) {
                 Components::Execute(ActionType::DRIVE_LINEAR, 0);
             }
             if (rotation != CONTROL_NOT_ACTIVE) {
@@ -49,9 +51,8 @@ public:
                 Components::Execute(ActionType::DRIVE_ROTATE, rotation);
             } else if (rotateTo != CONTROL_NOT_ACTIVE) {
                 Components::Execute(ActionType::ROTATE_TO, rotateTo);
-            } else {
+            } else if(rotateReleased) {
                 Components::Execute(ActionType::DRIVE_ROTATE, 0);
-
             }
         }
     }
@@ -163,6 +164,52 @@ public:
     }
 };
 
+class DoubleShotCommand : public Command {
+public:
+	int ticksSinceStart = -1;
+
+	const int TICKS_TILL_FINISH = 500;
+
+	const int TICKS_TILL_FIRST_SHOT = 0;
+	const int TICKS_TILL_SECOND_SHOT = 60;
+
+	const int DRIVE_SPEED = 127;
+
+	DoubleShotCommand() : Command(Controller::BOTH, {
+		Control::C_DOUBLE_SHOT
+		}) {}
+
+	void Execute(std::vector<ControlPress> &values) override {
+		bool wantsToShoot = Commands::GetPressType(values, C_DOUBLE_SHOT) == PRESSED;
+		bool wantsToCancel = Commands::GetPressType(values, C_DOUBLE_SHOT) == RELEASED;
+		if (wantsToCancel) {
+			Commands::Release(C_BALL_LIFT_UP);
+			ticksSinceStart = -1;
+		}
+		else if(wantsToShoot){
+			ticksSinceStart = 0;
+			Commands::Press(C_BALL_LIFT_UP);
+		}
+
+		if (ticksSinceStart != -1) {
+			// in the process of shooting
+			Components::Execute(ActionType::DRIVE_LINEAR, DRIVE_SPEED);
+			if (std::abs(ticksSinceStart - TICKS_TILL_SECOND_SHOT) < 15) {
+				Components::Execute(ActionType::INDEXER_RUN, -70);
+			}
+			else {
+				Components::Execute(ActionType::INDEXER_RUN, -127);
+			}
+			if (ticksSinceStart == TICKS_TILL_FINISH) {
+				ticksSinceStart = -1;
+				Commands::Release(C_BALL_LIFT_UP);
+				return;
+			}
+			ticksSinceStart++;
+		}
+	}
+};
+
 class ShootCommand : public Command {
 public:
 
@@ -175,7 +222,7 @@ public:
     const int GUARANTEED_SHOOT_TICKS = 100;
 
     ShootCommand() : Command(Controller::BOTH, {
-            Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW
+            Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW, Control::C_DOUBLE_SHOT
     }) {}
 
     void Execute(std::vector<ControlPress> &values) override {
@@ -186,7 +233,8 @@ public:
         if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED) {
             shooting = true;
             ticksHeldDown = 0;
-        } else if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::REPEATED) {
+		}
+		else if (Commands::GetPressType(values, Control::C_SHOOT) == PressType::REPEATED) {
             ticksHeldDown++;
         } else if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESS_NOT_ACTIVE) {
 			if (ticksHeldDown != -1) {
@@ -209,13 +257,13 @@ public:
             } else {
                 Robot::GetMotor(MotorID::INDEXER)->SetVoltage(0);
             }
-        } else {
+        } else if(Commands::GetPressType(values, Control::C_DOUBLE_SHOT) == PRESS_NOT_ACTIVE) {
             if(shooting) {
                 if(!secondZone && ballGoneThroughSecondZoneWhileShooting) {
                     // the ball has totally passed the second zone, meaning it has been shot
                     shooting = false;
                     ballGoneThroughSecondZoneWhileShooting = false;
-                    ticksHeldDown = -1;
+					ticksHeldDown = -1;
                     Commands::Release(C_SHOOT);
                     Robot::GetMasterController().rumble(".");
                     Components::Execute(ActionType::INDEXER_RUN, 0);
@@ -247,6 +295,7 @@ void Commands::Init() {
     new DriveCommands();
     new ReaperCommands();
     new ShootCommand();
+	new DoubleShotCommand();
     new FlywheelCommand();
     new VisionCommand();
     new ArmCommands();
