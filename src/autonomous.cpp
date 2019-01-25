@@ -29,30 +29,31 @@ void FrontAuton(Team team) {
 	}
 
 	pros::delay(30);
+
 	Commands::Press(C_BALL_LIFT_UP);
 	Commands::Execute(C_DRIVE_LINEAR_TO, 1250);
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (370));//turn to shot
-
-	Commands::Execute(C_DRIVE_LINEAR_TO, 100);
-
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (359));//turn to shot
+	// turned too far here at around 62 percent
+	Commands::Execute(C_DRIVE_LINEAR_TO, 80);
+	
 	Commands::Execute(C_SHOOT, 0, 350); //shot 1
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 600);//2nd shot
+	Commands::Execute(C_DRIVE_LINEAR_TO, 550);//2nd shot
 
 	Commands::Execute(C_SHOOT, 0, 350); //shot 2
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 80);//1st bottom flag turn
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 70);//1st bottom flag turn
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 500, 1000);//push in
+	Commands::Execute(C_DRIVE_LINEAR_TO, 450);//push in
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, -30, 800); // back out a little bit
+	Commands::Execute(C_DRIVE_LINEAR_TO, -500); // back out a little bit
 
     Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * -80, 500); // rotate before fully backing out
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * -60); // rotate before fully backing out
 
 	if(false) {
 	    // there is a ball that was recollected
@@ -81,11 +82,11 @@ void FrontAuton(Team team) {
 	} else {
 		// no ball was loaded
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, -1400, 2500); //back out to platform
+		Commands::Execute(C_DRIVE_LINEAR_TO, -1270); //back out to platform
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -360 * teamMultiplier, 800); // rotate to platform
+		Commands::Execute(C_DRIVE_ROTATE_TO, -360 * teamMultiplier); // rotate to platform
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 1200); // drive onto platform
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1400); // drive onto platform
 	}
 }
 
@@ -166,7 +167,7 @@ void skillsauton() {
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 	pros::delay(400);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, -335, 800);//turn to shot
+	Commands::Execute(C_DRIVE_ROTATE_TO, -335, 780);//turn to shot
 	pros::delay(400);
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, 100, 800);

@@ -67,17 +67,20 @@ public:
 
 class DriveComponent : public BotComponent {
 
-    const double MAX_ACCELERATION = 5;
+    const double MAX_ACCELERATION = 4;
+
+	bool beginStop = false;
 
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
-    const double ROTATE_TOTAL_ERROR_THRESHOLD = 20;
+    const double ROTATE_TOTAL_ERROR_THRESHOLD = 30;
 
-    const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 1;
+    const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 4;
 	//1210.800000 1300.800000 1244.800000 1248.800000
 	//1213.200000 1298.400000 1240.000000 1245.200000
 	//1214.400000 1303.600000 1239.600000 1251.200000
-    PID linearRotationCorrection = PID(0.4f, 0.1f, 0.12f, 1000, -1000);
+    PID linearRotationCorrection = PID(0.7f, 0.1f, 0.12f, 1000, -1000);
+	PID rotationRotationCorrection = PID(0.7f, 0.1f, 0.12f, 1000, -1000);
 
     std::array<std::pair<MotorID, double> *, 4> initialPositions{
             new std::pair<MotorID, double>(DRIVE_RIGHT_FRONT, 0),
@@ -98,10 +101,10 @@ class DriveComponent : public BotComponent {
             new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
     };
     std::array<std::pair<MotorID, PID> *, 4> pids{
-            new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.3f, 0.01f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.3f, 0.01f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.3f, 0.01f, 0.0f, 1000, -1000)),
-            new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.3f, 0.01f, 0.0f, 1000, -1000))
+		 new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.35f, 0.01f, 0.04f, 1000, -1000)),
+		 new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.35f, 0.01f, 0.04f, 1000, -1000)),
+		 new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.35f, 0.01f, 0.04f, 1000, -1000)),
+		 new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.35f, 0.01f, 0.04f, 1000, -1000))
     };
 public:
     DriveComponent() : BotComponent("Drive component",
@@ -225,26 +228,27 @@ public:
                                           (GetRelativePosition(DRIVE_RIGHT_FRONT) + GetRelativePosition(DRIVE_RIGHT_BACK)) / 2);
         double leftError = std::abs(leftGoalPositionRelative -
                                          (GetRelativePosition(DRIVE_LEFT_FRONT) + GetRelativePosition(DRIVE_LEFT_BACK)) / 2);
-        return (rightError + leftError) / 2 < threshold;
+        return (rightError + leftError) < threshold;
     }
 
     void LinearTo(int goalPositionRelative) {
 
         UpdatePositions();
-
-        if (WithinThreshold(goalPositionRelative, goalPositionRelative, LINEAR_TOTAL_ERROR_THRESHOLD)) {
-            Drive(0, 0);
-			printf("trying to stop\n");
-            if (NotMoving()) {
+		if (WithinThreshold(goalPositionRelative, goalPositionRelative, LINEAR_TOTAL_ERROR_THRESHOLD) || beginStop) {
+			Drive(0, 0);
+			UpdateGoalVoltages(0, 0);
+			beginStop = true;
+			printf("trying to stop linear\n");
+			if (NotMoving()) {
+				beginStop = false;
 				printf("stopped\n");
 				printf("%f %f %f %f\n", GetRelativePosition(DRIVE_RIGHT_FRONT), GetRelativePosition(DRIVE_RIGHT_BACK), GetRelativePosition(DRIVE_LEFT_FRONT), GetRelativePosition(DRIVE_LEFT_BACK));
-                Commands::Release(C_DRIVE_LINEAR_TO);
-                UpdateInitialPositions();
+				Commands::Release(C_DRIVE_LINEAR_TO);
+				UpdateInitialPositions();
 				ResetPIDS();
-            }
-            return;
-        }
-
+			}
+			return;
+		}
         double rightVoltage = (GetGoalVoltage(DRIVE_RIGHT_FRONT, goalPositionRelative) + GetGoalVoltage(DRIVE_RIGHT_BACK, goalPositionRelative)) / 2;
         // -127
         double leftVoltage = (GetGoalVoltage(DRIVE_LEFT_FRONT, goalPositionRelative) + GetGoalVoltage(DRIVE_LEFT_BACK, goalPositionRelative)) / 2;
@@ -260,6 +264,8 @@ public:
         double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
         // positive value
 
+		printf("voltage r: %f, l: %f, rpm r: %f, l: %f, diff: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, rpmDifference, voltageChange);
+
 		if(std::abs(rightVoltage + voltageChange / 2) < 127) {
 		    if(std::abs(leftVoltage - voltageChange / 2) < 127) {
                 rightVoltage += voltageChange / 2;
@@ -270,24 +276,26 @@ public:
         } else {
             leftVoltage -= voltageChange;
 		}
-
-		
 		
 		UpdateGoalVoltages(rightVoltage, leftVoltage);
 
         Drive(rightVoltage, leftVoltage);
+
     }
 
     void RotateTo(int goalPositionRelative) {
 
         UpdatePositions();
-		printf("right voltage is %f\n", GetValue(goalVoltages, DRIVE_RIGHT_FRONT));
-
-        if (WithinThreshold(-goalPositionRelative, goalPositionRelative, ROTATE_TOTAL_ERROR_THRESHOLD)) {
+        if (WithinThreshold(-goalPositionRelative, goalPositionRelative, ROTATE_TOTAL_ERROR_THRESHOLD) || beginStop) {
             Drive(0, 0);
-			printf("stopping\n");
+			UpdateGoalVoltages(0, 0);
+			printf("stopping rotate\n");
+
+			beginStop = true;
             if (NotMoving()) {
+				beginStop = false;
 				printf("stopped\n");
+				printf("%f %f %f %f\n", GetRelativePosition(DRIVE_RIGHT_FRONT), GetRelativePosition(DRIVE_RIGHT_BACK), GetRelativePosition(DRIVE_LEFT_FRONT), GetRelativePosition(DRIVE_LEFT_BACK));
                 Commands::Release(C_DRIVE_ROTATE_TO);
                 UpdateInitialPositions();
 				ResetPIDS();
@@ -304,7 +312,7 @@ public:
         // right should be opposite
         double rpmDifference = rightRpm + leftRpm;
         // 
-        double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
+		double voltageChange = rotationRotationCorrection.GetValue(rpmDifference, 0);
 		printf("voltage r: %f, l: %f, rpm r: %f, l: %f, diff: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, rpmDifference, voltageChange);
         // returns positive if right is too fast
 
@@ -321,8 +329,6 @@ public:
 			leftVoltage += voltageChange;
 		}
 
-
-		printf("updating goal voltage of right to %f\n", rightVoltage);
 		UpdateGoalVoltages(rightVoltage, leftVoltage);
 
         Drive(rightVoltage, leftVoltage);
