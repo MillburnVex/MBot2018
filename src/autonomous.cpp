@@ -35,9 +35,9 @@ void FrontAuton(Team team) {
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (359));//turn to shot
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (359 - ((team == RED) ? 30 : 0)));//turn to shot
 	// turned too far here at around 62 percent
-	Commands::Execute(C_DRIVE_LINEAR_TO, 80);
+	Commands::Execute(C_DRIVE_LINEAR_TO, 80 + ((team == RED ? 60 : 0)));
 	
 	Commands::Execute(C_SHOOT, 0, 350); //shot 1
 
@@ -47,13 +47,39 @@ void FrontAuton(Team team) {
 
 	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 70);//1st bottom flag turn
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 450);//push in
+	Commands::Execute(C_DRIVE_LINEAR_TO, 470);//push in
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, -500); // back out a little bit
+	Commands::Execute(C_DRIVE_LINEAR_TO, -520); // back out a little bit
 
     Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * -60); // rotate before fully backing out
+	pros::delay(50);
+
+	Commands::Press(C_BALL_LIFT_DOWN);
+
+	pros::delay(150);
+
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-60 + (team == BLUE ? 18 : 0))); // rotate before fully backing out
+
+	Commands::Execute(C_DRIVE_ROTATE_TO, -(350 - (team == BLUE ? 10 : 0)) * teamMultiplier); // rotate to platform
+
+	pros::delay(200);
+
+	Commands::Press(C_DRIVE_LINEAR, 65);
+
+	pros::delay(1000);
+
+	Commands::Release(C_DRIVE_LINEAR);
+
+	pros::delay(50);
+
+
+	Commands::Release(C_BALL_LIFT_DOWN);
+	pros::delay(50);
+
+
+
+
 
 	if(false) {
 	    // there is a ball that was recollected
@@ -68,6 +94,8 @@ void FrontAuton(Team team) {
 
 	    Commands::Execute(C_SHOOT, 0, 300); // hit top flag
 
+
+
 	    if(Robot::BallLoaded()) {
 			Commands::Execute(C_DRIVE_LINEAR_TO, 670); // move forward to bottom flag
 
@@ -81,12 +109,12 @@ void FrontAuton(Team team) {
 	    }
 	} else {
 		// no ball was loaded
+		/*
+		Commands::Execute(C_DRIVE_LINEAR_TO, (-1270 - (team == RED ? 40 : 0))); //back out to platform
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, -1270); //back out to platform
+		Commands::Execute(C_DRIVE_ROTATE_TO, -(360 - (team == BLUE ? 10 : 0)) * teamMultiplier); // rotate to platform
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -360 * teamMultiplier); // rotate to platform
-
-		Commands::Execute(C_DRIVE_LINEAR_TO, 1400); // drive onto platform
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1400); // drive onto platform*/
 	}
 }
 
