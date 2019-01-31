@@ -7,7 +7,7 @@ int updateMillis = 15;
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 pros::Controller partner = pros::Controller(pros::E_CONTROLLER_PARTNER);
 
-Team team = RED;
+Team team = BLUE;
 Position autonPosition = FRONT;
 
 bool manualMode = false;

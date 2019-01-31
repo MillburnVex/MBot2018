@@ -96,12 +96,21 @@ public:
 class ReaperCommands : public Command {
 public:
     ReaperCommands() : Command(Controller::BOTH,
-                               {Control::C_BALL_LIFT_DOWN, Control::C_BALL_LIFT_UP}) {}
+                               {Control::C_BALL_LIFT_DOWN, Control::C_BALL_LIFT_UP, Control::C_LOAD_BALL}) {}
 
     void Execute(std::vector<ControlPress> &values) override {
         bool up = (Commands::GetPressType(values, Control::C_BALL_LIFT_UP) != PressType::PRESS_NOT_ACTIVE);
         bool down = (Commands::GetPressType(values, Control::C_BALL_LIFT_DOWN) != PressType::PRESS_NOT_ACTIVE);
-        if (!up && !down) {
+		bool loadBall = (Commands::GetPressType(values, Control::C_LOAD_BALL) != PressType::PRESS_NOT_ACTIVE);
+		if (loadBall) {
+			if (Robot::BallLoaded()) {
+				Commands::Release(C_LOAD_BALL);
+			}
+			else {
+				up = true;
+			}
+		}
+		if (!up && !down) {
             Components::Execute(ActionType::REAPER_RUN, -25);
         } else if (up) {
             Components::Execute(ActionType::REAPER_RUN, -127);

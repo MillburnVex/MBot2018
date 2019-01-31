@@ -4,7 +4,7 @@
 #include "api.h"
 
 typedef enum {
-	FLYWHEEL = 5,
+	FLYWHEEL = 3,
 	BALL_LIFT = 7,
 	DRIVE_LEFT_FRONT = 1, DRIVE_LEFT_BACK = 2, DRIVE_RIGHT_FRONT = 10, DRIVE_RIGHT_BACK = 9,
 	ARM = 6,
