@@ -21,9 +21,9 @@ bool running = true;
 
 bool noParkFlip = false;
 
-bool doubleScrape = true;
+bool doubleScrape = false;
 
-bool park = false;
+bool park = true;
 
 void DoubleShot() {
 	Commands::Execute(C_SHOOT, 0, 300); //shot 1
@@ -79,7 +79,7 @@ void FrontAuton(Team team) {
 
     Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-70)); // rotate before fully backing out
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-62)); // rotate before fully backing out
 
 	if (doubleScrape) {
 		Commands::Release(C_BALL_LIFT_UP);
@@ -105,16 +105,9 @@ void FrontAuton(Team team) {
 
 		Commands::Execute(C_LOAD_BALL, 0);
 
-		Commands::Execute(C_SHOOT, 0);
-
-		Commands::Execute(C_FLYWHEEL_SET, 600, 0);
-
-		/* manual movement to align
 		Commands::Execute(C_DRIVE_LINEAR_TO, 300); // align with flag
 
 		DoubleShot();
-		*/
-		
 		
 	} else if (noParkFlip) {
 
@@ -134,9 +127,9 @@ void FrontAuton(Team team) {
 		Commands::Release(C_BALL_LIFT_DOWN);
 	}
 	else if (park) {
-		Commands::Execute(C_DRIVE_LINEAR_TO, (-1270 - (team == RED ? 40 : 0))); //back out to platform
+		Commands::Execute(C_DRIVE_LINEAR_TO, (-1330)); //back out to platform
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -(360 - (team == BLUE ? 10 : 0)) * teamMultiplier); // rotate to platform
+		Commands::Execute(C_DRIVE_ROTATE_TO, -(335) * teamMultiplier); // rotate to platform
 
 		Commands::Execute(C_DRIVE_LINEAR_TO, 1400); // drive onto platform
 	}
