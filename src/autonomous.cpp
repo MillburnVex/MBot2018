@@ -65,7 +65,7 @@ void FrontAuton(Team team) {
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (350 - ((team == RED) ? 30 : 0))); // turn to shot
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (330 - ((team == RED) ? 30 : 0))); // turn to shot
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, 55 + ((team == RED ? 60 : 0))); // line up with flag
 	
@@ -73,9 +73,9 @@ void FrontAuton(Team team) {
 
 	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 78);//1st bottom flag turn
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 470); // push in
+	Commands::Execute(C_DRIVE_LINEAR_TO, 495); // push in
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, -520); // back out a little bit
+	Commands::Execute(C_DRIVE_LINEAR_TO, -545); // back out a little bit
 
     Commands::Release(C_BALL_LIFT_UP);
 
@@ -129,7 +129,7 @@ void FrontAuton(Team team) {
 	else if (park) {
 		Commands::Execute(C_DRIVE_LINEAR_TO, (-1330)); //back out to platform
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -(335) * teamMultiplier); // rotate to platform
+		Commands::Execute(C_DRIVE_ROTATE_TO, -(300) * teamMultiplier); // rotate to platform
 
 		Commands::Execute(C_DRIVE_LINEAR_TO, 1400); // drive onto platform
 	}

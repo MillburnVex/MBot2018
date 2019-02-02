@@ -73,7 +73,7 @@ class DriveComponent : public BotComponent {
 
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
-    const double ROTATE_TOTAL_ERROR_THRESHOLD = 30;
+    const double ROTATE_TOTAL_ERROR_THRESHOLD = 20;
 
     const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 4;
 
@@ -105,16 +105,16 @@ class DriveComponent : public BotComponent {
                 new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
     };
     std::array<std::pair<MotorID, PID> *, 4> linearPids{
-		 new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.31f, 0.1f, 0.08f, 100, -100)),
-		 new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.31f, 0.1f, 0.08f, 100, -100)),
-		 new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.31f, 0.1f, 0.08f, 100, -100)),
-		 new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.31f, 0.1f, 0.08f, 100, -100))
+		 new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.31f, 0.1f, 0.17f, 170, -170)),
+		 new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.31f, 0.1f, 0.17f, 170, -170)),
+		 new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.31f, 0.1f, 0.17f, 170, -170)),
+		 new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.31f, 0.1f, 0.17f, 170, -170))
     };
 	std::array<std::pair<MotorID, PID> *, 4> rotationalPids{
-		 new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.5f, 0.06f, 0.1f, 60, -60)),
-		 new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.5f, 0.06f, 0.1f, 60, -60)),
-		 new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.5f, 0.06f, 0.1f, 60, -60)),
-		 new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.5f, 0.06f, 0.1f, 60, -60))
+		 new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.56f, 0.06f, 0.13f, 60, -60)),
+		 new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.56f, 0.06f, 0.13f, 60, -60)),
+		 new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.56f, 0.06f, 0.13f, 60, -60)),
+		 new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.56f, 0.06f, 0.13f, 60, -60))
 	};
 public:
     DriveComponent() : BotComponent("Drive component",

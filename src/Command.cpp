@@ -228,7 +228,9 @@ public:
 
     int ticksHeldDown = -1;
 
-    const int GUARANTEED_SHOOT_TICKS = 100;
+    const int GUARANTEED_SHOOT_TICKS = 50;
+
+	const int GUARANTEED_INTAKE_TICKS = 50;
 
     ShootCommand() : Command(Controller::BOTH, {
             Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW, Control::C_DOUBLE_SHOT
@@ -247,18 +249,27 @@ public:
             ticksHeldDown++;
         } else if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESS_NOT_ACTIVE) {
 			if (ticksHeldDown != -1) {
-				if (ticksHeldDown > GUARANTEED_SHOOT_TICKS) {
-					shooting = false;
-					ticksHeldDown = 0;
+			// released but waiting to finish
+				if (ticksHeldDown > GUARANTEED_INTAKE_TICKS) {
+					ticksHeldDown = -1;
+					return;
 				}
 				else {
 					ticksHeldDown++;
+				}
+				// continue counting
+				if (ticksHeldDown > GUARANTEED_SHOOT_TICKS) {
+					shooting = false;
 				}
 			}
         }
         if(shooting && secondZone) {
              ballGoneThroughSecondZoneWhileShooting = true;
         }
+
+		if (shooting || (ticksHeldDown != -1 && ticksHeldDown < GUARANTEED_INTAKE_TICKS)) {
+			Components::Execute(ActionType::REAPER_RUN, -127);
+		}
 
         if (Robot::IsInManualMode()) {
             if ((Commands::GetPressType(values, Control::C_SHOOT) != PressType::PRESS_NOT_ACTIVE)) {
@@ -272,7 +283,6 @@ public:
                     // the ball has totally passed the second zone, meaning it has been shot
                     shooting = false;
                     ballGoneThroughSecondZoneWhileShooting = false;
-					ticksHeldDown = -1;
                     Commands::Release(C_SHOOT);
                     Robot::GetMasterController().rumble(".");
                     Components::Execute(ActionType::INDEXER_RUN, 0);
@@ -302,8 +312,8 @@ public:
 
 void Commands::Init() {
     new DriveCommands();
-    new ReaperCommands();
     new ShootCommand();
+    new ReaperCommands();
 	new DoubleShotCommand();
     new FlywheelCommand();
     new VisionCommand();
