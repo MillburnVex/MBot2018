@@ -82,6 +82,9 @@ void Robot::Init() {
 	new Motor(MotorID::ARM);
     new AnalogSensor(SensorID::INDEXER_FIRST);
 	new AnalogSensor(SensorID::INDEXER_SECOND);
+	new Accelerometer(SensorID::ACCELEROMETER);
+	new Gyro(SensorID::GYRO);
+
 
 }
 

@@ -19,16 +19,26 @@
 
 bool running = true;
 
-bool noParkFlip = false;
+bool noParkFlip = true;
 
 bool doubleScrape = false;
 
-bool park = true;
+bool park = false;
+
+void test() {
+	pros::delay(400);
+
+	Commands::Execute(C_DRIVE_ROTATE_TO, 1800); // turn to shot
+
+	pros::delay(400);
+
+
+}
 
 void DoubleShot() {
 	Commands::Execute(C_SHOOT, 0, 300); //shot 1
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 550);//2nd shot
+	Commands::Execute(C_DRIVE_LINEAR_TO, 580);//2nd shot
 
 	Commands::Execute(C_SHOOT, 0, 300); //shot 2
 }
@@ -65,21 +75,21 @@ void FrontAuton(Team team) {
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (330 - ((team == RED) ? 36 : 0))); // turn to shot
-
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (900)); // turn to shot
+	pros::delay(500);
 	Commands::Execute(C_DRIVE_LINEAR_TO, 55 + ((team == RED ? 60 : 0))); // line up with flag
 	
 	DoubleShot();
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 78);//1st bottom flag turn
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * 100);//1st bottom flag turn
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 495); // push in
+	Commands::Execute(C_DRIVE_LINEAR_TO, 475); // push in
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -545); // back out a little bit
 
     Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-62)); // rotate before fully backing out
+	Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-100)); // rotate before fully backing out
 
 	if (doubleScrape) {
 		Commands::Release(C_BALL_LIFT_UP);
@@ -113,11 +123,11 @@ void FrontAuton(Team team) {
 
 		Commands::Press(C_BALL_LIFT_DOWN);
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -(350 - (team == BLUE ? 10 : 0)) * teamMultiplier); // rotate to platform
+		Commands::Execute(C_DRIVE_ROTATE_TO, -900 * teamMultiplier); // rotate to platform
 
-		Commands::Press(C_DRIVE_LINEAR, 65);
+		Commands::Press(C_DRIVE_LINEAR, 55);
 
-		pros::delay(1000);
+		pros::delay(1200);
 
 		Commands::Release(C_DRIVE_LINEAR);
 
@@ -129,7 +139,7 @@ void FrontAuton(Team team) {
 	else if (park) {
 		Commands::Execute(C_DRIVE_LINEAR_TO, (-1330)); //back out to platform
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -(300) * teamMultiplier); // rotate to platform
+		Commands::Execute(C_DRIVE_ROTATE_TO, -900 * teamMultiplier); // rotate to platform
 
 		Commands::Press(C_BALL_LIFT_UP);
 
@@ -240,7 +250,7 @@ void skillsauton() {
 
 		Commands::Press(C_BALL_LIFT_DOWN);
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, -(300) * teamMultiplier); // rotate to cap
+		Commands::Execute(C_DRIVE_ROTATE_TO, -(310) * teamMultiplier); // rotate to cap
 
 		Commands::Press(C_DRIVE_LINEAR, 65);
 
@@ -250,22 +260,22 @@ void skillsauton() {
 		Commands::Release(C_DRIVE_LINEAR);
 
 		pros::delay(1000);//wait for cap to stop moving
+
+		Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-40)); 
+
+
 		Commands::Press(C_DRIVE_LINEAR, 65);//push cap out of the way
 
 		pros::delay(3000);
 
 		Commands::Release(C_DRIVE_LINEAR);
 
-		pros::delay(50);
-
-
 		pros::delay(1000);
 
 
+		Commands::Execute(C_DRIVE_LINEAR_TO, -355); //back out
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, -325); //back out
-
-		Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (320)); //turn to bottom flag	
+		Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (350)); //turn to bottom flag	
 																	  
 		Commands::Press(C_DRIVE_LINEAR, 100);
 
@@ -277,11 +287,11 @@ void skillsauton() {
 
 		Commands::Execute(C_DRIVE_LINEAR_TO, -375);//pull back
 
-		Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-298)); //turn to go towards far side of field	
+		Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-330)); //turn to go towards far side of field	
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 830);// drive  to far side of the field in preparation for flipping cap 2
+		Commands::Execute(C_DRIVE_LINEAR_TO, 880);// drive  to far side of the field in preparation for flipping cap 2
 		
-		Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-175)); //turn to cap 2 	
+		Commands::Execute(C_DRIVE_ROTATE_TO, teamMultiplier * (-190)); //turn to cap 2 	
 
 		Commands::Execute(C_DRIVE_LINEAR_TO, 100);// go forward up to cap 2
 
@@ -327,7 +337,7 @@ void skillsauton() {
 
 		Commands::Execute(C_DRIVE_ROTATE_TO, 330); // rotate to go backwards to platform
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, (-1320)); //back out to platform
+		Commands::Execute(C_DRIVE_LINEAR_TO, (-1350)); //back out to platform
 
 		Commands::Execute(C_DRIVE_ROTATE_TO, (300) * teamMultiplier); // rotate to platform
 
@@ -348,7 +358,7 @@ void AutonomousUpdate(void *params) {
 }
 
 void autonomous() {
-	Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
+	Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
 	pros::Task updateTask(AutonomousUpdate, (void*) "i'd dab to that",
 		TASK_PRIORITY_DEFAULT + 1, TASK_STACK_DEPTH_DEFAULT, "Auton Update");
 	/*
@@ -358,7 +368,8 @@ void autonomous() {
 		BackAuton(Robot::GetTeam());
 	}
 	*/
-	skillsauton();
+	//test();
+	FrontAuton(BLUE);
 	pros::delay(100);
     Commands::Clear();
     running = false;

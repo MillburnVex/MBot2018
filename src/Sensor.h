@@ -5,7 +5,9 @@
 
 typedef enum {
 	INDEXER_FIRST = 1,
-	INDEXER_SECOND = 3
+	INDEXER_SECOND = 3,
+	ACCELEROMETER = 6,
+	GYRO = 5
 } SensorID;
 
 class Sensor {
@@ -27,6 +29,31 @@ public:
     explicit SensorButton(SensorID id);
 
     std::int32_t GetValue() override;
+};
+
+class Accelerometer : public Sensor {
+private:
+	pros::ADIAccelerometer prosAccelX;
+	pros::ADIAccelerometer prosAccelY;
+	pros::ADIAccelerometer prosAccelZ;
+
+public:
+	explicit Accelerometer(SensorID id);
+
+	std::int32_t GetValue() override;
+	double GetX();
+	double GetY();
+	double GetZ();
+};
+
+class Gyro : public Sensor {
+private:
+	pros::ADIGyro prosGyro;
+
+public:
+	explicit Gyro(SensorID id);
+
+	std::int32_t GetValue() override;
 };
 
 class AnalogSensor : public Sensor {

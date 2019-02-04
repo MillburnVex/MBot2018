@@ -67,18 +67,22 @@ public:
 
 class DriveComponent : public BotComponent {
 
-    const double MAX_ACCELERATION = 5;
+    const double MAX_ACCELERATION = 4;
 
 	bool beginStop = false;
 
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
-    const double ROTATE_TOTAL_ERROR_THRESHOLD = 20;
+    const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
 
     const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 4;
 
+	double initialRotation = 0;
+
     PID linearRotationCorrection = PID(0.0f, 0.0f, 0.0f, 1000, -1000);
-	PID rotationRotationCorrection = PID(0.0f, 0.0f, 0.0f, 1000, -1000);
+
+	PID rotationPID = PID(0.3f, 0.0f, 0.5f, 1000, -1000);
+
 
     std::array<std::pair<MotorID, double> *, 4> initialPositions{
             new std::pair<MotorID, double>(DRIVE_RIGHT_FRONT, 0),
@@ -110,12 +114,7 @@ class DriveComponent : public BotComponent {
 		 new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.31f, 0.1f, 0.17f, 170, -170)),
 		 new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.31f, 0.1f, 0.17f, 170, -170))
     };
-	std::array<std::pair<MotorID, PID> *, 4> rotationalPids{
-		 new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.56f, 0.06f, 0.13f, 60, -60)),
-		 new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.56f, 0.06f, 0.13f, 60, -60)),
-		 new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.56f, 0.06f, 0.13f, 60, -60)),
-		 new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.56f, 0.06f, 0.13f, 60, -60))
-	};
+	
 public:
     DriveComponent() : BotComponent("Drive component",
                                     {
@@ -176,10 +175,7 @@ public:
 		GetPID(linearPids, DRIVE_RIGHT_BACK)->Reset();
 		GetPID(linearPids, DRIVE_LEFT_FRONT)->Reset();
 		GetPID(linearPids, DRIVE_LEFT_BACK)->Reset();
-		GetPID(rotationalPids, DRIVE_RIGHT_FRONT)->Reset();
-		GetPID(rotationalPids, DRIVE_RIGHT_BACK)->Reset();
-		GetPID(rotationalPids, DRIVE_LEFT_FRONT)->Reset();
-		GetPID(rotationalPids, DRIVE_LEFT_BACK)->Reset();
+		rotationPID.Reset();
 	}
 
 	/**
@@ -187,6 +183,7 @@ public:
 	 * they can rotate relative to their positions and not absolute from starting position
 	 */
 	void UpdateInitialPositions() {
+		initialRotation = Robot::GetSensor(SensorID::GYRO)->GetValue();
 		SetValue(initialPositions, DRIVE_RIGHT_FRONT, Robot::GetMotor(DRIVE_RIGHT_FRONT)->GetPosition());
 		SetValue(initialPositions, DRIVE_RIGHT_BACK, Robot::GetMotor(DRIVE_RIGHT_BACK)->GetPosition());
 		SetValue(initialPositions, DRIVE_LEFT_FRONT, Robot::GetMotor(DRIVE_LEFT_FRONT)->GetPosition());
@@ -228,6 +225,7 @@ public:
 
 		double pidValue = GetPID(pids, id)->GetValue(currentPosition, relativeGoalPosition + GetValue(initialPositions, id));
 		double currentVoltage = GetGoalVoltage(id);
+		printf("voltage %f\n", currentVoltage);
 		double unsmoothedGoalVoltage = std::clamp(pidValue, -127.0, 127.0);
 
 		double goalAcceleration = unsmoothedGoalVoltage - currentVoltage;
@@ -241,14 +239,14 @@ public:
     void LinearTo(int goalPositionRelative) {
 
 		if (WithinThreshold(goalPositionRelative, goalPositionRelative, LINEAR_TOTAL_ERROR_THRESHOLD) || beginStop) {
-			Drive(0, 0);
 			UpdateGoalVoltages(0, 0);
+			Drive(0, 0);
 			beginStop = true;
 			printf("trying to stop linear\n");
 			if (NotMoving()) {
 				beginStop = false;
 				printf("stopped\n");
-				printf("%f %f %f %f\n", GetRelativePosition(DRIVE_RIGHT_FRONT), GetRelativePosition(DRIVE_RIGHT_BACK), GetRelativePosition(DRIVE_LEFT_FRONT), GetRelativePosition(DRIVE_LEFT_BACK));
+				//printf("%f %f %f %f\n", GetRelativePosition(DRIVE_RIGHT_FRONT), GetRelativePosition(DRIVE_RIGHT_BACK), GetRelativePosition(DRIVE_LEFT_FRONT), GetRelativePosition(DRIVE_LEFT_BACK));
 				Commands::Release(C_DRIVE_LINEAR_TO);
 				UpdateInitialPositions();
 				ResetPIDS();
@@ -259,29 +257,7 @@ public:
         // -127
         double leftVoltage = (GetGoalVoltage(DRIVE_LEFT_FRONT, goalPositionRelative, linearPids) + GetGoalVoltage(DRIVE_LEFT_BACK, goalPositionRelative, linearPids)) / 2;
         // -127
-
-        double rightRpm = (GetRPM(DRIVE_RIGHT_FRONT) + GetRPM(DRIVE_RIGHT_BACK)) / 2;
-        // -200
-        double leftRpm = (GetRPM(DRIVE_LEFT_FRONT) + GetRPM(DRIVE_LEFT_BACK)) / 2;
-        // -170
-
-        double rpmDifference = rightRpm - leftRpm;
-        // -30
-        double voltageChange = linearRotationCorrection.GetValue(rpmDifference, 0);
-        // positive value
-
-		printf("voltage r: %f, l: %f, rpm r: %f, l: %f, diff: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, rpmDifference, voltageChange);
-
-		if(std::abs(rightVoltage + voltageChange / 2) < 127) {
-		    if(std::abs(leftVoltage - voltageChange / 2) < 127) {
-                rightVoltage += voltageChange / 2;
-                leftVoltage -= voltageChange / 2;
-		    } else {
-                rightVoltage += voltageChange;
-		    }
-        } else {
-            leftVoltage -= voltageChange;
-		}
+		printf("voltage r: %f, l: %f, \n", rightVoltage, leftVoltage);
 
 		UpdateGoalVoltages(rightVoltage, leftVoltage);
 
@@ -290,51 +266,35 @@ public:
     }
 
     void RotateTo(int goalPositionRelative) {
+		printf("default value %f \n", initialRotation);
+		printf("target %d \n", goalPositionRelative);
 
-        if (WithinThreshold(-goalPositionRelative, goalPositionRelative, ROTATE_TOTAL_ERROR_THRESHOLD) || beginStop) {
-            Drive(0, 0);
+
+        if (std::abs((goalPositionRelative - initialRotation) - Robot::GetSensor(SensorID::GYRO)->GetValue()) < ROTATE_TOTAL_ERROR_THRESHOLD || beginStop) {
+            /*Drive(0, 0);
 			UpdateGoalVoltages(0, 0);
 			printf("stopping rotate\n");
+			printf("rotation %d \n", Robot::GetSensor(SensorID::GYRO)->GetValue());
 
 			beginStop = true;
-            if (NotMoving()) {
+            if (NotMoving()) {*/
+						Drive(0, 0);
+						UpdateGoalVoltages(0, 0);
 				beginStop = false;
 				printf("stopped\n");
-				printf("%f %f %f %f\n", GetRelativePosition(DRIVE_RIGHT_FRONT), GetRelativePosition(DRIVE_RIGHT_BACK), GetRelativePosition(DRIVE_LEFT_FRONT), GetRelativePosition(DRIVE_LEFT_BACK));
+				printf("rotation %d \n", Robot::GetSensor(SensorID::GYRO)->GetValue());
+
                 Commands::Release(C_DRIVE_ROTATE_TO);
                 UpdateInitialPositions();
 				ResetPIDS();
-            }
+            //}
             return;
         }
 
-        double rightVoltage = (GetGoalVoltage(DRIVE_RIGHT_FRONT, -goalPositionRelative, rotationalPids) + GetGoalVoltage(DRIVE_RIGHT_BACK, -goalPositionRelative, rotationalPids)) / 2;
-		double leftVoltage = (GetGoalVoltage(DRIVE_LEFT_FRONT, goalPositionRelative, rotationalPids) + GetGoalVoltage(DRIVE_LEFT_BACK, goalPositionRelative, rotationalPids)) / 2;
-
-        double rightRpm = (GetRPM(DRIVE_RIGHT_FRONT) + GetRPM(DRIVE_RIGHT_BACK)) / 2;
-        double leftRpm = (GetRPM(DRIVE_LEFT_FRONT) + GetRPM(DRIVE_LEFT_BACK)) / 2;
-
-        // right should be opposite
-        double rpmDifference = rightRpm + leftRpm;
-        // 
-		double voltageChange = rotationRotationCorrection.GetValue(rpmDifference, 0);
-		printf("voltage r: %f, l: %f, rpm r: %f, l: %f, diff: %f, neededVoltageChange: %f\n", rightVoltage, leftVoltage, rightRpm, leftRpm, rpmDifference, voltageChange);
-        // returns positive if right is too fast
-
-		if (std::abs(rightVoltage + voltageChange / 2) < 127) {
-			if (std::abs(leftVoltage + voltageChange / 2) < 127) {
-				rightVoltage += voltageChange / 2;
-				leftVoltage += voltageChange / 2;
-			}
-			else {
-				rightVoltage += voltageChange;
-			}
-		}
-		else {
-			leftVoltage += voltageChange;
-		}
-
-		UpdateGoalVoltages(rightVoltage, leftVoltage);
+		double leftVoltage = rotationPID.GetValue(Robot::GetSensor(SensorID::GYRO)->GetValue(), goalPositionRelative - initialRotation);
+		leftVoltage = std::clamp(leftVoltage, -90.0, 90.0);
+		printf("rotation %d \n", Robot::GetSensor(SensorID::GYRO)->GetValue());
+		double rightVoltage = -leftVoltage;
 
         Drive(rightVoltage, leftVoltage);
     }

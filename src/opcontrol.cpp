@@ -23,6 +23,7 @@ void Update() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+
     Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 	Commands::Clear();
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
@@ -40,6 +41,13 @@ void opcontrol() {
 
 	while (true) {
 		Update();
+		printf("rotation %d \n", Robot::GetSensor(SensorID::GYRO)->GetValue());
+
+		auto accelerometer = static_cast<Accelerometer*>(Robot::GetSensor(SensorID::ACCELEROMETER));
+
+		//printf("accel %f, %f, %f \n", accelerometer->GetX(), accelerometer->GetY(), accelerometer->GetZ());
+
+
 		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
 
 	}
