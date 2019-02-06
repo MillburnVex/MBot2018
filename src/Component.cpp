@@ -81,7 +81,7 @@ class DriveComponent : public BotComponent {
 
     PID linearRotationCorrection = PID(0.0f, 0.0f, 0.0f, 1000, -1000);
 
-	PID linearPID = PID(2f, 0.0f, 0.5f, 1000, -1000);
+	PID linearPID = PID(2.0f, 0.0f, 0.5f, 1000, -1000);
 	PID rotationPID = PID(0.3f, 0.0f, 0.5f, 1000, -1000);
 
 	float velocity;
@@ -150,7 +150,7 @@ public:
 		position += velocity * (Robot::GetUpdateMillis() / 1000);
 
 		double rightVoltage = linearPID.GetValue(position, goalPositionRelative);
-		rightVoltage = std::clamp(rightVoltage, -127, 127);
+		rightVoltage = std::clamp(rightVoltage, -127.0, 127.0);
 		double leftVoltage = -rightVoltage;
 
         Drive(rightVoltage, leftVoltage);

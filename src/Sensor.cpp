@@ -1,11 +1,9 @@
 #include "Sensor.h"
 #include "Sensor.h"
+#include "Sensor.h"
+#include "Sensor.h"
 
 std::vector<Sensor *> Sensor::allSensors;
-
-const int32_t G = 295;
-
-const double STEP = G / 9.81;
 
 Sensor::Sensor(SensorID id) : id(id) {
     allSensors.push_back(this);
@@ -26,7 +24,14 @@ int32_t AnalogSensor::GetValue() {
 }
 
 Accelerometer::Accelerometer(SensorID id) : Sensor(id), prosAccelX(pros::ADIAnalogIn(id)), prosAccelY(pros::ADIAnalogIn(id + 1)), prosAccelZ(pros::ADIAnalogIn(id + 2)) {
+	auto realX = prosAccelX.get_value();
+	auto realY = prosAccelX.get_value();
+	auto realZ = prosAccelX.get_value();
 
+	basisVector = Vec3(realX, realY, realZ);
+
+	auto stepVector = basisVector - 2048;
+	STEP = int(stepVector.length())/9.81;
 }
 
 std::int32_t Accelerometer::GetValue()
@@ -35,15 +40,25 @@ std::int32_t Accelerometer::GetValue()
 }
 
 double Accelerometer::GetX() {
-	return (prosAccelX.get_value()-2048)/STEP;
+	return get().x();
 }
 
 double Accelerometer::GetY() {
-	return (prosAccelY.get_value()-2048)/STEP;
+	return get().y();
 }
 
 double Accelerometer::GetZ() {
-	return (prosAccelZ.get_value()-2048)/STEP;
+	return get().z();
+}
+
+Vec3 Accelerometer::getRaw()
+{
+	return Vec3(prosAccelX.get_value(), prosAccelY.get_value(), prosAccelZ.get_value());
+}
+
+Vec3 Accelerometer::get()
+{
+	return (getRaw() - basisVector)/STEP;
 }
 
 

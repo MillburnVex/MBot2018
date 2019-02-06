@@ -2,6 +2,7 @@
 
 #include "api.h"
 #include <vector>
+#include "Vector.h"
 
 typedef enum {
 	INDEXER_FIRST = 1,
@@ -37,6 +38,10 @@ private:
 	pros::ADIAccelerometer prosAccelY;
 	pros::ADIAccelerometer prosAccelZ;
 
+	Vec3 basisVector;
+
+	double STEP;
+
 public:
 	explicit Accelerometer(SensorID id);
 
@@ -44,6 +49,9 @@ public:
 	double GetX();
 	double GetY();
 	double GetZ();
+
+	Vec3 getRaw();
+	Vec3 get();
 };
 
 class Gyro : public Sensor {
