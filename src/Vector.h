@@ -26,4 +26,5 @@ public:
 	Vec3 operator/(Vec3 other);
 	Vec3 operator/(double other);
 
+	double dot(Vec3 other);
 };

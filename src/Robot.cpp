@@ -2,7 +2,7 @@
 
 pros::Vision camera(13, pros::E_VISION_ZERO_CENTER);
 
-int updateMillis = 15;
+int updateMillis = 5;
 
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 pros::Controller partner = pros::Controller(pros::E_CONTROLLER_PARTNER);

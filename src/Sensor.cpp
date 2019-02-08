@@ -24,14 +24,20 @@ int32_t AnalogSensor::GetValue() {
 }
 
 Accelerometer::Accelerometer(SensorID id) : Sensor(id), prosAccelX(pros::ADIAnalogIn(id)), prosAccelY(pros::ADIAnalogIn(id + 1)), prosAccelZ(pros::ADIAnalogIn(id + 2)) {
+	
+}
+
+void Accelerometer::Calibrate() {
 	auto realX = prosAccelX.get_value();
-	auto realY = prosAccelX.get_value();
-	auto realZ = prosAccelX.get_value();
+	auto realY = prosAccelY.get_value();
+	auto realZ = prosAccelZ.get_value();
 
 	basisVector = Vec3(realX, realY, realZ);
 
 	auto stepVector = basisVector - 2048;
-	STEP = int(stepVector.length())/9.81;
+	STEP = int(stepVector.length()) / 9.81;
+
+	printf("step: %f, %f, %f\n", stepVector.x(), stepVector.y(), stepVector.z());
 }
 
 std::int32_t Accelerometer::GetValue()

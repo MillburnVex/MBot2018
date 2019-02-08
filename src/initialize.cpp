@@ -41,7 +41,7 @@ void initialize() {
 				pros::delay(50);
 			}
 			if (buttons == 4) {
-				pos = BACK;
+				pos = BACK; 
 			}
 			else if (buttons == 1) {
 				pos = FRONT;

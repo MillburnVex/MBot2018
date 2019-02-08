@@ -50,6 +50,8 @@ public:
 	double GetY();
 	double GetZ();
 
+	void Calibrate();
+
 	Vec3 getRaw();
 	Vec3 get();
 };

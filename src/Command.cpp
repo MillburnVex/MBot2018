@@ -25,7 +25,7 @@ class DriveCommands : public Command {
 public:
     DriveCommands() : Command(Controller::MASTER,
                               {Control::C_DRIVE_LINEAR, Control::C_DRIVE_ROTATE, Control::C_DRIVE_LINEAR_TO,
-                               Control::C_DRIVE_ROTATE_TO, Control::C_AIM}) {}
+                               Control::C_DRIVE_SET_ROTATION, Control::C_DRIVE_ROTATE_TO_ABSOLUTE, Control::C_AIM}) {}
 
     void Execute(std::vector<ControlPress> &values) override {
 		bool linearReleased = Commands::GetPressType(values, Control::C_DRIVE_LINEAR) == RELEASED;
@@ -33,7 +33,9 @@ public:
         int linear = Commands::GetValue(values, Control::C_DRIVE_LINEAR);
         int rotation = Commands::GetValue(values, Control::C_DRIVE_ROTATE);
         int linearTo = Commands::GetValue(values, Control::C_DRIVE_LINEAR_TO);
-        int rotateTo = Commands::GetValue(values, Control::C_DRIVE_ROTATE_TO);
+        int rotateTo = Commands::GetValue(values, Control::C_DRIVE_SET_ROTATION);
+		int rotateToAbsolute = Commands::GetValue(values, Control::C_DRIVE_ROTATE_TO_ABSOLUTE);
+
         bool aim = (Commands::GetPressType(values, Control::C_AIM) != PressType::PRESS_NOT_ACTIVE);
         if (aim) {
             Components::Execute(ActionType::DRIVE_LINEAR, 0);
@@ -49,8 +51,11 @@ public:
             if (rotation != CONTROL_NOT_ACTIVE) {
                 rotation = (rotation > 0 ? 127.0 : -127.0) * pow(std::abs(rotation) / 127.0, 17.0 / 7.0);
                 Components::Execute(ActionType::DRIVE_ROTATE, rotation);
-            } else if (rotateTo != CONTROL_NOT_ACTIVE) {
-                Components::Execute(ActionType::ROTATE_TO, rotateTo);
+			}
+			else if (rotateTo != CONTROL_NOT_ACTIVE) {
+				Components::Execute(ActionType::ROTATION_SET, rotateTo);
+			}else if (rotateToAbsolute != CONTROL_NOT_ACTIVE){
+				Components::Execute(ActionType::ROTATE_ABSOLUTE, rotateToAbsolute);
             } else if(rotateReleased) {
                 Components::Execute(ActionType::DRIVE_ROTATE, 0);
             }
@@ -60,7 +65,7 @@ public:
 };
 
 class ArmCommands : public Command {
-    const int HOLDANGLE = 300;
+    const int HOLDANGLE = 350;
     const int SCOREANGLE = 540;
     const int DOWNANGLE = 0;
     int pos = DOWNANGLE;
@@ -134,7 +139,7 @@ public:
         } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_SLOW) == PressType::PRESSED) {
             slowMode = !slowMode;
             Robot::GetMasterController().rumble(".");
-            Robot::GetMasterController().print(0, 1,
+            Robot::GetMasterController().print(0, 0,
                                                (slowMode) ? std::string("532").c_str() : std::string("600").c_str());
         }
         Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 532 : 600);

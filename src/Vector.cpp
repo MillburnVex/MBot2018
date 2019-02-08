@@ -51,3 +51,8 @@ Vec3 Vec3::operator/(double other)
 {
 	return operator*(1/other);
 }
+
+double Vec3::dot(Vec3 other)
+{
+	return 0.0;
+}
