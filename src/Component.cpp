@@ -69,7 +69,7 @@ class DriveComponent : public BotComponent {
 
 	bool beginStop = false;
 
-    const double MAX_ACCELERATION = 4;
+    const double MAX_ACCELERATION = 5;
 
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
@@ -81,10 +81,9 @@ class DriveComponent : public BotComponent {
 
     PID linearRotationCorrection = PID(0.0f, 0.0f, 0.0f, 1000, -1000);
 
-	PID rotationPID = PID(0.4f, 0.0f, 2.0f, 1000, -1000);
+	PID rotationPID = PID(0.45f, 0.0f, 2.5f, 1000, -1000);
 
-	PID rotationCorrection = PID(0.02f, 0.0f, 0.00f, 1000, -1000);
-
+	PID rotationCorrection = PID(0.017f, 0.0f, 0.0f, 1000, -1000);
 
 	double velocity;
 
@@ -302,7 +301,7 @@ public:
 
 
 		double leftVoltage = rotationPID.GetValue(Robot::GetSensor(SensorID::GYRO)->GetValue(), target);
-		leftVoltage = std::clamp(leftVoltage, -80.0, 80.0);
+		leftVoltage = std::clamp(leftVoltage, -60.0, 60.0);
 		double rightVoltage = -leftVoltage;
 
         Drive(rightVoltage, leftVoltage);

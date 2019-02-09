@@ -84,7 +84,7 @@ void FrontAuton(Team team) {
 
 	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * (860)); // turn to shot
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 55); // line up with flag
+	//Commands::Execute(C_DRIVE_LINEAR_TO, 55); // line up with flag
 	
 	DoubleShot();
 
@@ -98,7 +98,7 @@ void FrontAuton(Team team) {
 
     Commands::Release(C_BALL_LIFT_UP);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * (900)); // rotate before fully backing out
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * (920)); // rotate before fully backing out
 
 	if (doubleScrape) {
 		Commands::Release(C_BALL_LIFT_UP);
