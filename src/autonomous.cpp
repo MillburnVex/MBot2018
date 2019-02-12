@@ -27,15 +27,10 @@ bool park = true;
 
 void test() {
 	for (int i = 0; i < 5; i++) {
-		pros::delay(400);
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 1250); // turn to shot
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1000); // turn to shot
 
-		pros::delay(400);
-
-		Commands::Execute(C_DRIVE_LINEAR_TO, -1250); // turn to shot
-
-		pros::delay(400);
+		Commands::Execute(C_DRIVE_LINEAR_TO, -1000); // turn to shot
 	}
 
 	
@@ -82,19 +77,17 @@ void FrontAuton(Team team) {
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * (860)); // turn to shot
-
-	//Commands::Execute(C_DRIVE_LINEAR_TO, 55); // line up with flag
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // turn to shot	
 	
 	DoubleShot();
 
 	pros::delay(100);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1040);//1st bottom flag turn
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1000);//1st bottom flag turn
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 495); // push in
+	Commands::Execute(C_DRIVE_LINEAR_TO, 585); // push in
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, -565); // back out a little bit
+	Commands::Execute(C_DRIVE_LINEAR_TO, -645); // back out a little bit
 
     Commands::Release(C_BALL_LIFT_UP);
 
@@ -146,7 +139,7 @@ void FrontAuton(Team team) {
 		Commands::Release(C_BALL_LIFT_DOWN);
 	}
 	else if (park) {
-		Commands::Execute(C_DRIVE_LINEAR_TO, (-1370)); //back out to platform
+		Commands::Execute(C_DRIVE_LINEAR_TO, (-1410)); //back out to platform
 
 		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // rotate to platform
 
