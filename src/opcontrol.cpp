@@ -41,10 +41,6 @@ void opcontrol() {
 	uint32_t time = pros::millis();
 	while (true) {
 		Update();
-
-
-
 		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
-
 	}
 }

@@ -65,7 +65,7 @@ public:
 };
 
 class ArmCommands : public Command {
-    const int HOLDANGLE = 350;
+    const int HOLDANGLE = 300;
     const int SCOREANGLE = 540;
     const int DOWNANGLE = 0;
     int pos = DOWNANGLE;
@@ -128,7 +128,7 @@ public:
 class FlywheelCommand : public Command {
 public:
     FlywheelCommand() : Command(Controller::BOTH, {
-            Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW
+            Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_TOGGLE_SLOW
     }) {}
 
     bool slowMode = false;
@@ -136,7 +136,7 @@ public:
     void Execute(std::vector<ControlPress> &values) override {
         if ((Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::PRESSED)) {
             Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_FLYWHEEL_SET));
-        } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_SLOW) == PressType::PRESSED) {
+        } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_TOGGLE_SLOW) == PressType::PRESSED) {
             slowMode = !slowMode;
             Robot::GetMasterController().rumble(".");
             Robot::GetMasterController().print(0, 0,
@@ -238,7 +238,7 @@ public:
 	const int GUARANTEED_INTAKE_TICKS = 50;
 
     ShootCommand() : Command(Controller::BOTH, {
-            Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_SLOW, Control::C_DOUBLE_SHOT
+            Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_TOGGLE_SLOW, Control::C_DOUBLE_SHOT
     }) {}
 
     void Execute(std::vector<ControlPress> &values) override {

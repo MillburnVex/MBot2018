@@ -2,13 +2,13 @@
 
 pros::Vision camera(13, pros::E_VISION_ZERO_CENTER);
 
-int updateMillis = 5;
+int updateMillis = 15;
 
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 pros::Controller partner = pros::Controller(pros::E_CONTROLLER_PARTNER);
 
 Team team = RED;
-Position autonPosition = FRONT;
+Strategy strat = FRONT_PARK;
 
 bool manualMode = false;
 
@@ -20,8 +20,8 @@ Team Robot::GetTeam() {
 	return team;
 }
 
-Position Robot::GetAutonPosition() {
-	return autonPosition;
+Strategy Robot::GetAutonStrategy() {
+	return strat;
 }
 
 bool Robot::IsInManualMode() {
@@ -32,8 +32,8 @@ void Robot::SetTeam(Team t) {
 	team = t;
 }
 
-void Robot::SetAutonPosition(Position pos) {
-	autonPosition = pos;
+void Robot::SetAutonStrategy(Strategy newStrat) {
+	 strat = newStrat;
 }
 
 pros::Controller Robot::GetMasterController() {
@@ -49,10 +49,6 @@ void Robot::SetDriveBrakeMode(pros::motor_brake_mode_e_t mode) {
 	Robot::GetMotor(MotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->set_brake_mode(mode);
 	Robot::GetMotor(MotorID::DRIVE_RIGHT_BACK)->GetProsMotor()->set_brake_mode(mode);
 	Robot::GetMotor(MotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->set_brake_mode(mode);
-}
-
-int Robot::GetState() {
-    return 0;
 }
 
 pros::Vision Robot::GetCamera() {
@@ -84,8 +80,6 @@ void Robot::Init() {
 	new AnalogSensor(SensorID::INDEXER_SECOND);
 	new Accelerometer(SensorID::ACCELEROMETER);
 	new Gyro(SensorID::GYRO);
-
-
 }
 
 Sensor *Robot::GetSensor(SensorID id) {
