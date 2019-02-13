@@ -21,9 +21,9 @@ bool running = true;
 
 bool noParkFlip = false;
 
-bool doubleScrape = false;
+bool doubleScrape = true;
 
-bool park = true;
+bool park = false;
 
 void test() {
 	for (int i = 0; i < 5; i++) {
@@ -103,21 +103,30 @@ void FrontAuton(Team team) {
 
 		Commands::Execute(C_DRIVE_LINEAR_TO, -600); // go back to behind cap
 		 
-		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -175); // rotate to align with cap
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 450); // rotate to align with cap
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 347); // go up close to cap
+		Commands::Execute(C_DRIVE_LINEAR_TO, 360); // go up close to cap
 
-		if (Robot::BallLoaded()) {
-			Commands::Execute(C_SHOOT, 0, 150);
-		}
-
-		Commands::Execute(C_FLYWHEEL_SET, 565, 0);
+		//Commands::Execute(C_FLYWHEEL_SET, 565, 0);
 
 		DoubleScrape();
 
-		Commands::Execute(C_LOAD_BALL, 0);
+		Commands::Execute(C_DRIVE_LINEAR_TO, teamMultiplier * -400); // rotate to align with cap
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 300); // align with flag
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 0); // rotate to align flat
+
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1800); // drive to angle
+
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // rotate to align flat
+
+
+
+		//Commands::Execute(C_LOAD_BALL, 0);
+
+
+		//Commands::Execute(C_DRIVE_LINEAR_TO, 300); // align with flag
+
+
 
 		DoubleShot();
 		

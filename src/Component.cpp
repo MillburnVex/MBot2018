@@ -73,7 +73,7 @@ class DriveComponent : public BotComponent {
 
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
 
-    const double ROTATE_TOTAL_ERROR_THRESHOLD = 5;
+    const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
 
     const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 10;
 
