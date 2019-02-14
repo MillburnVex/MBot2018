@@ -9,7 +9,7 @@
 #include "PID.h"
 
 class FlywheelComponent : public BotComponent {
-	PID pid = PID(0.07f, 0.0f, 0.06f, 1000, -1000);
+	PID pid = PID(0.1f, 0.001f, 0.06f, 1000, -1000);
 public:
 
     int rpm = 600;
@@ -22,12 +22,14 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
         if (Components::IsActive(actions, ActionType::FLYWHEEL_RUN)) {
+			printf("setting value\n");
             rpm = Components::GetValue(actions, ActionType::FLYWHEEL_RUN);
+			//::Release(C_FLYWHEEL_SET);
         }
         double actualRpm = Robot::GetMotor(MotorID::FLYWHEEL)->GetVelocity();
         int voltageChange = pid.GetValue(actualRpm, rpm);
-		voltage = std::clamp(voltage + voltageChange, -127, 127);
-		//printf("actual rpm: %f, goal rpm: %d, voltage change: %d, final voltage: %d\n", actualRpm, rpm, voltageChange, voltage);
+		voltage = std::clamp(voltage + voltageChange, 70, 127);
+		printf("actual rpm: %f, goal rpm: %d, voltage change: %d, final voltage: %d\n", actualRpm, rpm, voltageChange, voltage);
         Robot::GetMotor(MotorID::FLYWHEEL)->SetVoltage(voltage);
     }
 };
@@ -75,11 +77,11 @@ class DriveComponent : public BotComponent {
 
     const double MAX_ROTATION_VOLTAGE = 60;
 
-    const double MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE = 10;
+    const double MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE = 15;
 
 	int goalRotation = 0;
 
-	PID rotationPID = PID(0.45f, 0.0f, 2.5f, 1000, -1000);
+	PID rotationPID = PID(0.49f, 0.0f, 2.5f, 1000, -1000);
 
 	PID rotationCorrection = PID(0.017f, 0.0f, 2.0f, 1000, -1000);
 

@@ -134,15 +134,20 @@ public:
     bool slowMode = false;
 
     void Execute(std::vector<ControlPress> &values) override {
-        if ((Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::PRESSED)) {
-            Components::Execute(ActionType::FLYWHEEL_RUN, Commands::GetValue(values, Control::C_FLYWHEEL_SET));
-        } else if (Commands::GetPressType(values, Control::C_FLYWHEEL_TOGGLE_SLOW) == PressType::PRESSED) {
-            slowMode = !slowMode;
-            Robot::GetMasterController().rumble(".");
-            Robot::GetMasterController().print(0, 0,
-                                               (slowMode) ? std::string("532").c_str() : std::string("600").c_str());
-        }
-        Components::Execute(ActionType::FLYWHEEL_RUN, (slowMode) ? 532 : 600);
+		int speed = 600;
+        
+		if (Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::REPEATED) {
+			speed = Commands::GetValue(values, Control::C_FLYWHEEL_SET);
+		}
+
+		if (Commands::GetPressType(values, Control::C_FLYWHEEL_TOGGLE_SLOW) == PressType::PRESSED) {
+			slowMode = !slowMode;
+			Robot::GetMasterController().rumble(".");
+			Robot::GetMasterController().print(0, 0,
+				(slowMode) ? std::string("532").c_str() : std::string("600").c_str());
+			speed = 532;
+		}
+		Components::Execute(ActionType::FLYWHEEL_RUN, speed);
     }
 };
 
