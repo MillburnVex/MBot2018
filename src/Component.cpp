@@ -22,9 +22,7 @@ public:
 
     void Execute(std::vector<ComponentAction> &actions) override {
         if (Components::IsActive(actions, ActionType::FLYWHEEL_RUN)) {
-			printf("setting value\n");
             rpm = Components::GetValue(actions, ActionType::FLYWHEEL_RUN);
-			//::Release(C_FLYWHEEL_SET);
         }
         double actualRpm = Robot::GetMotor(MotorID::FLYWHEEL)->GetVelocity();
         int voltageChange = pid.GetValue(actualRpm, rpm);

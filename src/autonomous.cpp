@@ -39,13 +39,11 @@ void test() {
 void StationaryDoubleShot() {
     Commands::Execute(C_SHOOT, 0, 300); // shoot top flag
 
-	Commands::Release(C_FLYWHEEL_SET);
-
 	pros::delay(10);
 
-    Commands::Press(C_FLYWHEEL_SET, 470); // prepare flywheel for stationary middle shot
+    Commands::Press(C_FLYWHEEL_SET, 340); // prepare flywheel for stationary middle shot
 
-    pros::delay(1500);
+    pros::delay(1000);
 
     Commands::Execute(C_SHOOT, 0, 300);
 }
@@ -59,7 +57,6 @@ void DoubleShot() {
 }
 
 void DoubleScrape() {
-	Commands::Press(C_BALL_LIFT_UP);
 
     Commands::Press(C_DRIVE_LINEAR, 50);
     pros::delay(500);
@@ -67,12 +64,14 @@ void DoubleScrape() {
     Commands::Release(C_DRIVE_LINEAR);
     pros::delay(20);
 
+	Commands::Press(C_BALL_LIFT_UP);
     Commands::Press(C_DRIVE_LINEAR, -75);
     pros::delay(500);
 
     Commands::Release(C_DRIVE_LINEAR);
-    pros::delay(800);
-
+    pros::delay(1000);
+	Commands::Execute(C_LOAD_BALL, 0);
+	Commands::Release(C_BALL_LIFT_UP);
 }
 
 void FrontAuton(Team team) {
@@ -98,7 +97,7 @@ void FrontAuton(Team team) {
     pros::delay(100);
    
 	if (doubleScrape) {
-		Commands::Press(C_FLYWHEEL_SET, 550);
+		Commands::Execute(C_FLYWHEEL_SET, 550);
 
 		Commands::Release(C_BALL_LIFT_UP);
 
@@ -110,11 +109,11 @@ void FrontAuton(Team team) {
 
 		DoubleScrape();
 
-		//Commands::Execute(C_DRIVE_LINEAR_TO, teamMultiplier * -200); // rotate to align with cap
+		// if no ball is loaded after some time, we should reverse intake and flip cap
 
 		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 420); // rotate to align flat
 
-		Commands::Execute(C_LOAD_BALL, 0); // guarantee ball is loaded
+		Commands::Execute(C_DRIVE_LINEAR_TO, 100); // rotate to align with cap
 
 		StationaryDoubleShot();
 	}else{
@@ -249,8 +248,7 @@ void autonomous() {
     }
     */
     //test();
-    FrontAuton(BLUE);
-    pros::delay(100);
+	FrontAuton(BLUE);
     Commands::Clear();
     running = false;
 

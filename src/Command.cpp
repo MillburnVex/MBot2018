@@ -126,6 +126,7 @@ public:
 };
 
 class FlywheelCommand : public Command {
+	int speed = 600;
 public:
     FlywheelCommand() : Command(Controller::BOTH, {
             Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_TOGGLE_SLOW
@@ -134,10 +135,10 @@ public:
     bool slowMode = false;
 
     void Execute(std::vector<ControlPress> &values) override {
-		int speed = 600;
         
-		if (Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::REPEATED) {
+		if (Commands::GetPressType(values, Control::C_FLYWHEEL_SET) == PressType::PRESSED) {
 			speed = Commands::GetValue(values, Control::C_FLYWHEEL_SET);
+			Commands::Release(C_FLYWHEEL_SET);
 		}
 
 		if (Commands::GetPressType(values, Control::C_FLYWHEEL_TOGGLE_SLOW) == PressType::PRESSED) {
@@ -145,7 +146,12 @@ public:
 			Robot::GetMasterController().rumble(".");
 			Robot::GetMasterController().print(0, 0,
 				(slowMode) ? std::string("532").c_str() : std::string("600").c_str());
-			speed = 532;
+			if (slowMode) {
+				speed = 532;
+			}
+			else {
+				speed = 600;
+			}
 		}
 		Components::Execute(ActionType::FLYWHEEL_RUN, speed);
     }
