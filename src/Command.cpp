@@ -117,10 +117,10 @@ public:
 		}
 		if (!up && !down) {
             Components::Execute(ActionType::REAPER_RUN, -25);
-        } else if (up) {
-            Components::Execute(ActionType::REAPER_RUN, -127);
-        } else {
+        } else if (down) {
             Components::Execute(ActionType::REAPER_RUN, 127);
+        } else {
+            Components::Execute(ActionType::REAPER_RUN, -127);
         }
     }
 };
@@ -315,6 +315,7 @@ public:
                     // ball is too far in
                     if(secondZone) {
                         Components::Execute(ActionType::INDEXER_RUN, 40);
+						Components::Execute(ActionType::REAPER_RUN, 0);
                     } else {
                         // just right
                         Components::Execute(ActionType::INDEXER_RUN, 0);
@@ -328,8 +329,8 @@ public:
 
 void Commands::Init() {
     new DriveCommands();
-    new ShootCommand();
     new ReaperCommands();
+    new ShootCommand();
 	new DoubleShotCommand();
     new FlywheelCommand();
     new VisionCommand();

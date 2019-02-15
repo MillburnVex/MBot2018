@@ -26,26 +26,28 @@ bool doubleScrape = true;
 bool park = false;
 
 void test() {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, 1000);
+        Commands::Execute(C_DRIVE_LINEAR_TO, 1500);
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, -1000);
+        Commands::Execute(C_DRIVE_LINEAR_TO, -1500);
     }
 
 
 }
 
 void StationaryDoubleShot() {
+	Commands::Press(C_BALL_LIFT_UP);
     Commands::Execute(C_SHOOT, 0, 300); // shoot top flag
 
 	pros::delay(10);
 
-    Commands::Press(C_FLYWHEEL_SET, 340); // prepare flywheel for stationary middle shot
+    Commands::Press(C_FLYWHEEL_SET, 445); // prepare flywheel for stationary middle shot
 
     pros::delay(1000);
 
     Commands::Execute(C_SHOOT, 0, 300);
+	Commands::Release(C_BALL_LIFT_UP);
 }
 
 void DoubleShot() {
@@ -92,6 +94,8 @@ void FrontAuton(Team team) {
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // turn to shot
 
+	Commands::Execute(C_DRIVE_LINEAR_TO, -50);
+
     DoubleShot();
 
     pros::delay(100);
@@ -101,11 +105,11 @@ void FrontAuton(Team team) {
 
 		Commands::Release(C_BALL_LIFT_UP);
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, -700); // go back to behind cap
+		Commands::Execute(C_DRIVE_LINEAR_TO, -740); // go back to behind cap
 
 		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 480); // rotate to align with cap
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 390); // go up close to cap
+		Commands::Execute(C_DRIVE_LINEAR_TO, 450); // go up close to cap
 
 		DoubleScrape();
 
@@ -113,16 +117,16 @@ void FrontAuton(Team team) {
 
 		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 420); // rotate to align flat
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 100); // rotate to align with cap
+		Commands::Execute(C_DRIVE_LINEAR_TO, 100); // go up a bit to flag
 
 		StationaryDoubleShot();
 	}else{
 
-		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1060); // 1st bottom flag turn
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1020); // 1st bottom flag turn
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, 585); // push in, score bottom flag
+		Commands::Execute(C_DRIVE_LINEAR_TO, 580); // push in, score bottom flag
 
-		Commands::Execute(C_DRIVE_LINEAR_TO, -645); // back out
+		Commands::Execute(C_DRIVE_LINEAR_TO, -640); // back out
 
 		Commands::Release(C_BALL_LIFT_UP);
 
@@ -230,7 +234,6 @@ void AutonomousUpdate(void *params) {
     while (running) {
         Commands::Update();
         Components::Update();
-		printf("time %d\n", pros::millis());
         pros::Task::delay_until(&time, Robot::GetUpdateMillis());
     }
 }
@@ -247,8 +250,9 @@ void autonomous() {
         BackAuton(Robot::GetTeam());
     }
     */
-    //test();
+	pros::delay(20);
 	FrontAuton(BLUE);
+	pros::delay(100);
     Commands::Clear();
     running = false;
 
