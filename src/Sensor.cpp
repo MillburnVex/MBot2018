@@ -72,6 +72,10 @@ Gyro::Gyro(SensorID id) : Sensor(id), prosGyro(pros::ADIGyro(id, 1)) {
 
 }
 
+void Gyro::Reset() {
+	prosGyro.reset();
+}
+
 int32_t Gyro::GetValue() {
 	return prosGyro.get_value();
 }

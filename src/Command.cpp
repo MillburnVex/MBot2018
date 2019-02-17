@@ -244,9 +244,9 @@ public:
 
     int ticksHeldDown = -1;
 
-    const int GUARANTEED_SHOOT_TICKS = 50;
+    const int GUARANTEED_SHOOT_TICKS = 100;
 
-	const int GUARANTEED_INTAKE_TICKS = 50;
+	const int GUARANTEED_INTAKE_TICKS = 100;
 
     ShootCommand() : Command(Controller::BOTH, {
             Control::C_SHOOT, Control::C_AIM, Control::C_FLYWHEEL_SET, Control::C_FLYWHEEL_TOGGLE_SLOW, Control::C_DOUBLE_SHOT
@@ -256,6 +256,8 @@ public:
 
         bool firstZone = Robot::BallInFirstZone();
         bool secondZone = Robot::BallInSecondZone();
+
+		printf("first: %d, second: %d\n", Robot::GetSensor(SensorID::INDEXER_FIRST)->GetValue(), Robot::GetSensor(SensorID::INDEXER_SECOND)->GetValue());
 
         if(Commands::GetPressType(values, Control::C_SHOOT) == PressType::PRESSED) {
             shooting = true;
@@ -314,8 +316,8 @@ public:
                 } else {
                     // ball is too far in
                     if(secondZone) {
-                        Components::Execute(ActionType::INDEXER_RUN, 40);
-						Components::Execute(ActionType::REAPER_RUN, 0);
+                        Components::Execute(ActionType::INDEXER_RUN, 80);
+						Components::Execute(ActionType::REAPER_RUN, 70);
                     } else {
                         // just right
                         Components::Execute(ActionType::INDEXER_RUN, 0);
@@ -329,8 +331,8 @@ public:
 
 void Commands::Init() {
     new DriveCommands();
-    new ReaperCommands();
     new ShootCommand();
+    new ReaperCommands();
 	new DoubleShotCommand();
     new FlywheelCommand();
     new VisionCommand();
@@ -519,7 +521,7 @@ void Commands::Update() {
 
         } else
             ++i;
-
+		
     }
     commandMutex.give();
 

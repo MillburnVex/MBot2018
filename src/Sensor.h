@@ -8,7 +8,8 @@ typedef enum {
 	INDEXER_FIRST = 1,
 	INDEXER_SECOND = 3,
 	ACCELEROMETER = 6,
-	GYRO = 5
+	GYRO = 5,
+	GYRO_2 = 7
 } SensorID;
 
 class Sensor {
@@ -62,6 +63,8 @@ private:
 
 public:
 	explicit Gyro(SensorID id);
+
+	void Reset();
 
 	std::int32_t GetValue() override;
 };

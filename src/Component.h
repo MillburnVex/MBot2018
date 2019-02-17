@@ -38,6 +38,8 @@ namespace Components {
 
     void Execute(ActionType actionType, int value);
 
+	void ResetInitialPositions();
+
     void Update();
 
     void Init();

@@ -4,6 +4,8 @@ pros::Vision camera(13, pros::E_VISION_ZERO_CENTER);
 
 int updateMillis = 5;
 
+int rotationOffset = 0;
+
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 pros::Controller partner = pros::Controller(pros::E_CONTROLLER_PARTNER);
 
@@ -63,6 +65,18 @@ bool Robot::BallInFirstZone() {
     return GetSensor(SensorID::INDEXER_FIRST)->GetValue() < 2300;
 }
 
+int Robot::GetRotation() {
+	return (int) (((float) (GetSensor(GYRO)->GetValue() + GetSensor(GYRO_2)->GetValue())) / 2.0f) + rotationOffset;
+}
+
+void Robot::ResetRotation(int offset) {
+	auto gyro1 = static_cast<Gyro*>(GetSensor(GYRO));
+	auto gyro2 = static_cast<Gyro*>(GetSensor(GYRO_2));
+	gyro1->Reset();
+	gyro2->Reset();
+	rotationOffset = offset;
+}
+
 bool Robot::BallLoaded() {
     return BallInSecondZone() || BallInFirstZone();
 }
@@ -80,6 +94,7 @@ void Robot::Init() {
 	new AnalogSensor(SensorID::INDEXER_SECOND);
 	new Accelerometer(SensorID::ACCELEROMETER);
 	new Gyro(SensorID::GYRO);
+	new Gyro(SensorID::GYRO_2);
 }
 
 Sensor *Robot::GetSensor(SensorID id) {

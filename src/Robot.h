@@ -38,6 +38,10 @@ namespace Robot {
 
     bool BallLoaded();
 
+	int GetRotation();
+
+	void ResetRotation(int offset = 0);
+
 	bool IsInManualMode();
 
     void Init();

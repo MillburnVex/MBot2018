@@ -8,6 +8,7 @@
 #include "Command.h"
 #include "PID.h"
 
+
 class FlywheelComponent : public BotComponent {
 	PID pid = PID(0.1f, 0.001f, 0.06f, 1000, -1000);
 public:
@@ -79,7 +80,7 @@ class DriveComponent : public BotComponent {
 
 	int goalRotation = 0;
 
-	PID rotationPID = PID(0.53f, 0.0f, 2.5f, 1000, -1000);
+	PID rotationPID = PID(0.55f, 0.0f, 2.5f, 1000, -1000);
 
 	PID rotationCorrection = PID(0.65f, 0.0f, 0.0f, 1000, -1000);
 
@@ -183,6 +184,13 @@ public:
 		SetValue(initialPositions, DRIVE_LEFT_BACK, Robot::GetMotor(DRIVE_LEFT_BACK)->GetPosition());
 	}
 
+	void UpdateInitialPositions(double rightPosition, double leftPosition) {
+		SetValue(initialPositions, DRIVE_RIGHT_FRONT, rightPosition);
+		SetValue(initialPositions, DRIVE_RIGHT_BACK, rightPosition);
+		SetValue(initialPositions, DRIVE_LEFT_FRONT, leftPosition);
+		SetValue(initialPositions, DRIVE_LEFT_BACK, leftPosition);
+	}
+
 	double GetGoalVoltage(MotorID id) {
 		return GetValue(goalVoltages, id);
 	}
@@ -212,6 +220,13 @@ public:
 		double leftError = std::abs(leftGoalPositionRelative -
 			(GetRelativePosition(DRIVE_LEFT_FRONT) + GetRelativePosition(DRIVE_LEFT_BACK)) / 2);
 		return (rightError + leftError) < threshold;
+	}
+
+	int Sign(double d) {
+		if (d < 0) {
+			return -1;
+		}
+		return 1;
 	}
 
 	double GetGoalVoltage(MotorID id, int relativeGoalPosition, std::array<std::pair<MotorID, PID> *, 4> pids) {
@@ -247,7 +262,7 @@ public:
 		//printf("   right voltage: %f\n", rightVoltage);
 		double leftVoltage = (GetGoalVoltage(DRIVE_LEFT_FRONT, goalPositionRelative, linearPids) + GetGoalVoltage(DRIVE_LEFT_BACK, goalPositionRelative, linearPids)) / 2;
 		//printf("   left voltage: %f\n", leftVoltage);
-		double actual = Robot::GetSensor(SensorID::GYRO)->GetValue();
+		double actual = Robot::GetRotation();
 		double error = rotationCorrection.GetValue(actual, goalRotation);
 		error = std::clamp(error, -MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE, MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE);
 		printf("target %d actual %f pid value %f\n", goalRotation, actual, error);
@@ -262,11 +277,11 @@ public:
     void RotateTo(int goalPositionRelative, bool absolute) { 
 		int target = goalPositionRelative;
 		if (!absolute) target += goalRotation;
-        if (std::abs(target - Robot::GetSensor(SensorID::GYRO)->GetValue()) < ROTATE_TOTAL_ERROR_THRESHOLD && NotMoving()) {
+        if (std::abs(target - Robot::GetRotation()) < ROTATE_TOTAL_ERROR_THRESHOLD && NotMoving()) {
 			Drive(0, 0);
 			UpdateGoalVoltages(0, 0);
 			Commands::Release(C_DRIVE_ROTATE_TO_ABSOLUTE);
-            UpdateInitialPositions();
+			UpdateInitialPositions();
 			ResetPIDS();
 			//printf("rotation done              ----------------------\n");
 			goalRotation = target;
@@ -278,7 +293,7 @@ public:
 		//printf("target: %d\n", target);
 		//printf("initial: %d\n", initialRotation);
 
-		double leftVoltage = rotationPID.GetValue(Robot::GetSensor(SensorID::GYRO)->GetValue(), target);
+		double leftVoltage = rotationPID.GetValue(Robot::GetRotation(), target);
 		leftVoltage = std::clamp(leftVoltage, -MAX_ROTATION_VOLTAGE, MAX_ROTATION_VOLTAGE);
 		double rightVoltage = -leftVoltage;
 
@@ -309,6 +324,8 @@ public:
         }
     }
 };
+
+DriveComponent* drive = NULL;
 
 class ReaperComponent : public BotComponent {
 public:
@@ -371,8 +388,12 @@ void Components::Update() {
     BotComponent::queue.clear();
 }
 
+void Components::ResetInitialPositions() {
+	drive->UpdateInitialPositions(0, 0);
+}
+
 void Components::Init() {
-    new DriveComponent();
+    drive = new DriveComponent();
     new FlywheelComponent();
     new ReaperComponent();
     new IndexerComponent();

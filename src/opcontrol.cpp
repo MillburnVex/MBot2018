@@ -5,6 +5,7 @@
 #include "Robot.h"
 
 void Update() {
+	printf("rotation: %d\n", Robot::GetRotation());
     Commands::Update();
     Components::Update();
 }
