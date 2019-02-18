@@ -21,9 +21,11 @@ bool running = true;
 
 bool noParkFlip = false;
 
-bool doubleScrape = true;
+bool doubleScrape = false;
 
 bool park = false;
+
+bool parkAndCapScore = true;
 
 void test() {
     for (int i = 0; i < 10; i++) {
@@ -127,7 +129,7 @@ void FrontAuton(Team team) {
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // turn to shot
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, (team == BLUE ? -50 : 60));
+	Commands::Execute(C_DRIVE_LINEAR_TO, (team == BLUE ? -65 : 60));
 
     DoubleShot();
 
@@ -183,7 +185,9 @@ void FrontAuton(Team team) {
 
 		if (noParkFlip) {
 
-			Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // rotate to cap
+			Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -30 * teamMultiplier); // rotate to cap
+
+			Commands::Execute(C_DRIVE_LINEAR_TO, 60);
 
 			FlipCap();
 
@@ -224,48 +228,71 @@ void BackAuton(Team team) {
     pros::delay(20);
 
     Commands::Press(C_BALL_LIFT_UP);
-    Commands::Execute(C_DRIVE_LINEAR_TO, 1250); // get ball under cap
+	Commands::Press(C_FLYWHEEL_SET, 560);
+    Commands::Execute(C_DRIVE_LINEAR_TO, 1270); // get ball under cap
 
-    Commands::Execute(C_FLYWHEEL_TOGGLE_SLOW, 0, 0);
+    Commands::Execute(C_DRIVE_LINEAR_TO, -170); //drive back
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -150); //drive back
-
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 890); // turn to middle flags
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 775); // turn to middle flags
+	pros::delay(300);
 
     Commands::Execute(C_SHOOT, 0, 300); // shoot top flag
 
-    Commands::Execute(C_SHOOT, 0, 300); // shoot middle flag
+	Commands::Execute(C_SHOOT, 0, 300); // shoot middle flag
 
-    Commands::Execute(C_FLYWHEEL_TOGGLE_SLOW, 0, 0);
+	pros::delay(300);
+
+    Commands::Press(C_FLYWHEEL_SET, 600);
 
     Commands::Release(C_BALL_LIFT_UP);
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -350);//wall
-    pros::delay(100);
+	if (park) {
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -1200);//back into wall
-    pros::delay(100);
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 890); // rotate to platform
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 350);//
-    pros::delay(100);
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1100); // park
+	}
+	else if (parkAndCapScore) {
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1250); // rotate to back into cap
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 500);//move to row
-    pros::delay(100);
+		Commands::Execute(C_DRIVE_LINEAR_TO, -550); // pick up cap
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -350, 800);//turn to platform
-    pros::delay(100);
+		pros::delay(300);
 
+		Commands::Press(C_ARM_UP);
+		pros::delay(Robot::GetUpdateMillis());
+		Commands::Release(C_ARM_UP);
 
-    Commands::Press(C_DRIVE_LINEAR, -100);//push in
-    pros::delay(600);
-    Commands::Release(C_DRIVE_LINEAR);
+		pros::delay(600);
+		
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // get ready to back up to pole
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 1800); // drive onto platform
-    pros::delay(100);
+		Commands::Execute(C_DRIVE_LINEAR_TO, -500); // back up to pole
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 0);//back out
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -900);
 
+		Commands::Press(C_DRIVE_LINEAR, 80); // drive into pole
 
+		pros::delay(800);
+
+		Commands::Release(C_DRIVE_LINEAR);
+
+		Commands::Press(C_ARM_UP);
+		pros::delay(Robot::GetUpdateMillis());
+		Commands::Release(C_ARM_UP); // score cap
+
+		pros::delay(800); // wait for score
+
+		Commands::Execute(C_DRIVE_LINEAR_TO, -200);
+
+		Commands::Press(C_ARM_DOWN);
+		pros::delay(Robot::GetUpdateMillis());
+		Commands::Release(C_ARM_DOWN); // lower arm
+
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 700); // rotate to platforms
+
+		Commands::Execute(C_DRIVE_LINEAR_TO, 1350); // park
+	}
 }
 
 
@@ -416,7 +443,7 @@ void autonomous() {
     }
     */
 	pros::delay(20);
-	FrontAuton(BLUE);
+	BackAuton(BLUE);
 	pros::delay(100);
     Commands::Clear();
     running = false;
