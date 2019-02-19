@@ -15,15 +15,15 @@ Strategy strat = FRONT_PARK;
 bool manualMode = false;
 
 int Robot::GetUpdateMillis() {
-	return updateMillis;
+    return updateMillis;
 }
 
 Team Robot::GetTeam() {
-	return team;
+    return team;
 }
 
 Strategy Robot::GetAutonStrategy() {
-	return strat;
+    return strat;
 }
 
 bool Robot::IsInManualMode() {
@@ -31,11 +31,11 @@ bool Robot::IsInManualMode() {
 }
 
 void Robot::SetTeam(Team t) {
-	team = t;
+    team = t;
 }
 
 void Robot::SetAutonStrategy(Strategy newStrat) {
-	 strat = newStrat;
+    strat = newStrat;
 }
 
 pros::Controller Robot::GetMasterController() {
@@ -47,14 +47,14 @@ pros::Controller Robot::GetPartnerController() {
 }
 
 void Robot::SetDriveBrakeMode(pros::motor_brake_mode_e_t mode) {
-	Robot::GetMotor(MotorID::DRIVE_LEFT_BACK)->GetProsMotor()->set_brake_mode(mode);
-	Robot::GetMotor(MotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->set_brake_mode(mode);
-	Robot::GetMotor(MotorID::DRIVE_RIGHT_BACK)->GetProsMotor()->set_brake_mode(mode);
-	Robot::GetMotor(MotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->set_brake_mode(mode);
+    Robot::GetMotor(MotorID::DRIVE_LEFT_BACK)->GetProsMotor()->set_brake_mode(mode);
+    Robot::GetMotor(MotorID::DRIVE_LEFT_FRONT)->GetProsMotor()->set_brake_mode(mode);
+    Robot::GetMotor(MotorID::DRIVE_RIGHT_BACK)->GetProsMotor()->set_brake_mode(mode);
+    Robot::GetMotor(MotorID::DRIVE_RIGHT_FRONT)->GetProsMotor()->set_brake_mode(mode);
 }
 
 pros::Vision Robot::GetCamera() {
-	return camera;
+    return camera;
 }
 
 bool Robot::BallInSecondZone() {
@@ -66,15 +66,15 @@ bool Robot::BallInFirstZone() {
 }
 
 int Robot::GetRotation() {
-	return (int) (((float) (GetSensor(GYRO)->GetValue() + GetSensor(GYRO_2)->GetValue())) / 2.0f) + rotationOffset;
+    return (int) (((float) (GetSensor(GYRO)->GetValue() + GetSensor(GYRO_2)->GetValue())) / 2.0f) + rotationOffset;
 }
 
 void Robot::ResetRotation(int offset) {
-	auto gyro1 = static_cast<Gyro*>(GetSensor(GYRO));
-	auto gyro2 = static_cast<Gyro*>(GetSensor(GYRO_2));
-	gyro1->Reset();
-	gyro2->Reset();
-	rotationOffset = offset;
+    auto gyro1 = static_cast<Gyro *>(GetSensor(GYRO));
+    auto gyro2 = static_cast<Gyro *>(GetSensor(GYRO_2));
+    gyro1->Reset();
+    gyro2->Reset();
+    rotationOffset = offset;
 }
 
 bool Robot::BallLoaded() {
@@ -89,12 +89,12 @@ void Robot::Init() {
     new Motor(MotorConfig(MotorID::FLYWHEEL, true, pros::E_MOTOR_GEARSET_06));
     new Motor(MotorID::BALL_LIFT);
     new Motor(MotorConfig(MotorID::INDEXER, false, pros::E_MOTOR_GEARSET_06));
-	new Motor(MotorID::ARM);
+    new Motor(MotorID::ARM);
     new AnalogSensor(SensorID::INDEXER_FIRST);
-	new AnalogSensor(SensorID::INDEXER_SECOND);
-	new Accelerometer(SensorID::ACCELEROMETER);
-	new Gyro(SensorID::GYRO);
-	new Gyro(SensorID::GYRO_2);
+    new AnalogSensor(SensorID::INDEXER_SECOND);
+    new Accelerometer(SensorID::ACCELEROMETER);
+    new Gyro(SensorID::GYRO);
+    new Gyro(SensorID::GYRO_2);
 }
 
 Sensor *Robot::GetSensor(SensorID id) {

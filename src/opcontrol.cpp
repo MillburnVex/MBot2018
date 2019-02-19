@@ -5,7 +5,7 @@
 #include "Robot.h"
 
 void Update() {
-	printf("rotation: %d\n", Robot::GetRotation());
+    printf("rotation: %d\n", Robot::GetRotation());
     Commands::Update();
     Components::Update();
 }
@@ -24,10 +24,10 @@ void Update() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	static_cast<Accelerometer*>(Robot::GetSensor(SensorID::ACCELEROMETER))->Calibrate();
+    static_cast<Accelerometer *>(Robot::GetSensor(SensorID::ACCELEROMETER))->Calibrate();
 
     Robot::SetDriveBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-	Commands::Clear();
+    Commands::Clear();
     pros::c::controller_clear(pros::E_CONTROLLER_MASTER);
     while (!Robot::GetMasterController().is_connected()) {
         pros::lcd::print(1, "Connect master controller!");
@@ -38,10 +38,10 @@ void opcontrol() {
         pros::Task::delay(500);
     }
     pros::lcd::clear();
-	
-	uint32_t time = pros::millis();
-	while (true) {
-		Update();
-		pros::Task::delay_until(&time, Robot::GetUpdateMillis());
-	}
+
+    uint32_t time = pros::millis();
+    while (true) {
+        Update();
+        pros::Task::delay_until(&time, Robot::GetUpdateMillis());
+    }
 }

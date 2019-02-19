@@ -5,11 +5,11 @@
 #include "Vector.h"
 
 typedef enum {
-	INDEXER_FIRST = 1,
-	INDEXER_SECOND = 3,
-	ACCELEROMETER = 6,
-	GYRO = 5,
-	GYRO_2 = 7
+    INDEXER_FIRST = 1,
+    INDEXER_SECOND = 3,
+    ACCELEROMETER = 6,
+    GYRO = 5,
+    GYRO_2 = 7
 } SensorID;
 
 class Sensor {
@@ -35,45 +35,49 @@ public:
 
 class Accelerometer : public Sensor {
 private:
-	pros::ADIAccelerometer prosAccelX;
-	pros::ADIAccelerometer prosAccelY;
-	pros::ADIAccelerometer prosAccelZ;
+    pros::ADIAccelerometer prosAccelX;
+    pros::ADIAccelerometer prosAccelY;
+    pros::ADIAccelerometer prosAccelZ;
 
-	Vec3 basisVector;
+    Vec3 basisVector;
 
-	double STEP;
+    double STEP;
 
 public:
-	explicit Accelerometer(SensorID id);
+    explicit Accelerometer(SensorID id);
 
-	std::int32_t GetValue() override;
-	double GetX();
-	double GetY();
-	double GetZ();
+    std::int32_t GetValue() override;
 
-	void Calibrate();
+    double GetX();
 
-	Vec3 getRaw();
-	Vec3 get();
+    double GetY();
+
+    double GetZ();
+
+    void Calibrate();
+
+    Vec3 getRaw();
+
+    Vec3 get();
 };
 
 class Gyro : public Sensor {
 private:
-	pros::ADIGyro prosGyro;
+    pros::ADIGyro prosGyro;
 
 public:
-	explicit Gyro(SensorID id);
+    explicit Gyro(SensorID id);
 
-	void Reset();
+    void Reset();
 
-	std::int32_t GetValue() override;
+    std::int32_t GetValue() override;
 };
 
 class AnalogSensor : public Sensor {
 private:
-	pros::ADIAnalogIn sensor;
+    pros::ADIAnalogIn sensor;
 public:
-	explicit AnalogSensor(SensorID id);
+    explicit AnalogSensor(SensorID id);
 
-	std::int32_t GetValue() override;
+    std::int32_t GetValue() override;
 };

@@ -16,29 +16,29 @@
 class BotComponent {
 public:
     static std::vector<BotComponent *> allComponents;
-    static std::vector<ComponentAction> queue;
+    static std::vector <ComponentAction> queue;
 
-    std::vector<ActionType> validActions;
+    std::vector <ActionType> validActions;
 
     std::string name;
 
-    BotComponent(std::string name, std::vector<ActionType> validActions);
+    BotComponent(std::string name, std::vector <ActionType> validActions);
 
-    virtual void Execute(std::vector<ComponentAction> &actions) {
+    virtual void Execute(std::vector <ComponentAction> &actions) {
     }
 };
 
 namespace Components {
 
-    bool IsActive(std::vector<ComponentAction> &actions, ActionType actionType);
+    bool IsActive(std::vector <ComponentAction> &actions, ActionType actionType);
 
-    int GetValue(std::vector<ComponentAction> &actions, ActionType actionType);
+    int GetValue(std::vector <ComponentAction> &actions, ActionType actionType);
 
     void Execute(ActionType actionType);
 
     void Execute(ActionType actionType, int value);
 
-	void ResetInitialPositions();
+    void ResetInitialPositions();
 
     void Update();
 
