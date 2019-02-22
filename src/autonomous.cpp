@@ -308,9 +308,7 @@ void Skills() {
     auto team = RED;
 
 	pros::delay(20);
-	//Robot::ResetRotation(-900 * teamMultiplier);
 	Commands::Press(C_BALL_LIFT_UP);
-	/*
 	Commands::Execute(C_DRIVE_LINEAR_TO, 1250);
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
@@ -319,7 +317,7 @@ void Skills() {
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, 30);
 
-	DoubleShot(500);
+	DoubleShot();
 
 	pros::delay(100);
 
@@ -396,9 +394,9 @@ void Skills() {
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 930); // rotate towards bottom flag
 
-    Commands::Press(C_DRIVE_LINEAR, 100); // BOTTOM FLAG THREE
+    Commands::Press(C_DRIVE_LINEAR, 120); // BOTTOM FLAG THREE
 
-    pros::delay(1400);
+    pros::delay(1200);
 
     Commands::Release(C_DRIVE_LINEAR);
 
@@ -424,9 +422,9 @@ void Skills() {
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // rotate to face other wall
 
-	Commands::Press(C_DRIVE_LINEAR, 120); // ALIGN WITH WALL
+	Commands::Press(C_DRIVE_LINEAR, 127); // ALIGN WITH WALL
 
-	pros::delay(600);
+	pros::delay(400);
 
 	Commands::Release(C_DRIVE_LINEAR);
 
@@ -440,19 +438,19 @@ void Skills() {
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, 2100); // drive over to other side
 
-	Commands::Press(C_DRIVE_LINEAR, 120); // ALIGN WITH WALL
+	Commands::Press(C_DRIVE_LINEAR, 127); // ALIGN WITH WALL
 
-	pros::delay(400);
+	pros::delay(300);
 
 	Commands::Release(C_DRIVE_LINEAR);
 
-	pros::delay(200);
+	pros::delay(100);
 
 	Robot::ResetRotation(teamMultiplier * -900); // ALIGNED WITH WALL - GYROS RESET
-	*/
-	//Commands::Execute(C_DRIVE_LINEAR_TO, -90); // back up from wall
 
-	//Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -10); // rotate so that back is facing cap
+	Commands::Execute(C_DRIVE_LINEAR_TO, -90); // back up from wall
+
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -10); // rotate so that back is facing cap
 
 	Commands::Execute(C_DRIVE_LINEAR_TO, -1000); // back up into cap
 
@@ -480,6 +478,9 @@ void Skills() {
 
 	Commands::Release(C_DRIVE_LINEAR);
 
+	Robot::ResetRotation(-900 * teamMultiplier); // ROBOT ALIGNED, GYROS RESET
+
+	Commands::Execute(C_FLYWHEEL_SET, 560); // prepare to hit far flags
 	Commands::Press(C_ARM_UP);
 	pros::delay(10);
 	Commands::Release(C_ARM_UP); // score cap
@@ -492,18 +493,40 @@ void Skills() {
 	pros::delay(10);
 	Commands::Release(C_ARM_DOWN);
 
-	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -1800 * teamMultiplier); // prepare to flip
+	Commands::Press(C_BALL_LIFT_UP);
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 900 * teamMultiplier);
 
-	Commands::Press(C_DRIVE_LINEAR_TO, 1000); // drive near cap
+	Commands::Execute(C_DRIVE_LINEAR_TO, 200); // hopefully get ball from under cap
 
-	FlipCap();
+	Commands::Execute(C_DRIVE_LINEAR_TO, -100); // back up from cap
 
-	Commands::Press(C_DRIVE_LINEAR_TO, -2000); // drive near cap
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 780 * teamMultiplier); // prepare to score flags
 
+	Commands::Execute(C_LOAD_BALL, 0, 600); // guarantee ball is loaded
 
-	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -2700 * teamMultiplier); // rotate towards flags
+	Commands::Execute(C_SHOOT, 0, 400);
 
-	Commands::Execute(C_DRIVE_LINEAR_TO, 1200); // go towards platforms
+	Commands::Execute(C_SHOOT, 0, 400);
+
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // rotate towards far side
+
+	Commands::Execute(C_DRIVE_LINEAR_TO, 1200); // go towards far side
+
+    Commands::Press(C_DRIVE_LINEAR, 127); // ALIGN WITH WALL
+
+    pros::delay(300);
+
+    Commands::Release(C_DRIVE_LINEAR);
+
+    pros::delay(100);
+
+    Robot::ResetRotation(); // ALIGNED WITH WALL - GYROS RESET
+
+    Commands::Execute(C_DRIVE_LINEAR_TO, -100);
+
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -900 * teamMultiplier);
+
+    Commands::Execute(C_DRIVE_LINEAR_TO, 600);
 
 	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -1800 * teamMultiplier); // rotate towards platforms
 
