@@ -47,6 +47,10 @@ namespace Robot {
 
     int GetRotation();
 
+	void SetCancelCommandIfNotMoving(bool t);
+
+	bool ShouldCancelCommandIfNotMoving();
+
     void ResetRotation(int offset = 0);
 
     bool IsInManualMode();

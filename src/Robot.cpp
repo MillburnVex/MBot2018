@@ -6,6 +6,8 @@ int updateMillis = 5;
 
 int rotationOffset = 0;
 
+bool cancelCommandIfNotMoving = false;
+
 pros::Controller master = pros::Controller(pros::E_CONTROLLER_MASTER);
 pros::Controller partner = pros::Controller(pros::E_CONTROLLER_PARTNER);
 
@@ -32,6 +34,14 @@ bool Robot::IsInManualMode() {
 
 void Robot::SetTeam(Team t) {
     team = t;
+}
+
+void Robot::SetCancelCommandIfNotMoving(bool t) {
+	cancelCommandIfNotMoving = t;
+}
+
+bool Robot::ShouldCancelCommandIfNotMoving() {
+	return cancelCommandIfNotMoving;
 }
 
 void Robot::SetAutonStrategy(Strategy newStrat) {

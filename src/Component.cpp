@@ -68,6 +68,10 @@ public:
 
 class DriveComponent : public BotComponent {
 
+	int ticksSinceLastMovement = -1;
+
+	const int TICKS_NOT_MOVING_TILL_CANCEL = 2500;
+
     const double LINEAR_TOTAL_ERROR_THRESHOLD = 45;
 
     const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
@@ -111,10 +115,10 @@ class DriveComponent : public BotComponent {
                 new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
     };
     std::array<std::pair < MotorID, PID> *, 4> linearPids{
-        new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.3f, 0.02f, 0.17f, 400, -400)),
-                new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.3f, 0.02f, 0.17f, 400, -400)),
-                new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.3f, 0.02f, 0.17f, 400, -400)),
-                new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.3f, 0.02f, 0.17f, 400, -400))
+        new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.31f, 0.02f, 0.17f, 400, -400)),
+                new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.31f, 0.02f, 0.17f, 400, -400)),
+                new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.31f, 0.02f, 0.17f, 400, -400)),
+                new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.31f, 0.02f, 0.17f, 400, -400))
     };
 
 public:
@@ -267,6 +271,21 @@ public:
             ResetPIDS();
             return;
         }
+		if (NotMoving()) {
+			ticksSinceLastMovement++;
+			if (Robot::ShouldCancelCommandIfNotMoving() && ticksSinceLastMovement >= TICKS_NOT_MOVING_TILL_CANCEL) {
+				Commands::Release(C_DRIVE_LINEAR_TO);
+				printf("linear done           -----------------------\n");
+				UpdateGoalVoltages(0, 0);
+				Drive(0, 0);
+				UpdateInitialPositions();
+				ResetPIDS();
+				return;
+			}
+		}
+		else {
+			ticksSinceLastMovement = -1;
+		}
        /* printf("right error %f\n", std::abs(goalPositionRelative -
                                             (GetRelativePosition(DRIVE_RIGHT_FRONT) +
                                              GetRelativePosition(DRIVE_RIGHT_BACK)) / 2));
@@ -308,7 +327,21 @@ public:
             goalRotation = target;
             return;
         }
-
+		if (NotMoving()) {
+			ticksSinceLastMovement++;
+			if (Robot::ShouldCancelCommandIfNotMoving() && ticksSinceLastMovement >= TICKS_NOT_MOVING_TILL_CANCEL) {
+				Commands::Release(C_DRIVE_LINEAR_TO);
+				printf("linear done           -----------------------\n");
+				UpdateGoalVoltages(0, 0);
+				Drive(0, 0);
+				UpdateInitialPositions();
+				ResetPIDS();
+				return;
+			}
+		}
+		else {
+			ticksSinceLastMovement = -1;
+		}
         printf("current value 1: %d\n", Robot::GetSensor(SensorID::GYRO)->GetValue());
 		printf("current value 2: %d\n", Robot::GetSensor(SensorID::GYRO_2)->GetValue());
 		printf("current value total: %d\n", Robot::GetRotation());
