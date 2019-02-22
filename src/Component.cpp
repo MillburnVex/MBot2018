@@ -68,21 +68,21 @@ public:
 
 class DriveComponent : public BotComponent {
 
-    const double LINEAR_TOTAL_ERROR_THRESHOLD = 30;
+    const double LINEAR_TOTAL_ERROR_THRESHOLD = 45;
 
     const double ROTATE_TOTAL_ERROR_THRESHOLD = 10;
 
-    const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 10;
+    const double STOPPED_VELOCITY_TOTAL_ERROR_THRESHOLD = 14;
 
     const double MAX_ROTATION_VOLTAGE = 60;
 
-    const double MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE = 10;
+    const double MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE = 18;
 
     int goalRotation = 0;
+	
+    PID rotationPID = PID(0.51f, 0.0f, 2.8f, 1000, -1000);
 
-    PID rotationPID = PID(0.55f, 0.0f, 2.5f, 1000, -1000);
-
-    PID rotationCorrection = PID(0.65f, 0.0f, 0.0f, 1000, -1000);
+    PID rotationCorrection = PID(0.2f, 0.0f, 0.0f, 1000, -1000);
 
     double velocity;
 
@@ -111,10 +111,10 @@ class DriveComponent : public BotComponent {
                 new std::pair<MotorID, double>(DRIVE_LEFT_BACK, 0)
     };
     std::array<std::pair < MotorID, PID> *, 4> linearPids{
-        new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.27f, 0.02f, 0.17f, 300, -300)),
-                new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.27f, 0.02f, 0.17f, 300, -300)),
-                new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.27f, 0.02f, 0.17f, 300, -300)),
-                new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.27f, 0.02f, 0.17f, 300, -300))
+        new std::pair<MotorID, PID>(DRIVE_RIGHT_FRONT, PID(0.3f, 0.02f, 0.17f, 400, -400)),
+                new std::pair<MotorID, PID>(DRIVE_RIGHT_BACK, PID(0.3f, 0.02f, 0.17f, 400, -400)),
+                new std::pair<MotorID, PID>(DRIVE_LEFT_FRONT, PID(0.3f, 0.02f, 0.17f, 400, -400)),
+                new std::pair<MotorID, PID>(DRIVE_LEFT_BACK, PID(0.3f, 0.02f, 0.17f, 400, -400))
     };
 
 public:
@@ -267,16 +267,16 @@ public:
             ResetPIDS();
             return;
         }
-        printf("right error %f\n", std::abs(goalPositionRelative -
+       /* printf("right error %f\n", std::abs(goalPositionRelative -
                                             (GetRelativePosition(DRIVE_RIGHT_FRONT) +
                                              GetRelativePosition(DRIVE_RIGHT_BACK)) / 2));
         printf("left error %f\n", std::abs(goalPositionRelative -
                                            (GetRelativePosition(DRIVE_LEFT_FRONT) +
-                                            GetRelativePosition(DRIVE_LEFT_FRONT)) / 2));
+                                            GetRelativePosition(DRIVE_LEFT_BACK)) / 2));
         printf("not moving %f\n", (std::abs(GetRPM(DRIVE_RIGHT_FRONT)) +
                                    std::abs(GetRPM(DRIVE_RIGHT_BACK)) +
                                    std::abs(GetRPM(DRIVE_LEFT_FRONT)) +
-                                   std::abs(GetRPM(DRIVE_LEFT_BACK))) / 4);
+                                   std::abs(GetRPM(DRIVE_LEFT_BACK))) / 4);*/
         double rightVoltage = (GetGoalVoltage(DRIVE_RIGHT_FRONT, goalPositionRelative, linearPids) +
                                GetGoalVoltage(DRIVE_RIGHT_BACK, goalPositionRelative, linearPids)) / 2;
         //printf("   right voltage: %f\n", rightVoltage);
@@ -286,9 +286,9 @@ public:
         double actual = Robot::GetRotation();
         double error = rotationCorrection.GetValue(actual, goalRotation);
         error = std::clamp(error, -MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE, MAX_LINEAR_ROTATION_CORRECTION_VOLTAGE);
-        printf("target %d actual %f pid value %f\n", goalRotation, actual, error);
-        //leftVoltage += error;
-        //rightVoltage -= error;
+//        printf("target %d actual %f pid value %f\n", goalRotation, actual, error);
+        leftVoltage += error;
+        rightVoltage -= error;
 
         UpdateGoalVoltages(rightVoltage, leftVoltage);
 
@@ -309,10 +309,12 @@ public:
             return;
         }
 
-        //printf("current value: %d\n", Robot::GetSensor(SensorID::GYRO)->GetValue());
-        //printf("goal: %d\n", goalPositionRelative);
-        //printf("target: %d\n", target);
-        //printf("initial: %d\n", initialRotation);
+        printf("current value 1: %d\n", Robot::GetSensor(SensorID::GYRO)->GetValue());
+		printf("current value 2: %d\n", Robot::GetSensor(SensorID::GYRO_2)->GetValue());
+		printf("current value total: %d\n", Robot::GetRotation());
+
+        printf("goal: %d\n", goalPositionRelative);
+        printf("target: %d\n\n", target);
 
         double leftVoltage = rotationPID.GetValue(Robot::GetRotation(), target);
         leftVoltage = std::clamp(leftVoltage, -MAX_ROTATION_VOLTAGE, MAX_ROTATION_VOLTAGE);

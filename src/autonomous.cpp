@@ -23,16 +23,20 @@ bool noParkFlip = false;
 
 bool doubleScrape = false;
 
-bool park = false;
+bool park = true;
 
 bool parkAndCapScore = true;
 
 void test() {
     for (int i = 0; i < 10; i++) {
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, 1500);
+        Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -900);
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, -1500);
+		printf("DONE DONE DONE DONE DONE DONE DONE DONE DONE \n");
+
+        Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0);
+
+		printf("DONE DONE DONE DONE DONE DONE DONE DONE DONE \n");
     }
 
 
@@ -54,7 +58,7 @@ void FlipCap() {
 
 bool StationaryDoubleShot(bool flipIfNoSecondShot = true) {
     Commands::Press(C_BALL_LIFT_UP);
-    Commands::Execute(C_SHOOT, 0, 300); // shoot top flag
+    Commands::Execute(C_SHOOT, 0, 400); // shoot top flag
 
     Commands::Execute(C_LOAD_BALL, 0, 800);
 
@@ -68,22 +72,22 @@ bool StationaryDoubleShot(bool flipIfNoSecondShot = true) {
 
     pros::delay(1000);
 
-    Commands::Execute(C_SHOOT, 0, 300);
+    Commands::Execute(C_SHOOT, 0, 400);
     Commands::Release(C_BALL_LIFT_UP);
     return true;
 }
 
 void DoubleShot(int delay = 0) {
-    Commands::Execute(C_SHOOT, 0, 300); //shot 1
+    Commands::Execute(C_SHOOT, 0, 400); //shot 1
 
     pros::delay(delay);
 
     Commands::Execute(C_DRIVE_LINEAR_TO, 580);// 2nd shot alignment
 
-    Commands::Execute(C_SHOOT, 0, 300); //shot 2
+    Commands::Execute(C_SHOOT, 0, 400); //shot 2
 }
 
-void DoubleScrape() {
+void DoubleScrape(int timesToShake = 1) {
 
     Commands::Press(C_DRIVE_LINEAR, 50);
     pros::delay(500);
@@ -98,14 +102,16 @@ void DoubleScrape() {
     Commands::Release(C_DRIVE_LINEAR);
 
     pros::delay(1000);
+	for (int i = 0; i < timesToShake; i++) {
+		Commands::Release(C_BALL_LIFT_UP);
+		Commands::Press(C_BALL_LIFT_DOWN);
 
-    Commands::Release(C_BALL_LIFT_UP);
-    Commands::Press(C_BALL_LIFT_DOWN);
+		pros::delay(100); // wiggle ball to break up jams
 
-    pros::delay(100); // wiggle ball to break up jams
-
-    Commands::Release(C_BALL_LIFT_DOWN);
-
+		Commands::Release(C_BALL_LIFT_DOWN);
+		Commands::Press(C_BALL_LIFT_UP);
+		pros::delay(450);
+	}
     Commands::Execute(C_LOAD_BALL, 0, 1000);
 
     Commands::Release(C_BALL_LIFT_UP);
@@ -129,7 +135,7 @@ void FrontAuton(Team team) {
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // turn to shot
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, (team == BLUE ? -65 : 60));
+    Commands::Execute(C_DRIVE_LINEAR_TO, (team == BLUE ? -65 : 20));
 
     DoubleShot();
 
@@ -176,12 +182,12 @@ void FrontAuton(Team team) {
 
         Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1060); // 1st bottom flag turn
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, 620); // push in, score bottom flag
+        Commands::Execute(C_DRIVE_LINEAR_TO, 635); // push in, score bottom flag
 
         Commands::Release(C_BALL_LIFT_UP);
         Commands::Press(C_BALL_LIFT_DOWN);
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, -680); // back out
+        Commands::Execute(C_DRIVE_LINEAR_TO, -695); // back out
 
         if (noParkFlip) {
 
@@ -191,7 +197,7 @@ void FrontAuton(Team team) {
 
             FlipCap();
 
-            Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 450); // rotate to bottom flag
+            Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 500); // rotate to bottom flag
 
             Commands::Press(C_DRIVE_LINEAR, 127); // toggle bottom flag
 
@@ -202,9 +208,9 @@ void FrontAuton(Team team) {
 
             Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * (935)); // rotate before fully backing out
 
-            Commands::Execute(C_DRIVE_LINEAR_TO, (-1450)); //back out to platform
+            Commands::Execute(C_DRIVE_LINEAR_TO, (-1450 + (team == RED ? 70 : 0))); //back out to platform
 
-            Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -30); // rotate to platform
+            Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -10); // rotate to platform
 
             Commands::Release(C_BALL_LIFT_DOWN);
             Commands::Press(C_BALL_LIFT_UP);
@@ -227,19 +233,19 @@ void BackAuton(Team team) {
     pros::delay(20);
 
     Commands::Press(C_BALL_LIFT_UP);
-    Commands::Press(C_FLYWHEEL_SET, 560);
+    Commands::Press(C_FLYWHEEL_SET, 555);
     Commands::Execute(C_DRIVE_LINEAR_TO, 1270); // get ball under cap
 
     Commands::Execute(C_DRIVE_LINEAR_TO, -170); //drive back
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 775); // turn to middle flags
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 786); // turn to middle flags
     pros::delay(300);
 
     Commands::Execute(C_SHOOT, 0, 300); // shoot top flag
 
     Commands::Execute(C_SHOOT, 0, 300); // shoot middle flag
 
-    pros::delay(300);
+    pros::delay(200);
 
     Commands::Press(C_FLYWHEEL_SET, 600);
 
@@ -253,25 +259,26 @@ void BackAuton(Team team) {
     } else if (parkAndCapScore) {
         Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1250); // rotate to back into cap
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, -550); // pick up cap
+        Commands::Execute(C_DRIVE_LINEAR_TO, -560, 650); // pick up cap
 
-        pros::delay(300);
+        pros::delay(100);
 
         Commands::Press(C_ARM_UP);
-        pros::delay(Robot::GetUpdateMillis());
+        pros::delay(10);
         Commands::Release(C_ARM_UP);
 
-        pros::delay(600);
+        pros::delay(400);
 
         Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // get ready to back up to pole
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, -500); // back up to pole
+        Commands::Execute(C_DRIVE_LINEAR_TO, -665); // back up to pole
 
+		Commands::Press(C_BALL_LIFT_UP);
         Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -900);
 
         Commands::Press(C_DRIVE_LINEAR, 80); // drive into pole
 
-        pros::delay(800);
+        pros::delay(600);
 
         Commands::Release(C_DRIVE_LINEAR);
 
@@ -279,7 +286,7 @@ void BackAuton(Team team) {
         pros::delay(Robot::GetUpdateMillis());
         Commands::Release(C_ARM_UP); // score cap
 
-        pros::delay(800); // wait for score
+        pros::delay(600); // wait for score
 
         Commands::Execute(C_DRIVE_LINEAR_TO, -200);
 
@@ -287,9 +294,10 @@ void BackAuton(Team team) {
         pros::delay(Robot::GetUpdateMillis());
         Commands::Release(C_ARM_DOWN); // lower arm
 
-        Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 700); // rotate to platforms
+        Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 667); // rotate to platforms
 
-        Commands::Execute(C_DRIVE_LINEAR_TO, 1350); // park
+        Commands::Execute(C_DRIVE_LINEAR_TO, 1580); // park
+		Commands::Release(C_BALL_LIFT_DOWN);
     }
 }
 
@@ -299,29 +307,29 @@ void Skills() {
 
     auto team = RED;
 
-    pros::delay(20);
+	pros::delay(20);
+	//Robot::ResetRotation(-900 * teamMultiplier);
+	Commands::Press(C_BALL_LIFT_UP);
+	/*
+	Commands::Execute(C_DRIVE_LINEAR_TO, 1250);
 
-    Commands::Press(C_BALL_LIFT_UP);
+	Commands::Execute(C_DRIVE_LINEAR_TO, -1100);
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 1250); // grab ball
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 890); // turn to shot
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -1130);
+	Commands::Execute(C_DRIVE_LINEAR_TO, 30);
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // turn to shot
+	DoubleShot(500);
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 60); // align with flags
-
-    DoubleShot(500); // SHOTS ONE AND TWO
+	pros::delay(100);
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 1020); // rotate to bottom flag
 
     Commands::Execute(C_DRIVE_LINEAR_TO, 620); // BOTTOM FLAG ONE
 
-    // NEXT PART: DOUBLE SCRAPE, 2 FLAGS, CAP, BOTTOM FLAG
+    // NEXT PART: CAP, BOTTOM FLAG
 
     Commands::Execute(C_DRIVE_LINEAR_TO, -680); // back partially
-
-    Commands::Release(C_BALL_LIFT_UP);
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * (920)); // rotate before fully backing out
 
@@ -329,47 +337,68 @@ void Skills() {
 
     Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // rotate towards other side of field
 
-    Commands::Press(C_DRIVE_LINEAR, -100); // back in to align with wall
-
-    pros::delay(600);
-
-    Commands::Release(C_DRIVE_LINEAR);
+    Commands::Press(C_DRIVE_LINEAR, -120); // back in to align with wall
 
     pros::delay(300);
 
+    Commands::Release(C_DRIVE_LINEAR);
+
+    pros::delay(100);
+
     Robot::ResetRotation(); // ALIGNED WITH WALL - GYROS RESET
 
-    //Components::ResetInitialPositions(); // RESET DRIVE MOTOR POSITIONS
+    Commands::Execute(C_DRIVE_LINEAR_TO, 800); // drive forwards from wall
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 265); // drive forwards from wall
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // rotate to align with cap
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 510); // rotate to align with cap
+    Commands::Execute(C_DRIVE_LINEAR_TO, 100); // go up close to cap
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 370); // go up close to cap
+	FlipCap(); // CAP SCORED
 
-    DoubleScrape();
+    Commands::Execute(C_DRIVE_LINEAR_TO, -150); // back up from cap
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 490); // rotate to align with middle flags
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // prepare to align with bottom flag
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 100); // go up a bit to flag
+    Commands::Execute(C_DRIVE_LINEAR_TO, 670); // align with bottom flag
 
-    StationaryDoubleShot(false); // SHOTS THREE AND FOUR
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 920); // turn towards bottom flag
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -100); // back up for cap flip
+	Commands::Press(C_BALL_LIFT_UP);
+	Commands::Press(C_DRIVE_LINEAR, 120); // BOTTOM FLAG TWO
 
-    FlipCap(); // FLIP CAP
+	pros::delay(900);
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -200); // back up from cap
+	Commands::Release(C_DRIVE_LINEAR);
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // face the other side of the field
+	pros::delay(200);
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 600); // prepare to hit bottom flag
+	Robot::ResetRotation(900 * teamMultiplier); // ALIGNED WITH WALL - GYROS RESET
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 920); // rotate towards bottom flag
+	if (Robot::BallLoaded()) {
+		Commands::Execute(C_DRIVE_LINEAR_TO, -620); //  back up from wall, at the right amount to hit middle flag
 
-    Commands::Press(C_DRIVE_LINEAR, 100); // BOTTOM FLAG TWO
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 860); // align with flag
 
-    pros::delay(1500);
+		Commands::Execute(C_SHOOT, 0, 500); // shoot middle flag
+
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // re rotate correctly
+
+		Commands::Execute(C_DRIVE_LINEAR_TO, -70);
+	} else {
+		Commands::Execute(C_DRIVE_LINEAR_TO, -680); // back up from flag
+	}
+
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -75 * teamMultiplier); // face the next cap
+
+    Commands::Execute(C_DRIVE_LINEAR_TO, 930); // drive up to cap
+
+	FlipCap(); // FLIP CAP 2
+
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 930); // rotate towards bottom flag
+
+    Commands::Press(C_DRIVE_LINEAR, 100); // BOTTOM FLAG THREE
+
+    pros::delay(1400);
 
     Commands::Release(C_DRIVE_LINEAR);
 
@@ -377,45 +406,108 @@ void Skills() {
 
     Robot::ResetRotation(900 * teamMultiplier); // ALIGNED WITH WALL - GYROS RESET
 
-    //Components::ResetInitialPositions(); // RESET DRIVE MOTOR POSITIONS
+	if (Robot::BallLoaded()) {
+		Commands::Execute(C_DRIVE_LINEAR_TO, -560); //  back up from wall, at the right amount to hit middle flag
 
-    // NEXT PART: FLIP CAP, PARK
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 880); // align with flag
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -900); // back up to cap
+		Commands::Execute(C_SHOOT, 0, 500); // shoot middle flag
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // rotate to cap
+		Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * 900); // re rotate correctly
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 800); // go up to cap
+		Commands::Execute(C_DRIVE_LINEAR_TO, -720);
+	}
+	else {
+		Commands::Execute(C_DRIVE_LINEAR_TO, -1300); // back up from wall
+	}
+    // NEXT PART: 2 HIGH CAPS, PARK
 
-    FlipCap(); // FLIP CAP
+    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // rotate to face other wall
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -300); // back up from cap
+	Commands::Press(C_DRIVE_LINEAR, 120); // ALIGN WITH WALL
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -900); // rotate towards platforms
+	pros::delay(600);
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 500); // away from flags
+	Commands::Release(C_DRIVE_LINEAR);
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 0); // face towards wall
+	pros::delay(200);
 
-    Commands::Press(C_DRIVE_LINEAR, 100); // align with wall
+	Robot::ResetRotation(); // ALIGNED WITH WALL - GYROS RESET
 
-    pros::delay(2000);
+	Commands::Execute(C_DRIVE_LINEAR_TO, -150); // back up from wall
 
-    Commands::Release(C_DRIVE_LINEAR);
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -920); // rotate towards back side
 
-    Robot::ResetRotation(); // ALIGNED WITH WALL - GYROS RESET
+	Commands::Execute(C_DRIVE_LINEAR_TO, 2100); // drive over to other side
 
-    //Components::ResetInitialPositions(); // RESET DRIVE MOTOR POSITIONS
+	Commands::Press(C_DRIVE_LINEAR, 120); // ALIGN WITH WALL
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, -250);
+	pros::delay(400);
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -900); // rotate towards platforms
+	Commands::Release(C_DRIVE_LINEAR);
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 600);
+	pros::delay(200);
 
-    Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -1800); // prepare to go up on platforms
+	Robot::ResetRotation(teamMultiplier * -900); // ALIGNED WITH WALL - GYROS RESET
+	*/
+	//Commands::Execute(C_DRIVE_LINEAR_TO, -90); // back up from wall
 
-    Commands::Execute(C_DRIVE_LINEAR_TO, 2400); // park
+	//Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -10); // rotate so that back is facing cap
+
+	Commands::Execute(C_DRIVE_LINEAR_TO, -1000); // back up into cap
+
+	Commands::Press(C_DRIVE_LINEAR, -60); // slowly back up into cap
+
+	pros::delay(400);
+
+	Commands::Release(C_DRIVE_LINEAR);
+
+	Commands::Press(C_ARM_UP); // lift cap up
+	pros::delay(10);
+	Commands::Release(C_ARM_UP);
+
+	pros::delay(600); // wait for cap to be up
+
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, 100 * teamMultiplier); // rotate towards opposite side
+
+	Commands::Execute(C_DRIVE_LINEAR_TO, 424); // drive forward to be ready for pole
+
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, teamMultiplier * -900); // rotate to pole
+
+	Commands::Press(C_DRIVE_LINEAR, 80); // drive into pole
+
+	pros::delay(600);
+
+	Commands::Release(C_DRIVE_LINEAR);
+
+	Commands::Press(C_ARM_UP);
+	pros::delay(10);
+	Commands::Release(C_ARM_UP); // score cap
+
+	pros::delay(600); // wait for score
+	
+	Commands::Execute(C_DRIVE_LINEAR_TO, -200); // back up
+
+	Commands::Press(C_ARM_DOWN); // put arm down
+	pros::delay(10);
+	Commands::Release(C_ARM_DOWN);
+
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -1800 * teamMultiplier); // prepare to flip
+
+	Commands::Press(C_DRIVE_LINEAR_TO, 1000); // drive near cap
+
+	FlipCap();
+
+	Commands::Press(C_DRIVE_LINEAR_TO, -2000); // drive near cap
+
+
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -2700 * teamMultiplier); // rotate towards flags
+
+	Commands::Execute(C_DRIVE_LINEAR_TO, 1200); // go towards platforms
+
+	Commands::Execute(C_DRIVE_ROTATE_TO_ABSOLUTE, -1800 * teamMultiplier); // rotate towards platforms
+
+	Commands::Execute(C_DRIVE_LINEAR_TO, 2400); // park
 
 }
 
@@ -441,7 +533,7 @@ void autonomous() {
     }
     */
     pros::delay(20);
-    BackAuton(BLUE);
+	Skills();
     pros::delay(100);
     Commands::Clear();
     running = false;

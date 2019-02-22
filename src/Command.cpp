@@ -312,7 +312,6 @@ public:
                     // ball is too far in
                     if (secondZone) {
                         Components::Execute(ActionType::INDEXER_RUN, 80);
-                        Components::Execute(ActionType::REAPER_RUN, 70);
                     } else {
                         // just right
                         Components::Execute(ActionType::INDEXER_RUN, 0);
